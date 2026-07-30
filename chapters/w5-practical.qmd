@@ -1,0 +1,528 @@
+# Multiple linear and logistic regression (IES Week 11) {#sec-w5-practical}
+
+This practical follows the IES Week 11 seminar of the same name. That seminar explained confounding, connected it to the epidemiology half's own treatment of bias, and extended the simple regression model from IES Week 10 into a multiple regression with several predictors. It showed how to interpret an adjusted coefficient, how a categorical predictor's contrasts are read against a reference level, and made the connection between that and one-way analysis of variance. It then explained why a straight line is the wrong model for a 0/1 outcome, introduced the logistic model as the fix, and showed that exponentiating a coefficient turns it into an adjusted odds ratio, the same quantity the epidemiology half already taught how to calculate by hand. It closed with baseline cardiovascular disease, `blm.cvd`, as a case where the data cannot say whether a variable is a confounder or a mediator, and showed a sensitivity analysis as the honest way to report that. In this session we fit all of that in R.
+
+## Chapter intended learning outcomes
+
+By the end of this session you will be able to:
+
+1. Derive a fixed-window binary outcome from an event indicator and a follow-up time, and justify the exclusion rule it requires
+2. Fit a multivariable linear regression in R
+3. Include categorical predictors correctly and set an appropriate reference level
+4. Compare crude and adjusted estimates and quantify the change
+5. Fit a logistic regression with `glm(family = binomial)`
+6. Exponentiate coefficients to obtain odds ratios with confidence intervals
+7. Produce a publication-quality regression table for either model type
+8. Fit a pair of models differing only in one adjustment variable, and present them as a sensitivity analysis
+9. Write an interpretation of an adjusted association suitable for a results section
+
+## Setup
+
+As in IES Weeks 7 to 10, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
+
+This chapter adds one new package underneath the scenes: `gtsummary`'s `tbl_regression()`, which we use for the first time here, depends on `broom.helpers`. It isn't part of the tidyverse or `gtsummary` itself, so if you haven't needed it before, it likely isn't installed yet. As P1 explained, installing a package and loading it are two different actions. If `broom.helpers` isn't already on your machine, run `install.packages("broom.helpers")` once in the console, not inside this document. We don't `library()` it directly; `gtsummary` finds it automatically once it's installed. As in IES Weeks 8 to 10, `dictionary` is read in even though no code below refers to it, so it's to hand the moment you're unsure what a column means.
+
+```{r}
+#| label: setup
+#| message: false
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(gtsummary)
+library(here)
+library(broom)
+
+nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
+dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
+```
+
+```{r}
+#| label: setup-hidden
+#| include: false
+options(width = 76)
+source(here("R", "gtsummary-knitprint.R"))
+```
+
+```{r}
+#| label: recode
+
+nhanes <- nhanes |>
+  mutate(
+    gender = factor(gender,
+      levels = c(1, 2),
+      labels = c("Male", "Female")),
+    eth = factor(eth,
+      levels = c(1, 2, 3, 4, 5),
+      labels = c("Mexican American", "Other Hispanic", "White", "Black", "Others")),
+    edu = factor(edu,
+      levels = c(1, 2, 3),
+      labels = c("Less than high school", "High school graduate", "Above high school")),
+    smoking = factor(smoking,
+      levels = c("Never", "Previous", "Current")),
+    phq.c = factor(phq.c,
+      levels = c("0 Normal", "1 Mild symptoms", "2 Possible depression"),
+      labels = c("Normal", "Mild symptoms", "Possible depression"),
+      ordered = TRUE),
+    blm.cvd = factor(blm.cvd,
+      levels = c(0, 1),
+      labels = c("No", "Yes"))
+  )
+```
+
+This is the same recode we introduced in IES Week 7 and repeated in IES Weeks 8 to 10. See IES Week 7 for the reasoning behind each variable, including why `edu`, although its categories do have a natural order, is built as a plain factor rather than an ordered one: this chapter is exactly the reason why. We repeat the recode here, unchanged, so this chapter stands on its own too.
+
+This chapter's shape is different from IES Weeks 7 to 10 in one respect. Every other practical in this book puts its worked content first and its exercises at the end. This one opens with an exercise instead, because the outcome variable every model in this chapter needs, `dead_10yr`, is not supplied in the data and is not built for you in the setup chunk above: you build it yourself, right now, before any of the regression content that follows. That is deliberate, not a change of habit part-way through the book. Deriving a ten-year outcome from a death indicator and a follow-up time, and deciding what to do with the participants it cannot classify either way, is itself the first thing this chapter has to teach.
+
+## Opening exercise: building a ten-year mortality outcome
+
+`nhanes_mph` records whether each participant died during follow-up (`dth`) and how long they were followed for (`fu_month`, in months). This is the column IES Week 7 flagged as the one the dictionary doesn't fully document: it says "Death in follow-up" and stops, without telling us which value means what. So we state it here, and it's worth noticing that you had to be told rather than being able to look it up. `dth` is 1 for a participant who died during the study and 0 for one who didn't.
+
+Neither column on its own answers the question this chapter needs: did a participant die *within ten years*? "Died" isn't a question you can answer until you say "by when."
+
+Three groups exist in this data:
+
+- Participants who died, and whose death happened within 120 months (10 years) of their follow-up starting. These count as an event: `1`.
+- Participants known to be alive at 120 months. This includes everyone followed at least that long without dying, but it also includes anyone who died *after* 120 months: surviving to month 150 and then dying still means they were alive at month 120, so this group counts as a non-event: `0`, regardless of whether death eventually happened later on.
+- Participants who did not die, but whose recorded follow-up ended before 120 months. These cannot be classified either way. They might have died the month after their follow-up ended, or lived another thirty years. Calling them "survivors" would be a guess dressed up as data, so they are excluded rather than coded as `0`.
+
+Two tools do the work, and both are new. `case_when()`, from `dplyr`, checks a series of conditions in order and returns the first matching value, which is exactly what a three-way rule needs. Each line pairs a condition on the left of the `~` with the value to return on the right, and the last line is usually a catch-all: `TRUE` is a condition that is always met, so anything reaching it without matching a line above gets whatever that line returns. Order matters, because `case_when()` stops at the first condition a participant matches. The second tool is an argument rather than a function. `table()` normally leaves missing values out of its count, the way it did in IES Week 7; `useNA = "always"` tells it to report them as their own category instead, which is what we want here, since the participants we exclude are the point rather than a footnote.
+
+::: {.callout-important appearance="simple"}
+## Your turn, before you read on
+
+**Exercise (ILO 1).** Write the `mutate()` yourself. Using `case_when()`, build a new column called `dead_10yr` in `nhanes` that returns `1` for the first group above, `0` for the second, and `NA` for the third, then count the three groups with `table(nhanes$dead_10yr, useNA = "always")`.
+
+Two things to work out as you write it, which matter more than the syntax:
+
+1. The rule for the second group needs no mention of `dth` at all. Why not? Think about who is in that group.
+2. Once you have the counts, be ready to say why the third group can't simply be added to the `0`s and called survivors.
+
+Have a real go before opening the answer. Everything after this section runs on the column you're about to build, so it's worth getting your hands on it rather than reading someone else's version of it.
+:::
+
+::: {.callout-note collapse="true"}
+## Answer: building `dead_10yr`
+
+```{r}
+#| label: dead-10yr
+nhanes <- nhanes |>
+  mutate(
+    dead_10yr = case_when(
+      dth == 1 & fu_month <= 120 ~ 1,
+      fu_month >= 120 ~ 0,
+      TRUE ~ NA
+    )
+  )
+
+table(nhanes$dead_10yr, useNA = "always")
+```
+
+The second condition is written as `fu_month >= 120` alone, with no condition on `dth`, precisely to catch both parts of that second group: `dth == 1` (died, but after month 120) and `dth == 0` (never died, followed at least that long) both belong in it. Anyone who was still being observed at month 120 was alive at month 120, and that is the whole question.
+
+The catch-all comes last and returns `NA`. That's the third group: alive, but followed for less than ten years. Had it been written first, it would have swallowed everybody.
+:::
+
+```{r}
+#| label: dead-10yr-counts
+#| include: false
+n_dead <- sum(nhanes$dead_10yr == 1, na.rm = TRUE)
+n_alive <- sum(nhanes$dead_10yr == 0, na.rm = TRUE)
+n_excluded <- sum(is.na(nhanes$dead_10yr))
+```
+
+`r format(n_dead, big.mark = ",")` participants died within the ten-year window, `r format(n_alive, big.mark = ",")` are known to have been alive at ten years (whether or not they later died), and `r format(n_excluded, big.mark = ",")` are excluded because their follow-up ended too early to classify them either way. That's a large number excluded, but it's the honest cost of a fixed-window outcome: we're deliberately not using information about *when* someone died beyond whether it was inside or outside our chosen window, and we're refusing to guess about the people whose observation window closed before the ten years were up. The `r format(n_dead, big.mark = ",")` events that remain are plenty to fit the regression models this chapter builds.
+
+There is a family of methods, survival analysis, built precisely to use the follow-up time we've just thrown away and to keep the participants we've just excluded. Kaplan-Meier curves and Cox regression are its familiar tools. They're out of scope here, and Advanced Statistics is where you'll meet them.
+
+::: {.callout-note}
+## Try it yourself: a different window
+
+Rebuild `dead_10yr` using a five-year window (60 months) instead of ten. Report the new event and exclusion counts, and write one sentence on why a shorter window changes both numbers in the direction it does.
+:::
+
+## Extending the IES Week 10 model
+
+IES Week 10 fitted total cholesterol (`chol`, in mmol/L) against sedentary time alone (`sed`, in hours/day), `chol ~ sed`, and found a small, non-significant slope: it adjusted for nothing else, so it couldn't rule out age (in years) or gender accounting for the pattern. We now add them, along with education (`edu`), the same way `+` adds any predictor to an `lm()` formula:
+
+```{r}
+#| label: lm-adjusted
+chol_adj_complete <- nhanes |>
+  filter(!is.na(sed), !is.na(chol), !is.na(age), !is.na(gender), !is.na(edu))
+
+m_adj <- lm(chol ~ sed + age + gender + edu, data = chol_adj_complete)
+summary(m_adj)
+confint(m_adj)
+```
+
+The coefficient on `sed` is now what this model calls the *adjusted* association between sedentary time and cholesterol: the association after holding age, gender, and education constant. "Holding constant" doesn't mean the model repeats the analysis separately for every combination of those variables. It means the model assumes the effect of an extra hour of sedentary time is the same regardless of a participant's age, gender, or education, and estimates that one shared slope from everybody at once.
+
+## Categorical predictors and reference levels
+
+`gender` and `edu` entered that model as factors, and each one contributes a row per non-reference level rather than one row for the whole variable. `levels()`, from base R, shows a factor's categories in order; the first one listed is the reference level, the category every other row is compared against:
+
+```{r}
+#| label: levels-edu
+levels(nhanes$edu)
+```
+
+`"Less than high school"` is first, so it's already the reference we want, the same way IES Week 7 set it up when it built this factor for the first time. `relevel()`, met in IES Week 7 on `eth` and again in IES Week 9 on `strep_tb$arm`, confirms this explicitly rather than leaving it implicit:
+
+```{r}
+#| label: relevel-edu
+edu_ref_check <- relevel(nhanes$edu, ref = "Less than high school")
+levels(edu_ref_check)
+```
+
+Nothing changed, because `"Less than high school"` was already first. That's worth doing anyway: confirming a reference level is correct is cheap, and assuming it without checking is how a wrong reference level ends up in a report unnoticed.
+
+Reading the coefficients table above: `eduHigh school graduate` compares that group to `"Less than high school"`, holding sed, age, and gender fixed, and `eduAbove high school` does the same for the highest education group. Neither is statistically significant here, but the reading is the same whether or not it reaches significance: each row is a difference from the one category everything else in that variable is measured against.
+
+The same check applies to `gender`:
+
+```{r}
+#| label: levels-gender
+levels(nhanes$gender)
+```
+
+`"Male"` is first, so `"Male"` is the reference level and the model's `genderFemale` row is the difference for females relative to males, holding sed, age, and education fixed. This isn't alphabetical order, and it isn't R choosing for us: it's a direct consequence of how the setup chunk built the factor, `factor(gender, levels = c(1, 2), labels = c("Male", "Female"))`, where the numeric code `1` was listed first and labelled `"Male"`. Whichever label is attached to the first level named in `levels =` becomes the reference, so the reference level is a choice made back in the recoding step, not something to discover afterwards.
+
+## Crude versus adjusted: quantifying the change
+
+IES Week 10's crude result and this chapter's adjusted one are worth setting side by side directly. Note that we refit the crude model here rather than reusing IES Week 10's, so that both models run on `chol_adj_complete`, the same set of participants. That matters: if the crude model used everyone with `sed` and `chol` recorded while the adjusted one dropped anybody also missing `edu`, the two estimates would differ for two reasons at once, adjustment and a different sample, and we couldn't tell which was doing the work. This is also why the crude figure below isn't identical to the one IES Week 10 reported.
+
+```{r}
+#| label: crude-model
+m_crude <- lm(chol ~ sed, data = chol_adj_complete)
+tidy(m_crude, conf.int = TRUE) |> filter(term == "sed")
+tidy(m_adj, conf.int = TRUE) |> filter(term == "sed")
+```
+
+```{r}
+#| label: crude-adj-numbers
+#| include: false
+crude_sed <- tidy(m_crude, conf.int = TRUE) |> filter(term == "sed")
+adj_sed <- tidy(m_adj, conf.int = TRUE) |> filter(term == "sed")
+
+# sprintf() rather than round(): these slopes are small enough that round()
+# hands knitr a number in scientific notation, which renders as 7.4^{-4}.
+# dp3 keeps odds ratios at a fixed three decimals, so 1.020 doesn't print as
+# 1.02 alongside 1.019 in a sentence comparing the two.
+dp5 <- function(x) sprintf("%.5f", x)
+dp3 <- function(x) sprintf("%.3f", x)
+```
+
+Crude, the slope on `sed` is about `r dp5(crude_sed$estimate)` mmol/L per hour/day (95% CI `r dp5(crude_sed$conf.low)` to `r dp5(crude_sed$conf.high)`, p = `r round(crude_sed$p.value, 3)`). Adjusted for age, gender, and education, it moves to about `r dp5(adj_sed$estimate)` mmol/L per hour/day (95% CI `r dp5(adj_sed$conf.low)` to `r dp5(adj_sed$conf.high)`, p = `r round(adj_sed$p.value, 3)`).
+
+Look at the estimate first, not the p-value. The adjusted slope is about `r round(adj_sed$estimate / crude_sed$estimate, 1)` times the size of the crude one: holding age, gender, and education constant pulls the association between sedentary time and cholesterol substantially further from zero. That movement in the estimate is what confounding looks like. Age and gender were masking part of a real association, and the model that ignores them understates it.
+
+The p-value crosses 0.05 on the way, and it's worth being careful about how much weight that carries. It's a consequence of the estimate moving away from zero, not a separate finding, and nothing magic happened between `r round(crude_sed$p.value, 3)` and `r round(adj_sed$p.value, 3)`. Had the adjusted interval still included zero, the shift in the estimate would have been just as real and just as worth reporting.
+
+## Diagnostics for the multivariable model
+
+The same diagnostic plots IES Week 10 used still apply here, checked against the adjusted model rather than the simple one:
+
+```{r}
+#| label: diagnostics-adjusted
+adj_aug <- augment(m_adj)
+
+ggplot(adj_aug, aes(x = .fitted, y = .resid)) +
+  geom_point(alpha = 0.1) +
+  geom_hline(yintercept = 0) +
+  labs(x = "Fitted value (mmol/L)", y = "Residual (mmol/L)")
+
+ggplot(adj_aug, aes(sample = .std.resid)) +
+  stat_qq() +
+  stat_qq_line() +
+  labs(x = "Theoretical quantiles", y = "Standardised residuals")
+```
+
+The same pattern IES Week 10 found reappears: a fairly even scatter around zero for most of the range, with a small group of participants with unusually high cholesterol pulling the upper tail away from the reference line in the QQ plot. Adding more predictors hasn't changed that; the issue lives in a handful of extreme observations, not in the number of variables in the model.
+
+## When the outcome is binary: logistic regression
+
+`chol` is continuous, so `lm()` was the right tool. `dead_10yr` is 0 or 1, a genuinely different kind of outcome, and `lm()` is the wrong tool for it. A straight line fitted to a 0/1 outcome can, and eventually will, predict values below 0 or above 1, which aren't valid probabilities. `glm()`, base R's function for generalised linear models, fixes this by modelling the log odds of the outcome instead of the outcome directly, using maximum likelihood rather than least squares to fit the line. We don't need the machinery behind maximum likelihood to use it, only to know that the software is doing something different from `lm()` under the hood.
+
+Fitting one looks almost identical to fitting an `lm()`. The formula is the same shape, and the only addition is `family = binomial`, which tells `glm()` the outcome is binary:
+
+We build the complete-case sample first and fit both models on it, for the same reason the linear models above shared one sample: the crude and adjusted estimates should differ because of the adjustment, not because they were calculated on different people.
+
+```{r}
+#| label: dead-complete
+dead_complete <- nhanes |>
+  filter(!is.na(dead_10yr), !is.na(sed), !is.na(age), !is.na(gender), !is.na(edu))
+```
+
+```{r}
+#| label: glm-crude
+m_dead_crude <- glm(dead_10yr ~ sed, data = dead_complete, family = binomial)
+summary(m_dead_crude)
+```
+
+```{r}
+#| label: glm-adjusted
+m_dead_adj <- glm(dead_10yr ~ sed + age + gender + edu,
+  data = dead_complete, family = binomial)
+summary(m_dead_adj)
+```
+
+We keep this adjustment set deliberately small. `dead_complete` holds `r format(nrow(dead_complete), big.mark = ",")` participants, of whom `r format(sum(dead_complete$dead_10yr), big.mark = ",")` died within ten years. That's fewer events than the `r format(sum(nhanes$dead_10yr, na.rm = TRUE), big.mark = ",")` we counted at the start of the chapter, because requiring a recorded value for every predictor drops participants of its own. Those `r format(sum(dead_complete$dead_10yr), big.mark = ",")` events are what the model actually has to work with, and there isn't room to add many more predictors before it runs short of events per predictor.
+
+## Odds ratios: exponentiating the coefficients
+
+A logistic regression's coefficients are on the log-odds scale, which isn't how the epidemiology half reported odds ratios. `exp()`, base R's exponential function, undoes the log and converts a coefficient back to an odds ratio. `coef()` and `confint()` pull the coefficients and their confidence intervals the same way they did for `lm()`:
+
+```{r}
+#| label: or-crude
+exp(coef(m_dead_crude))
+exp(confint(m_dead_crude))
+```
+
+`confint()` printed `Waiting for profiling to be done...` before the answer. That's a progress note, not a warning, and it's worth knowing what it's telling us because it marks a real difference between `glm()` and `lm()`.
+
+For a linear model, `confint()` builds each interval the way IES Week 8 built one by hand: an estimate, plus or minus a multiplier times a standard error. For a logistic model that shortcut is only an approximation, so `confint()` does something better instead. It works along each coefficient, refitting the model repeatedly to find the range of values the data are consistent with. That search is the "profiling", and the message is `glm()` saying it's running. On this dataset it takes a second or two. On a much larger model it can take noticeably longer, which is the only reason the message exists at all.
+
+```{r}
+#| label: or-adjusted
+exp(coef(m_dead_adj))
+exp(confint(m_dead_adj))
+```
+
+The same message appears again above, for the same reason.
+
+`broom::tidy()` does the same conversion in one step with `exponentiate = TRUE`:
+
+```{r}
+#| label: tidy-exponentiate
+tidy(m_dead_adj, exponentiate = TRUE, conf.int = TRUE) |> filter(term == "sed")
+```
+
+```{r}
+#| label: or-numbers
+#| include: false
+or_crude <- tidy(m_dead_crude, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "sed")
+or_adj <- tidy(m_dead_adj, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "sed")
+```
+
+Crude, each additional hour/day of sedentary time is associated with an odds ratio of about `r dp3(or_crude$estimate)` for ten-year mortality (95% CI: `r dp3(or_crude$conf.low)` to `r dp3(or_crude$conf.high)`, p < 0.001). Adjusted for age, gender, and education, the odds ratio attenuates to about `r dp3(or_adj$estimate)` (95% CI: `r dp3(or_adj$conf.low)` to `r dp3(or_adj$conf.high)`, p < 0.001). Both intervals sit entirely above 1, the null value for an odds ratio, so both are statistically significant. But the adjusted estimate is noticeably smaller than the crude one: part of the crude association was really age, since older participants are both more sedentary and more likely to die within ten years for reasons that have nothing to do with sedentary behaviour itself.
+
+Both odds ratios sit close to 1, so this is a quiet demonstration of confounding rather than a dramatic one. Exercise 2 below runs the identical comparison on vigorous activity outside work instead, where the same mechanism, age, moves the estimate by a factor of about six rather than a couple of percent. Do that exercise before deciding how seriously to take adjustment. It is the loudest example this dataset has.
+
+## Regression tables with `gtsummary`
+
+`tbl_regression()`, from `gtsummary`, builds a publication-style table directly from a fitted model, the regression equivalent of `tbl_summary()`. For the linear model, no extra argument is needed:
+
+```{r}
+#| label: tbl-regression-linear
+tbl_regression(m_adj)
+```
+
+For the logistic model, `exponentiate = TRUE` reports odds ratios instead of log-odds coefficients:
+
+```{r}
+#| label: tbl-regression-logistic
+tbl_regression(m_dead_adj, exponentiate = TRUE)
+```
+
+`tbl_merge()`, also from `gtsummary`, places two tables side by side under named headers, which is exactly what a crude-vs-adjusted comparison needs:
+
+```{r}
+#| label: tbl-merge-crude-adjusted
+tbl_crude <- tbl_regression(m_dead_crude, exponentiate = TRUE)
+tbl_adj <- tbl_regression(m_dead_adj, exponentiate = TRUE)
+
+tbl_merge(list(tbl_crude, tbl_adj),
+  tab_spanner = c("Crude", "Adjusted"), quiet = TRUE)
+```
+
+`quiet = TRUE` switches off a message `tbl_merge()` prints when the two tables have different numbers of rows, warning that rows might end up out of order. Different numbers of rows is precisely what we want here, since the adjusted model has three predictors the crude one doesn't, and the rows do come out in the right order. Check that yourself when you use it, though, rather than silencing the message out of habit.
+
+## The sensitivity analysis: is `blm.cvd` a confounder or a mediator?
+
+The seminar raised a genuine difficulty with `blm.cvd`, baseline cardiovascular disease. It's plausible as a confounder: existing heart disease could make someone both less physically active and more likely to die, in which case adjusting for it removes bias. It's equally plausible as a mediator: sedentary behaviour could contribute to cardiovascular disease, which then contributes to death, in which case adjusting for it would remove part of the very effect this model is trying to estimate. Baseline CVD and sedentary time were both measured at the same study visit, so nothing in the data itself can settle which story is correct. That's not a gap in this analysis; it's a limit on what an observational snapshot can ever tell you, and the honest response is to report the estimate both ways rather than to pick one.
+
+```{r}
+#| label: sensitivity-cvd
+dead_cvd_complete <- dead_complete |> filter(!is.na(blm.cvd))
+
+m_dead_without <- glm(dead_10yr ~ sed + age + gender + edu,
+  data = dead_cvd_complete, family = binomial)
+m_dead_with <- glm(dead_10yr ~ sed + age + gender + edu + blm.cvd,
+  data = dead_cvd_complete, family = binomial)
+
+tbl_without <- tbl_regression(m_dead_without, exponentiate = TRUE)
+tbl_with <- tbl_regression(m_dead_with, exponentiate = TRUE)
+
+tbl_merge(list(tbl_without, tbl_with),
+  tab_spanner = c("Without baseline CVD", "With baseline CVD"), quiet = TRUE)
+```
+
+```{r}
+#| label: sensitivity-numbers
+#| include: false
+or_without <- tidy(m_dead_without, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "sed")
+or_with <- tidy(m_dead_with, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "sed")
+```
+
+The odds ratio for `sed` moves only a little between the two models: `r dp3(or_without$estimate)` (95% CI `r dp3(or_without$conf.low)` to `r dp3(or_without$conf.high)`, p < 0.001) without `blm.cvd`, and `r dp3(or_with$estimate)` (95% CI `r dp3(or_with$conf.low)` to `r dp3(or_with$conf.high)`, p < 0.001) with it. `blm.cvd` itself is a strong predictor of ten-year mortality, but adjusting for it changes almost nothing about the sedentary time estimate. That's worth reporting honestly too: this isn't a case where the two models tell dramatically different stories. The point of running both isn't to hunt for a big swing, it's that *which* number is the right one to report, even when they're this close, depends on an assumption about `blm.cvd` that this study's design cannot verify. A results section reporting only one of these numbers would be making that assumption silently.
+
+## Exercises
+
+**Exercise 1** (ILOs 2, 3, 4). Fit `chol ~ met_t + age + gender + edu`, where `met_t` is total physical activity in MET-hours/day, and compare it with the crude model `chol ~ met_t`. Report both slopes for `met_t` with their 95% confidence intervals and p-values, and write one sentence describing how the adjusted estimate differs from the crude one, including its direction.
+
+Before reading the adjusted model's output, use `levels()` to state which category of `edu` the model is using as its reference. Then refit the adjusted model with `"Above high school"` as the reference instead, using `relevel()`, and write one sentence saying what changed in the `edu` coefficients and one saying what did *not* change about the `met_t` slope.
+
+**Exercise 2** (ILOs 5, 6, 7). Fit `dead_10yr ~ vpa_r + age + gender + edu`, where `vpa_r` is vigorous physical activity outside work in hours/day, and compare it with the crude model `dead_10yr ~ vpa_r`. Exponentiate both models' coefficients to obtain odds ratios with confidence intervals, and build a `tbl_regression()` table for the adjusted model. Write one sentence interpreting the adjusted odds ratio for `vpa_r` in context.
+
+**Exercise 3** (ILO 8). Using the adjusted model from Exercise 2, fit a second version that also adjusts for `blm.cvd`. Combine both models into one table with `tbl_merge()`, and write one sentence comparing the two odds ratios for `vpa_r` and one sentence stating what each model assumes about `blm.cvd`.
+
+## Writing exercise
+
+Write two short paragraphs, as they would appear in a results section.
+
+In the first, report the adjusted association between sedentary time and cholesterol from this chapter's linear model, and the adjusted odds ratio for sedentary time and ten-year mortality from the logistic model, each with its 95% confidence interval and p-value. Add one sentence on what this analysis cannot establish: an observational adjustment reduces confounding by the variables actually included, but it cannot rule out confounding by variables that were never measured.
+
+In the second, separate paragraph, report both odds ratios for `sed` from the sensitivity analysis, with and without `blm.cvd`, and state plainly what each model assumes about baseline CVD's role and why the data available here cannot decide between those assumptions.
+
+## Where this leaves you
+
+That's the end of the course, so it's worth stopping to say what you now have and, just as importantly, what you don't.
+
+### What the five weeks built
+
+The five practicals look like five topics. They were one thing, taken apart and put back together. IES Week 7 described a variable. IES Week 8 attached a confidence interval to that description, so we could say how precisely the sample pinned the population down. IES Week 9 compared two groups, and reactivated the risk ratios and odds ratios the epidemiology half had already taught you to calculate by hand, this time with uncertainty attached to them. IES Week 10 modelled one variable as a function of another. This week put several variables into that model at once, so an association could be adjusted for the others, and then swapped a continuous outcome for a binary one and got back an adjusted odds ratio, which is exactly the quantity IES Week 9 produced by hand from a 2×2 table. The pieces from IES Weeks 7 to 9 are now sitting inside one regression model.
+
+That arc is the module's **ILO 3**, critically appraising and applying key statistical methods, and it is what this book exists for. Two of the other module outcomes ran quietly alongside it. Every writing exercise asked what a result *means* for a public health question rather than what the number is, which is **ILO 1**. And this chapter is where **ILO 4**, causality, stops being an abstraction: `blm.cvd` is equally arguable as a confounder and as a mediator, the data cannot settle it, and we reported both models rather than picking the answer we preferred. If one habit survives this course, make it that one. Deciding what to adjust for is a judgement you make from subject knowledge and study design, before the analysis. No software will make it for you, and no p-value will tell you that you got it wrong.
+
+### What this course has not covered
+
+These are real boundaries, not gaps you're expected to quietly fill in yourself. Each has a home, and for most of them that home is Advanced Statistics.
+
+- **Prognostic modelling.** Every model in this book has been *aetiological*: we asked whether one exposure is associated with one outcome, one coefficient at a time, adjusted for confounders, and everything else in the model was there to make that one coefficient trustworthy. A prognostic model asks a different question, how well can we predict who gets the outcome, and it is built differently, judged differently, and reported differently. Fitting the same `glm()` does not make it the same analysis.
+- **Survival analysis.** Signposted already, where this chapter threw away `fu_month` and excluded everyone whose follow-up ended early. Kaplan-Meier curves and Cox regression use exactly the information we discarded.
+- **Missing data handling.** Worth being blunt about, because it affected every result you have produced. Every model in this book is a *complete-case* analysis: anyone missing a value on any variable in the model was dropped. This chapter's logistic model ran on `r format(nrow(dead_complete), big.mark = ",")` of the `r format(nrow(nhanes), big.mark = ",")` participants in the dataset. We said so each time, which is the minimum, but saying so is not the same as handling it. Methods that use the incomplete records rather than deleting them, multiple imputation chief among them, are not covered here.
+- **Sample size calculation based on regression.** IES Week 8 sized a two-group comparison. Sizing a study around an adjusted regression coefficient is a different calculation.
+- **Meta-analysis**, which combines estimates across studies rather than producing one from a single dataset.
+- **Mediation analysis.** This chapter raised the confounder-versus-mediator ambiguity and stopped at reporting both models. Formally decomposing an effect into a direct and an indirect part is a separate method, and stopping where we did is the right place for an introductory course to stop.
+- **Time-varying confounding**, where a confounder changes over the course of follow-up and standard adjustment stops working.
+
+Two boundaries named earlier belong on the same list. **Survey weighting**, from IES Week 7: we have treated a complex survey as a simple cohort throughout, so nothing here is a national estimate. And the logistic-specific material this week's seminar set aside, **model fit statistics, pseudo-R², logistic diagnostics, interaction, and prediction**.
+
+None of that makes what you have learned provisional. An adjusted estimate with a confidence interval, reported honestly, with its assumptions stated and its limits named, is the working core of applied epidemiology. It is most of what you will read in the literature and most of what you will be asked to produce. Knowing where it stops is part of knowing how to use it.
+
+::: {.callout-note collapse="true"}
+## Solutions
+
+**Exercise 1**
+
+```{r}
+#| label: sol-ex1
+met_t_complete <- nhanes |>
+  filter(!is.na(met_t), !is.na(chol), !is.na(age), !is.na(gender), !is.na(edu))
+
+m_met_t_crude <- lm(chol ~ met_t, data = met_t_complete)
+m_met_t_adj <- lm(chol ~ met_t + age + gender + edu, data = met_t_complete)
+
+tidy(m_met_t_crude, conf.int = TRUE) |> filter(term == "met_t")
+tidy(m_met_t_adj, conf.int = TRUE) |> filter(term == "met_t")
+```
+
+```{r}
+#| label: sol-ex1-numbers
+#| include: false
+crude_met <- tidy(m_met_t_crude, conf.int = TRUE) |> filter(term == "met_t")
+adj_met <- tidy(m_met_t_adj, conf.int = TRUE) |> filter(term == "met_t")
+```
+
+Crude, the slope on `met_t` is about `r dp5(crude_met$estimate)` mmol/L per MET-hour/day (95% CI: `r dp5(crude_met$conf.low)` to `r dp5(crude_met$conf.high)`, p = `r round(crude_met$p.value, 3)`). The interval includes zero, so on its own this says very little: these data are consistent with no association between total activity and cholesterol, and they don't rule one out either.
+
+Adjusted for age, gender, and education, the slope changes sign and becomes clearly non-zero, at about `r dp5(adj_met$estimate)` mmol/L per MET-hour/day (95% CI: `r dp5(adj_met$conf.low)` to `r dp5(adj_met$conf.high)`, p < 0.001). Once those three are held constant, more total activity is associated with slightly *higher* cholesterol in this sample. That's a reminder that adjustment can change a result's direction, not just its size, and that a crude estimate near zero can hide an association rather than rule one out. Both models are fitted on `met_t_complete`, the same participants, so the difference between them is the adjustment and nothing else.
+
+Now the reference level:
+
+```{r}
+#| label: sol-ex1-relevel
+levels(met_t_complete$edu)
+
+met_t_relevelled <- met_t_complete |>
+  mutate(edu = relevel(edu, ref = "Above high school"))
+
+m_met_t_adj2 <- lm(chol ~ met_t + age + gender + edu, data = met_t_relevelled)
+tidy(m_met_t_adj2, conf.int = TRUE)
+```
+
+`"Less than high school"` is listed first, so that's the reference the original model used, and both `edu` rows in its output were differences from that group. After `relevel()`, `"Above high school"` is the reference, and the two `edu` rows now compare the other groups against *it* instead. The numbers change, and so do their signs, because they're answering a different question: not "how does this group compare with the least-educated group?" but "how does this group compare with the most-educated group?"
+
+The `met_t` slope doesn't move at all. It's identical in both models, to every decimal place. Changing which category a factor is measured against changes how that factor's own coefficients read, and nothing else: the model is fitting the same thing either way, just describing one part of it from a different starting point. That's worth seeing once, because it's easy to assume a reference level is a modelling decision that affects everything. It isn't. It's a reporting decision, and it affects only the rows belonging to the variable you changed.
+
+Note that here we *did* write the releveled factor back into a data frame, rather than working on a copy as IES Week 7 did. That's because this time we need to fit a model with it, and `lm()` has to find the changed factor inside the data it's given. We put it in a new object, `met_t_relevelled`, rather than overwriting `met_t_complete`, so the original model above stays reproducible.
+
+**Exercise 2**
+
+```{r}
+#| label: sol-ex2
+vpa_r_dead_complete <- nhanes |>
+  filter(!is.na(vpa_r), !is.na(dead_10yr), !is.na(age), !is.na(gender), !is.na(edu))
+
+m_vpa_r_crude <- glm(dead_10yr ~ vpa_r, data = vpa_r_dead_complete, family = binomial)
+m_vpa_r_adj <- glm(dead_10yr ~ vpa_r + age + gender + edu,
+  data = vpa_r_dead_complete, family = binomial)
+
+tidy(m_vpa_r_crude, exponentiate = TRUE, conf.int = TRUE) |> filter(term == "vpa_r")
+tidy(m_vpa_r_adj, exponentiate = TRUE, conf.int = TRUE) |> filter(term == "vpa_r")
+
+tbl_regression(m_vpa_r_adj, exponentiate = TRUE)
+```
+
+```{r}
+#| label: sol-ex2-numbers
+#| include: false
+or_vpa_crude <- tidy(m_vpa_r_crude, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "vpa_r")
+or_vpa_adj <- tidy(m_vpa_r_adj, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "vpa_r")
+```
+
+Adjusted for age, gender, and education, each additional hour/day of vigorous activity outside work is associated with an odds ratio of about `r dp3(or_vpa_adj$estimate)` for ten-year mortality (95% CI: `r dp3(or_vpa_adj$conf.low)` to `r dp3(or_vpa_adj$conf.high)`, p < 0.001): participants reporting more vigorous activity had substantially lower odds of dying within ten years, holding age, gender, and education constant.
+
+Now compare that with the crude model, because the gap is the biggest one in this chapter. Crude, the odds ratio is `r dp3(or_vpa_crude$estimate)`, which would say that an extra hour a day of vigorous activity cuts the odds of dying by something like 94%. Adjusted, it is `r dp3(or_vpa_adj$estimate)`: still a substantial association, but a fraction of the size. Almost all of that difference is age. Older participants do far less vigorous activity and are far more likely to die within ten years, for reasons that have nothing to do with the activity itself, so a crude comparison of the active against the inactive is largely a comparison of the young against the old. This is the same confounding story the chapter told with `sed`, in a much louder version: there the adjusted estimate moved from `r dp3(or_crude$estimate)` to `r dp3(or_adj$estimate)`, here it moves by a factor of about `r round(or_vpa_adj$estimate / or_vpa_crude$estimate)`. Reporting the crude figure on its own would badly overstate what vigorous activity does.
+
+**Exercise 3**
+
+```{r}
+#| label: sol-ex3
+vpa_r_cvd_complete <- vpa_r_dead_complete |> filter(!is.na(blm.cvd))
+
+m_vpa_r_without <- glm(dead_10yr ~ vpa_r + age + gender + edu,
+  data = vpa_r_cvd_complete, family = binomial)
+m_vpa_r_with <- glm(dead_10yr ~ vpa_r + age + gender + edu + blm.cvd,
+  data = vpa_r_cvd_complete, family = binomial)
+
+tbl_vpa_without <- tbl_regression(m_vpa_r_without, exponentiate = TRUE)
+tbl_vpa_with <- tbl_regression(m_vpa_r_with, exponentiate = TRUE)
+
+tbl_merge(list(tbl_vpa_without, tbl_vpa_with),
+  tab_spanner = c("Without baseline CVD", "With baseline CVD"), quiet = TRUE)
+```
+
+```{r}
+#| label: sol-ex3-numbers
+#| include: false
+or_vpa_without <- tidy(m_vpa_r_without, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "vpa_r")
+or_vpa_with <- tidy(m_vpa_r_with, exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "vpa_r")
+```
+
+The odds ratio for `vpa_r` moves a little between the two models: `r dp3(or_vpa_without$estimate)` (95% CI `r dp3(or_vpa_without$conf.low)` to `r dp3(or_vpa_without$conf.high)`, p < 0.001) without `blm.cvd`, and `r dp3(or_vpa_with$estimate)` (95% CI `r dp3(or_vpa_with$conf.low)` to `r dp3(or_vpa_with$conf.high)`, p < 0.001) with it. That's a smaller shift than the main adjustment step but still a real one. Without `blm.cvd`, the model assumes that any relationship between baseline CVD and mortality operates entirely through the predictors already in the model; with it, the model assumes `blm.cvd` is a separate cause of death, worth adjusting for directly. Both are defensible readings of a single measurement taken at one study visit, and nothing in this dataset can say which one is correct.
+
+**Writing exercise (sample answer)**
+
+Sedentary time was associated with total cholesterol after adjustment for age, gender, and education (slope `r dp5(adj_sed$estimate)` mmol/L per hour/day, 95% CI `r dp5(adj_sed$conf.low)` to `r dp5(adj_sed$conf.high)`, p = `r round(adj_sed$p.value, 3)`), and with higher odds of ten-year all-cause mortality (adjusted odds ratio `r dp3(or_adj$estimate)`, 95% CI `r dp3(or_adj$conf.low)` to `r dp3(or_adj$conf.high)`, p < 0.001). Both estimates adjust only for the variables included in this model; they cannot rule out confounding by factors that were never measured, such as overall frailty or comorbidity not captured here.
+
+In a sensitivity analysis, the adjusted odds ratio for sedentary time and ten-year mortality was `r dp3(or_without$estimate)` (95% CI `r dp3(or_without$conf.low)` to `r dp3(or_without$conf.high)`) without baseline cardiovascular disease in the model, and `r dp3(or_with$estimate)` (95% CI `r dp3(or_with$conf.low)` to `r dp3(or_with$conf.high)`) with it included. The first model assumes baseline CVD's influence on mortality runs entirely through the other adjustment variables; the second treats it as an independent contributor to mortality risk worth adjusting for directly. Because sedentary behaviour and baseline CVD were both measured at the same study visit, this dataset cannot establish which assumption is correct, and both estimates are reported for that reason.
+:::

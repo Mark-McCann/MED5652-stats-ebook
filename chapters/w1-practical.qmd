@@ -1,0 +1,551 @@
+# Describing and visualising data (IES Week 7) {#sec-w1-practical}
+
+This practical follows the IES Week 7 seminar of the same name. That seminar covered variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In P1 and P2 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this session we go straight to using that data.
+
+## Chapter intended learning outcomes
+
+By the end of this session you will be able to:
+
+1. Use `select()`, `filter()`, `mutate()`, and `arrange()` to manipulate a dataset
+2. Produce grouped summaries with `group_by()` and `summarise()`
+3. Construct frequency and cross-tabulations
+4. Build histograms, boxplots, bar charts, and scatterplots in `ggplot2`
+5. Modify a plot's bin width, scale, and labels, and describe the effect on interpretation
+6. Convert a character variable to a factor and set its reference level
+7. Produce a basic "Table 1" of participant characteristics
+
+## The data: `nhanes_mph`
+
+Before we load anything, it's worth knowing what we're loading. We use this dataset in every chapter from here to the end of the book, so the ten minutes spent here pays off five times over.
+
+NHANES is the National Health and Nutrition Examination Survey, run by the National Center for Health Statistics, part of the US Centers for Disease Control and Prevention. It's designed to describe the health of the American population, and it's unusual in that it doesn't just ask people questions. Participants are interviewed at home and then examined in a mobile clinic, where measurements are taken and blood samples drawn. That's why our data can carry a real measured cholesterol value rather than "has a doctor ever told you your cholesterol is high?".
+
+`nhanes_mph` is a curated extract of it, prepared for this course: 41,765 adults aged 18 to 85, described by 27 variables. Those cover demographics, education, smoking and alcohol, physical activity split by domain, sedentary time, total cholesterol, depression symptoms, and whether the participant died during follow-up. The full list is in the dictionary file, which we read in alongside the data below and use throughout.
+
+### One simplification, stated out loud
+
+NHANES is not a simple random sample of Americans. It's a **complex survey**. Some groups are deliberately sampled more heavily than others, participants are recruited in geographic clusters rather than one at a time, and every participant carries a survey weight saying how many people in the population they stand for. Analysed properly, all of that has to go into the calculation.
+
+This course ignores it. We treat `nhanes_mph` as though it were a simple cohort: every participant counts once, and counts the same. That's a real simplification, and it means the numbers we produce here would not be the right numbers to publish as national estimates. We do it because the statistical ideas this course teaches are hard enough to learn once, without learning them and survey weighting at the same time. Survey weighting is an Advanced Statistics topic, and that's where you'll meet it properly.
+
+You'll see this pattern repeatedly in the book: we name the simplification, say what it costs, and point at where the honest version lives. Getting into the habit of asking "what has this analysis assumed?" matters more than any single technique in here.
+
+## Setup
+
+As in P2, we read the data with `read_csv()` from the `readr` package. We build the file path with `here()` from the `here` package. This builds a path from the project folder down to the file, so the code runs on any machine no matter where the project sits. `nhanes_mph` arrives as two files: the data itself, and a separate dictionary file that names every variable. Both are plain CSV files, so we read both with `read_csv()`.
+
+This chapter loads three packages P2 didn't: `dplyr` for manipulating data, `ggplot2` for plotting, and `gtsummary` for building tables. As P1 explained, installing a package and loading it are two different actions, so if you haven't installed these already, run this once in the console, not inside this document:
+
+``` r
+install.packages(c("dplyr", "ggplot2", "gtsummary"))
+```
+
+After that, the `library()` calls below are all you need, this session and every session after it.
+
+```{r}
+#| label: setup
+#| message: false
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(gtsummary)
+library(here)
+
+nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
+dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
+```
+
+```{r}
+#| label: setup-hidden
+#| include: false
+options(width = 76)
+source(here("R", "gtsummary-knitprint.R"))
+```
+
+Running that in your own console prints more than it does on this page. The `library()` calls announce themselves, and each `read_csv()` prints the column specification message P2 unpacked. This book hides both from here on, because they say the same thing in every chapter and P2 already read one properly. Nothing is being kept from you: glance at the row and column counts in your own console the way P2 showed, and carry on.
+
+`glimpse()`, from `dplyr`, shows every column, its type, and its first few values. It's useful for checking what actually came in, rather than what we expected to come in.
+
+```{r}
+#| label: glimpse-raw
+glimpse(nhanes)
+```
+
+Six columns describe a category but aren't usable as one yet: `gender`, `eth`, `edu`, `smoking`, `phq.c`, and `blm.cvd`. Some of them, like `gender`, are plain integers standing in for a label. Others are more mixed. `glimpse()` shows `smoking` and `phq.c` as character columns, not numbers at all. Whatever the raw form, we should never guess the *meaning* of a code from the column name. It lives in the dictionary, and that's the first place to look.
+
+```{r}
+#| label: dictionary-lookup
+dictionary |>
+  filter(`Variable names` %in% c("gender", "eth", "edu", "smoking", "phq.c", "blm.cvd"))
+```
+
+All six are documented, but not all in the same way. For `gender`, `eth`, `edu`, and `blm.cvd`, the dictionary gives a numeric code against each category: `1=Male; 2=Female`, and so on. Those are the four we have to translate. For `smoking` and `phq.c` it just lists the categories, and `glimpse()` already told us why no translation is needed: they don't arrive as bare numbers at all. `smoking` is already the text "Never", "Previous", or "Current". `phq.c` is already a label too, with the original code number kept at the front of the string, for example `"0 Normal"`.
+
+That last detail is worth pausing on, because it shows what each source is good for. The dictionary tells us what a column *means*. It doesn't tell us what shape the values arrive in, and nothing in the entry for `phq.c` warns us that the code number is glued to the front of every label. `glimpse()` tells us the shape but not the meaning. Read together they answer the question; read on their own, either one leaves you guessing.
+
+The dictionary isn't exhaustive, either. `dth`, the death indicator we use in IES Week 11, is described only as "Death in follow-up", with no codes given at all, so which of 0 and 1 means died has to be established some other way. That's the exception rather than the rule here, and it's still a better starting point than writing code against a column's name and hoping.
+
+We turn every one of the six into a factor with `mutate()` and `factor()`, whether the raw values are numbers or text. `factor()` takes the raw values (`levels`) and the labels we want to give them (`labels`), in matching order. The labels are ours to choose, and we take one small liberty below: the dictionary abbreviates `eth`'s first category to "Mexican", and we write it out as "Mexican American", the full NHANES category name. Wording a label more clearly than the dictionary does is fine. Changing which code it sits against is not, and that's the part to copy exactly. One of the six, `phq.c`, is ordinal: its categories run from normal to possible depression in a natural order, so we build it with `ordered = TRUE`. `edu` is ordinal too, in principle, less education to more, but we build it as a plain factor instead. IES Week 11 fits a regression model against it and reads each category's effect directly against a reference level, which is simplest with a plain factor rather than the trend-based contrasts an ordered factor produces. `gender`, `eth`, `smoking`, and `blm.cvd` are nominal, with no natural order, so they're plain factors for the more familiar reason. By default, the first level listed becomes the *reference* level. This is the category everything else gets compared against once regression starts, in IES Week 11. For now the choice mostly affects how a bar chart or table orders its categories, but it's worth setting deliberately from the start rather than accepting whatever order R guesses.
+
+```{r}
+#| label: recode
+
+nhanes <- nhanes |>
+  mutate(
+    gender = factor(gender,
+      levels = c(1, 2),
+      labels = c("Male", "Female")),
+    eth = factor(eth,
+      levels = c(1, 2, 3, 4, 5),
+      labels = c("Mexican American", "Other Hispanic", "White", "Black", "Others")),
+    edu = factor(edu,
+      levels = c(1, 2, 3),
+      labels = c("Less than high school", "High school graduate", "Above high school")),
+    smoking = factor(smoking,
+      levels = c("Never", "Previous", "Current")),
+    phq.c = factor(phq.c,
+      levels = c("0 Normal", "1 Mild symptoms", "2 Possible depression"),
+      labels = c("Normal", "Mild symptoms", "Possible depression"),
+      ordered = TRUE),
+    blm.cvd = factor(blm.cvd,
+      levels = c(0, 1),
+      labels = c("No", "Yes"))
+  )
+
+glimpse(nhanes)
+```
+
+The blank and missing values in `smoking`, `edu`, `phq.c`, and `blm.cvd` have become `NA` in the process, just as they were before recoding. `factor()` relabels the values that are present and carries missingness through unchanged. From here on, every chapter opens with a short setup chunk that repeats these same steps, so each chapter stands on its own.
+
+## Checking and setting a reference level
+
+We said above that the first level listed becomes the reference level. That was a claim, so let's actually look. `levels()`, from base R, lists a factor's categories in their current order:
+
+```{r}
+#| label: levels-smoking
+levels(nhanes$smoking)
+```
+
+`"Never"` is first, so `"Never"` is the reference. Everything else gets read against it: "Previous" means previous compared with never, and "Current" means current compared with never. That's the sensible choice here, and it isn't an accident. It's what we asked for when we wrote `levels = c("Never", "Previous", "Current")` in the recode above. Change the order in that line and you change the reference.
+
+Sometimes we want a different reference without rebuilding the factor. `relevel()`, also from base R, takes a factor and moves the level named in `ref` to the front:
+
+```{r}
+#| label: relevel-eth
+eth_white_ref <- relevel(nhanes$eth, ref = "White")
+levels(eth_white_ref)
+```
+
+`"White"` has moved to the front, so it would now be the reference, with the other four groups read against it. The rest keep their order, just shifted along.
+
+Notice we assigned the result to a **new** object, `eth_white_ref`, rather than writing it back into `nhanes`. That's deliberate. Every chapter in this book rebuilds `nhanes` with the same recode, so if we quietly changed the factor here, this chapter's `nhanes` would stop matching the one IES Weeks 8 to 11 build, and a table would come out in a different order for no visible reason. When we're demonstrating something, we work on a copy.
+
+Right now the reference level only decides the order categories appear in a table, or along a bar chart's axis. In IES Week 11 it decides what every coefficient in a regression model means, which is a much bigger deal. Checking it is cheap, so it's worth making the habit automatic well before it starts to matter.
+
+## Manipulating a dataset: the `dplyr` verbs
+
+Four verbs from `dplyr` cover most of what we need to get from a raw dataset to the piece of it we actually want to look at.
+
+`select()` keeps only the named columns:
+
+```{r}
+#| label: select-demo
+nhanes |> select(age, gender, sed, chol)
+```
+
+`filter()` keeps only the rows that satisfy a condition. Here, that's participants under 40:
+
+```{r}
+#| label: filter-demo
+nhanes |> filter(age < 40)
+```
+
+`mutate()` adds a new column, or changes an existing one, as we already saw above in the recoding step. Here it adds a new column that classifies participants as under or over 65:
+
+```{r}
+#| label: mutate-demo
+nhanes |> mutate(over_65 = age >= 65) |> select(age, over_65)
+```
+
+`arrange()` sorts the rows by a column, lowest to highest by default:
+
+```{r}
+#| label: arrange-demo
+nhanes |> arrange(age)
+```
+
+These four combine in a short pipe to answer a real question. For example, who are the ten oldest current smokers in the sample?
+
+```{r}
+#| label: verbs-combined
+nhanes |>
+  filter(smoking == "Current") |>
+  arrange(desc(age)) |>
+  select(age, gender, smoking) |>
+  slice(1:10)
+```
+
+`desc()` reverses the sort order. `slice()`, also from `dplyr`, keeps only the rows at the given positions. Here, that's the first ten after sorting.
+
+## Grouped summaries
+
+`group_by()` splits a dataset into groups without changing how it looks. `summarise()` then collapses each group down to one row of statistics. Used together, they answer questions like this: what's average cholesterol, separately for men and women?
+
+```{r}
+#| label: group-summarise
+nhanes |>
+  filter(!is.na(gender), !is.na(chol)) |>
+  group_by(gender) |>
+  summarise(
+    mean_chol = mean(chol, na.rm = TRUE),
+    sd_chol = sd(chol, na.rm = TRUE),
+    median_chol = median(chol, na.rm = TRUE),
+    n = n()
+  )
+```
+
+Three of those functions are new. `mean()` we already met in P1. `sd()`, from base R, returns the standard deviation: a measure of how spread out the values are, in the same units as the variable itself. `median()`, also base R, returns the middle value once everything is sorted, so half the participants sit below it and half above. Both are the summaries the seminar introduced, now with a function attached to each.
+
+`na.rm = TRUE` tells `mean()` and `sd()` to drop missing values before calculating. Without it, a single `NA` in a column makes the whole result `NA`. The `filter()` step above drops rows where `gender` or `chol` itself is missing, so the group sizes reported in `n` reflect exactly the rows the means are calculated from. `n()`, used inside `summarise()`, counts the rows in each group.
+
+The `gender` half of that filter turns out to change nothing: every participant in this extract has a gender recorded, so there are no rows for it to drop. We write it anyway, here and everywhere else in this book, and it's worth being clear that this is a deliberate habit rather than an oversight. You only know a column has no missing values because you checked, and the cost of checking every time is one short line that does nothing when there's nothing to do. The `chol` half of the same filter is doing real work: `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no cholesterol value, and without it they'd be counted in `n` while contributing nothing to the mean.
+
+
+Whether we report the mean and SD or the median and IQR depends on shape, not habit. A skewed distribution gets misrepresented by a mean, because the mean gets pulled toward the tail. The seminar's rule was to look at the shape before choosing. We'll build the plot we need for that in a moment, but categorical variables need a different kind of summary first: a count, not a mean.
+
+## Frequency and cross-tabulations
+
+`table()`, from base R, counts how many rows fall into each category of a variable. Given one variable, it produces a **frequency table**:
+
+```{r}
+#| label: table-smoking
+table(nhanes$smoking)
+```
+
+`table()` drops `NA` values by default rather than counting them as their own category, so this count is out of everyone with a recorded smoking status, not out of everyone in the dataset. Raw counts are hard to compare across groups of different sizes, so we usually want percentages instead. `prop.table()`, also from base R, takes a table and turns its counts into proportions of the total:
+
+```{r}
+#| label: proptable-smoking
+table(nhanes$smoking) |> prop.table()
+```
+
+Multiplying by 100 and rounding turns those proportions into percentages, in whatever way is easiest to read.
+
+Giving `table()` two variables instead of one produces a **cross-tabulation**: a two-way table with one variable's categories as rows and the other's as columns, one cell per combination. Here's smoking status by gender:
+
+```{r}
+#| label: table-smoking-gender
+smoking_gender <- table(nhanes$smoking, nhanes$gender)
+smoking_gender
+```
+
+The rows are `smoking`, the columns are `gender`, because that's the order the two variables were given to `table()` in. As with the frequency table above, raw counts are easier to compare as percentages, but now there's a choice to make: percentage of what? `prop.table()` takes a `margin` argument for this. `margin = 1` divides each row by its own row total, giving **row percentages**, the breakdown of gender within each smoking category:
+
+```{r}
+#| label: proptable-row
+prop.table(smoking_gender, margin = 1)
+```
+
+`margin = 2` divides each column by its own column total instead, giving **column percentages**, the breakdown of smoking status within each gender:
+
+```{r}
+#| label: proptable-col
+prop.table(smoking_gender, margin = 2)
+```
+
+Both tables are built from the same counts, but they answer different questions, and the research question decides which one belongs in a report. This is the same two-by-two logic the epidemiology half already uses for exposure-by-outcome tables, just with more than two categories on one side.
+
+## Plotting with `ggplot2`
+
+Every `ggplot2` plot is built from the same three pieces: the **data**, the **aesthetic mapping** (`aes()`, which decides which variables go on which axis or colour), and the **geometry** (`geom_*()`, which decides what kind of shape represents the data). These pieces are joined with `+`, not the pipe `|>` we've been using so far. That's a genuine inconsistency, not a typo to ignore. `ggplot2` was written before the pipe existed, and `+` has stuck ever since as the way to add one layer of a plot on top of another. Read `+` here as "and add this layer", the same way `|>` reads as "and then". The two aren't interchangeable, though. `ggplot2` code is joined with `+`, and everything else in this course is joined with `|>`. Here's a histogram of sedentary time:
+
+```{r}
+#| label: histogram-demo
+ggplot(nhanes, aes(x = sed)) +
+  geom_histogram(binwidth = 1) +
+  labs(x = "Sedentary time (hours/day)", y = "Count")
+```
+
+There are three layers there. `ggplot()` names the data and the mapping, `geom_histogram()` says to draw it as a histogram, and `labs()` sets the axis labels. `labs()` is worth using every single time. Left out, the axes are labelled with the raw column name, so this one would have read `sed` rather than "Sedentary time (hours/day)", and nobody outside this course knows what `sed` means or what units it's in. A plot that needs explaining out loud isn't finished. Every plot from here on sets its labels, and so should yours.
+
+That warning about removed rows is the one P2 explained: `sed` has `r format(sum(is.na(nhanes$sed)), big.mark = ",")` participants with no recorded value, and they can't be placed on the axis, so `ggplot2` left them out and said so. It will appear above most plots in this chapter, with a different number each time depending on the variable. Glance at the number, check it's the size you expect, and carry on.
+
+A boxplot of cholesterol by gender:
+
+```{r}
+#| label: boxplot-demo
+ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = chol)) +
+  geom_boxplot() +
+  labs(x = "Gender", y = "Total cholesterol (mmol/L)")
+```
+
+A bar chart of smoking status:
+
+```{r}
+#| label: barchart-demo
+ggplot(nhanes |> filter(!is.na(smoking)), aes(x = smoking)) +
+  geom_bar() +
+  labs(x = "Smoking status", y = "Count")
+```
+
+A scatterplot of cholesterol against age:
+
+```{r}
+#| label: scatter-demo
+ggplot(nhanes, aes(x = age, y = chol)) +
+  geom_point(alpha = 0.1) +
+  labs(x = "Age (years)", y = "Total cholesterol (mmol/L)")
+```
+
+`alpha = 0.1` makes each point mostly transparent. Where thousands of points overlap, the darker regions show where the data are dense. A plain scatterplot of this many points would otherwise just be a solid block of ink.
+
+::: {.callout-note}
+## Try it yourself: bin width and scale
+
+Take the histogram of `sed` above. Change `binwidth` to `0.1`, then to `5`, and re-run it each time. Then add `+ ylim(0, 500)` to the original plot. `ylim()`, from `ggplot2`, fixes the lower and upper limits of the y-axis by hand instead of letting the plot choose them to fit the data. Be careful with it: anything falling outside the limits you set is dropped from the plot altogether rather than being drawn cut off at the edge, so a bar taller than the limit doesn't get shortened, it disappears. For each change, write one sentence on what altered in the plot, and one sentence on what the data themselves did not change. This is the same distinction the seminar drew between a plot design choice and the underlying distribution.
+
+This is the first of several "Try it yourself" boxes in the book, and none of them has a written solution. Running the code is the answer. Exercise 3 below covers the same ground in a form that does have one.
+:::
+
+## A first Table 1
+
+A "Table 1" is the standard first table in a health research report. It shows participant characteristics, often split by a grouping variable. `tbl_summary()`, from `gtsummary`, builds one directly from a data frame.
+
+```{r}
+#| label: table1-demo
+nhanes |>
+  select(age, gender, eth, smoking, chol) |>
+  tbl_summary()
+```
+
+Adding `by =` splits the table by a grouping variable, giving one column per group:
+
+```{r}
+#| label: table1-by-gender
+nhanes |>
+  select(age, gender, eth, smoking, chol) |>
+  tbl_summary(by = gender)
+```
+
+`tbl_summary()` automatically chooses mean and SD or median and IQR for each numeric column, based on its distribution. That's the same decision we made by eye above, now made for every column at once.
+
+## Worked example: describing age
+
+Now let's bring the tools above together, on a variable we haven't used elsewhere in this chapter: `age`. Alongside `mean()`, `sd()`, and `median()`, we bring in one new function: `IQR()`, from base R, returns the interquartile range, the gap between the 25th and 75th percentile, in the same units as the variable itself. It's the number the "IQR" in "median and IQR" refers to.
+
+```{r}
+#| label: worked-summary
+nhanes |>
+  summarise(
+    mean_age = mean(age, na.rm = TRUE),
+    sd_age = sd(age, na.rm = TRUE),
+    median_age = median(age, na.rm = TRUE),
+    iqr_age = IQR(age, na.rm = TRUE)
+  )
+```
+
+```{r}
+#| label: worked-histogram
+ggplot(nhanes, aes(x = age)) +
+  geom_histogram(binwidth = 5) +
+  labs(x = "Age (years)", y = "Count")
+```
+
+The histogram is close to symmetric, with no strong tail in either direction. So the mean and SD are a fair summary here. Median and IQR would tell much the same story. Now let's split by gender:
+
+```{r}
+#| label: worked-boxplot
+ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = age)) +
+  geom_boxplot() +
+  labs(x = "Gender", y = "Age (years)")
+```
+
+```{r}
+#| label: worked-table1
+nhanes |>
+  select(age, gender) |>
+  tbl_summary(by = gender)
+```
+
+Age looks similar across the two gender groups, both in the boxplot and in the Table 1. There's no obvious difference to report here, and it would be wrong to manufacture one.
+
+## Exercises
+
+**Exercise 1** (ILO 1). Using the four `dplyr` verbs, and a pipe, answer this: among participants aged 65 or over who have never smoked, what are the ten highest cholesterol values? Keep only `age`, `gender`, and `chol` in your answer. Then add a column called `chol_high` that is `TRUE` when `chol` is above 6 mmol/L and `FALSE` otherwise.
+
+**Exercise 2** (ILOs 2, 4). Describe the distribution of sedentary time (`sed`). Report the mean and SD or the median and IQR, whichever the shape justifies, and support your choice with a histogram and a boxplot. Then produce a scatterplot of `chol` against `sed`, label both axes with their units, and write one sentence on whether the plot suggests any relationship between the two.
+
+**Exercise 3** (ILOs 4, 5). Build a histogram of total cholesterol (`chol`) with a `binwidth` of 0.5, labelled properly with `labs()`. Then produce two more versions of it: one with a `binwidth` of 0.05, and one with the original bin width but with `+ ylim(0, 1000)` added. Write one sentence for each of the two changes saying what it does to the impression the plot gives, and one sentence saying which of the three you would put in a report and why.
+
+**Exercise 4** (ILOs 2, 4, 6). Compare total cholesterol (`chol`) by gender. Produce a grouped summary and a boxplot, and write one sentence comparing the two groups. Then use `levels()` to state which gender is currently the reference level, and `relevel()` to make the other one the reference instead, assigning the result to a new object rather than overwriting `nhanes`.
+
+**Exercise 5** (ILOs 3, 6, 7). Produce a Table 1 of `age`, `gender`, `eth`, `smoking`, and `chol`, stratified by depression classification (`phq.c`).
+
+**Exercise 6** (ILOs 3, 4). Build a cross-tabulation of smoking status (`smoking`) against education (`edu`) with `table()`. Produce both the row percentages and the column percentages with `prop.table()`.
+
+Then answer this question using whichever of the two is appropriate: *among people who never smoked, how is education distributed?* State which of your two tables answers it, and say in one sentence why the other one doesn't. Finally, produce a bar chart of `edu`, labelled properly.
+
+## Writing exercise
+
+Every practical in this book ends with one of these, and it's worth knowing why before you write the first one. The module's assessment is a structured paper on a dataset you haven't seen, where every question asks for an analysis *and* the sentence that interprets it, and the interpretation carries half the marks. So these exercises are the assessment in miniature, five times over, before it counts. Output without a sentence around it is an unfinished answer here and an incomplete one there.
+
+Using the Table 1 from Exercise 5, write a short paragraph of about 150 words, as you would for the results section of a report. Describe how participant characteristics differ, or don't, across the three depression classification groups. State which characteristics look similar across groups and which look different, and avoid overstating a difference the table doesn't support.
+
+Start by stating how many participants the table is actually based on, and how many were excluded because they had no depression classification recorded. The number is in the message printed above the table. A results paragraph that doesn't say what it's counting is incomplete, however good the rest of the sentence is.
+
+::: {.callout-note collapse="true"}
+## Solutions
+
+**Exercise 1**
+
+```{r}
+#| label: sol-ex1
+nhanes |>
+  filter(age >= 65, smoking == "Never") |>
+  arrange(desc(chol)) |>
+  select(age, gender, chol) |>
+  slice(1:10)
+```
+
+`filter()` takes two conditions separated by a comma, which means the same as `&`: both have to be true. Then `arrange(desc(chol))` sorts from highest cholesterol down, `select()` keeps the three columns asked for, and `slice(1:10)` takes the top ten rows.
+
+The `mutate()` step is separate, because adding a column to ten hand-picked rows isn't much use. Applied to the whole dataset it is:
+
+```{r}
+#| label: sol-ex1-mutate
+nhanes |>
+  mutate(chol_high = chol > 6) |>
+  select(age, chol, chol_high)
+```
+
+`chol > 6` is a comparison, exactly like the ones in P1, and it returns `TRUE` or `FALSE` for every row. Participants with no cholesterol value recorded get `NA` rather than `FALSE`, which is correct: we don't know whether they're above 6, and guessing "no" would be inventing data.
+
+**Exercise 2**
+
+```{r}
+#| label: sol-ex2
+nhanes |>
+  summarise(
+    median_sed = median(sed, na.rm = TRUE),
+    iqr_sed = IQR(sed, na.rm = TRUE)
+  )
+
+ggplot(nhanes, aes(x = sed)) +
+  geom_histogram(binwidth = 1) +
+  labs(x = "Sedentary time (hours/day)", y = "Count")
+
+ggplot(nhanes, aes(x = sed, y = "")) +
+  geom_boxplot() +
+  labs(x = "Sedentary time (hours/day)", y = NULL)
+```
+
+The histogram is right-skewed, with a long tail of participants reporting many hours of sedentary time. So the median and IQR describe it more fairly than the mean and SD would.
+
+```{r}
+#| label: sol-ex2-scatter
+ggplot(nhanes, aes(x = sed, y = chol)) +
+  geom_point(alpha = 0.1) +
+  labs(x = "Sedentary time (hours/day)",
+       y = "Total cholesterol (mmol/L)")
+```
+
+The scatterplot shows no clear relationship. The cloud of points is roughly the same height right across the range of sedentary time, rather than drifting up or down as you move left to right. Whatever else predicts cholesterol here, sedentary time on its own doesn't look like much of it. IES Week 10 puts a number and a confidence interval on that impression instead of leaving it to the eye.
+
+**Exercise 3**
+
+```{r}
+#| label: sol-ex3-binwidth
+ggplot(nhanes, aes(x = chol)) +
+  geom_histogram(binwidth = 0.5) +
+  labs(x = "Total cholesterol (mmol/L)", y = "Count")
+
+ggplot(nhanes, aes(x = chol)) +
+  geom_histogram(binwidth = 0.05) +
+  labs(x = "Total cholesterol (mmol/L)", y = "Count")
+
+ggplot(nhanes, aes(x = chol)) +
+  geom_histogram(binwidth = 0.5) +
+  ylim(0, 1000) +
+  labs(x = "Total cholesterol (mmol/L)", y = "Count")
+```
+
+Narrowing the bins to 0.05 breaks the smooth shape into a spiky, gappy outline. Cholesterol is recorded to a limited number of decimal places, so at this bin width many bins fall in the gaps between recorded values and come out empty. Those spikes are an artefact of how the values were written down, not a real feature of cholesterol.
+
+Capping the y-axis at 1,000 does something worse, and worth seeing once. Every bar taller than 1,000 doesn't get its top trimmed off, it vanishes from the plot completely. The tallest bar here counts over 7,000 participants, and the whole middle of the distribution is taller than the cap, so what's left is the two tails with a hole where most of the data should be. A reader who didn't check the code would have no way of knowing that anything was missing.
+
+The first version is the one to put in a report. It shows the whole distribution at a bin width where the shape is readable, and it doesn't drop anything. Notice that all three plots are drawn from exactly the same numbers: nothing about cholesterol changed between them, only the choices we made about how to draw it. That's the seminar's point about misleading figures, made with our own data and our own code rather than someone else's published chart.
+
+**Exercise 4**
+
+```{r}
+#| label: sol-ex4-summary
+nhanes |>
+  filter(!is.na(gender)) |>
+  group_by(gender) |>
+  summarise(
+    mean_chol = mean(chol, na.rm = TRUE),
+    sd_chol = sd(chol, na.rm = TRUE),
+    n = n()
+  )
+
+ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = chol)) +
+  geom_boxplot() +
+  labs(x = "Gender", y = "Total cholesterol (mmol/L)")
+```
+
+Mean cholesterol is slightly higher in women than in men, and the boxplots overlap substantially. That's a small difference in the centre, not a separation of the two distributions.
+
+```{r}
+#| label: sol-ex4-relevel
+levels(nhanes$gender)
+
+gender_female_ref <- relevel(nhanes$gender, ref = "Female")
+levels(gender_female_ref)
+```
+
+`"Male"` is listed first, so `"Male"` is currently the reference level, which follows from the recode listing the numeric code `1` first and labelling it `"Male"`. After `relevel()`, `"Female"` is at the front of the new object and would be the reference instead. `nhanes` itself is untouched.
+
+**Exercise 5**
+
+```{r}
+#| label: sol-ex5
+nhanes |>
+  select(age, gender, eth, smoking, chol, phq.c) |>
+  tbl_summary(by = phq.c)
+```
+
+Notice the message above the table: `4499 missing rows in the "phq.c" column have been removed.` That's `gtsummary` telling us something important, not complaining. It isn't an error, and the table is fine.
+
+What it means is this. We asked for the table split three ways, by `phq.c`. A participant with no depression classification recorded can't go in any of the three columns, because we don't know which one they belong in. So `tbl_summary()` left them out, and told us how many: 4,499 of the `r format(nrow(nhanes), big.mark = ",")` participants in the dataset. The table describes the `r format(nrow(nhanes) - 4499, big.mark = ",")` who remain.
+
+This is the same idea as the removed-rows warnings above the plots, arriving in a different form. There, missing values couldn't be placed on an axis; here, they can't be placed in a column. Either way the software drops them and says so, and either way the number is the thing to look at rather than the message.
+
+It matters here more than usual, because this is the table the writing exercise asks you to describe. Describing it as though it covered everybody would overstate what it shows by 4,499 people. Whenever you report a table like this, say what it's based on.
+
+**Exercise 6**
+
+```{r}
+#| label: sol-ex6-table
+smoking_edu <- table(nhanes$smoking, nhanes$edu)
+smoking_edu
+
+prop.table(smoking_edu, margin = 1)
+prop.table(smoking_edu, margin = 2)
+```
+
+The row percentages are the ones that answer the question. `smoking` was given to `table()` first, so smoking is the rows, and `margin = 1` divides each row by its own total. The "Never" row then reads as the education breakdown *within* people who never smoked, which is exactly what was asked, and those three numbers add to 100%.
+
+The column percentages answer a different question: within each education group, what share smoke, used to smoke, and never smoked. That's a perfectly good question, just not this one. Both tables come from the same counts, so neither is more correct than the other in the abstract. What decides it is which total you want the percentages to be a share of, and that comes from the question, not from the data.
+
+```{r}
+#| label: sol-ex6-bar
+ggplot(nhanes |> filter(!is.na(edu)), aes(x = edu)) +
+  geom_bar() +
+  labs(x = "Education", y = "Count")
+```
+
+**Writing exercise (sample answer)**
+
+Depression classification was recorded for `r format(nrow(nhanes) - 4499, big.mark = ",")` of the `r format(nrow(nhanes), big.mark = ",")` participants; the remaining 4,499 had no classification recorded and are not included in this table. Among those classified, age, gender, and ethnicity distributions were broadly similar across the three groups. Current smoking was more common among participants classified with possible depression than among those classified as normal. Mean total cholesterol was similar across all three groups. These are descriptive comparisons only, based on group summaries and counts, not any formal test of difference. Hypothesis tests come in IES Week 9.
+:::

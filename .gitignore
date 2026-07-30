@@ -1,0 +1,31 @@
+# Quarto build artifacts and cache
+/.quarto/
+/_book/
+*_files/
+*_cache/
+
+# renv (activate.R, settings.json and lock file ARE tracked; see renv/.gitignore)
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/
+
+# R session/session files
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# OS cruft
+.DS_Store
+
+# Claude Code local tool state
+.claude/
+
+**/*.quarto_ipynb
+
+# Internal planning/instruction docs, not part of the published book
+*.md

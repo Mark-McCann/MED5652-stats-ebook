@@ -1,0 +1,473 @@
+# Data and data handling (IES Week 6) {#sec-p2-practical}
+
+This session follows P1, where we learned the language itself: objects, functions, packages, and how to read an error message. Today we bring in real data for the first time. We'll take a spreadsheet apart to see what makes it usable, import it into R, look it over, spot what's missing, and produce one small piece of real analysis, start to finish. By the end you will have written and saved your own R script, and re-run it from a fresh session to prove it still works. That is the way you'll work for the rest of the course. IES Week 7 picks up from here and goes straight into using `nhanes_mph` properly.
+
+## Chapter intended learning outcomes
+
+By the end of this session you will be able to:
+
+1. Identify features of a spreadsheet that will prevent it being analysed, and restructure it
+2. Locate a file you have downloaded, and state where your browser saves files by default
+3. Read, construct, and copy a full file path on your own operating system
+4. Import a CSV into R using a correctly specified path
+5. Diagnose and resolve the most common import failures
+6. Inspect an imported dataset's dimensions, variable names, and types
+7. Identify missing values in a dataset
+8. Produce a simple summary and a simple plot
+9. Write, save, and re-run an R script that imports data, summarises it, and produces a plot
+
+## Setup
+
+There's nothing to read in yet, so, as in P1, this chunk only sets the console's print width.
+
+```{r}
+#| label: setup
+options(width = 76)
+```
+
+## Tidy data, in a spreadsheet
+
+### What makes data usable
+
+A dataset R can work with follows three simple rules: one variable per column, one observation per row, one value per cell. Data laid out this way is called **tidy**. It sounds obvious written down, but very few spreadsheets people actually hand you follow it, because a spreadsheet is usually built to be *read by a person*, not imported by software. People merge cells to make a heading look nice. They use colour instead of writing a word down. They leave blank rows for visual spacing. None of that survives import, and some of it actively breaks it.
+
+### What breaks an import
+
+- **Merged cells.** A heading merged across several columns looks fine to a person, but when R reads the underlying columns back out, most of them come back empty, because the merge only stored the value in one of the cells it covers.
+- **Colour used to carry information**, instead of a word or a number, for example filling a cell red to mean "smoker" with no text at all. R reads cell values, not cell colours. The information the colour was carrying disappears completely.
+- **Units mixed into the value**, like `"72kg"` in a column that should hold a plain number. R reads `"72kg"` as text, not as 72, and every ordinary calculation on that column, `mean()` included, stops working until it's a number on its own.
+- **Blank rows used for spacing.** A blank row inserted purely to separate two sections becomes a row of missing values, `NA`, in every column, once imported.
+- **Notes written in a stray cell**, off to the side of the actual table, with no column of their own.
+- **More than one table on a single sheet.** R expects a sheet to be one table. A second, unrelated table lower down the same sheet gets read as more rows of the first table, and the result makes no sense.
+
+**Exercise (ILO 1).** `data/p2_messy_clinic.xlsx` is a small, made-up clinic visit log, built specifically to have every one of these problems at once. Open it in Excel, or whatever spreadsheet software you have.
+
+::: {.callout-tip appearance="simple"}
+**Screenshot placeholder** (`images/p2-messy-spreadsheet.png`): `p2_messy_clinic.xlsx` open in a spreadsheet application, showing the merged title row, the merged "Vitals" sub-header, the colour-only Smoker column, and the second table below the gap.
+:::
+
+Go through the sheet and list every feature above that you can find in it. Then build a clean version: one header row naming every column, one row per patient, weight and height as plain numbers with the units moved into the column name instead of the value, the smoker column holding an actual word, no stray notes, and the second table (the follow-up schedule) either removed or saved as a completely separate file. Save your clean version as a `.csv` file. The Solutions section describes the fixes, but building the file yourself, in spreadsheet software, is the actual point of this exercise. There's nothing to submit for it.
+
+## Finding a file, and telling R where it is
+
+Before we can read anything into R, we need to know exactly where the file we want actually lives. This is the file system skill everything from here on assumes.
+
+**Where downloads go.** When you download a file from a browser, most browsers save it into a folder called `Downloads` by default, without asking. On Windows that's usually `C:\Users\yourname\Downloads`; on a Mac it's usually `/Users/yourname/Downloads`. If you can't find a file you just downloaded, that folder is the first place to check, and it's worth confirming where your own browser is set to save to, since some let you change it.
+
+**Reading a path.** A file path is a set of directions from somewhere fixed down to one specific file, one folder at a time, separated by slashes. `data/mph_nhanes_20241107.csv` reads as "the folder called `data`, then inside it the file called `mph_nhanes_20241107.csv`." A longer path just has more folders to walk through before reaching the file.
+
+**Copying a path.** You'll rarely type a full path out by hand; instead, you copy it straight from your file browser.
+
+- **Windows:** hold Shift and right-click the file, then choose **Copy as path**.
+- **macOS:** right-click the file, then hold the **Option** key, which changes the menu, and choose **Copy "filename" as Pathname**.
+
+**Backslashes versus forward slashes.** A path copied this way on Windows uses backslashes, `\`, for example `C:\Users\yourname\Documents\ies_mph\data\file.csv`. R uses forward slashes, `/`, instead, and treats a lone backslash as the start of a special character rather than a folder separator, so a pasted Windows path usually needs every `\` replaced with `/` before R will accept it.
+
+**What a CSV actually is.** Open a `.csv` file in a plain text editor, Notepad on Windows or TextEdit on a Mac, rather than in spreadsheet software, and you'll see plain text: one line per row, values separated by commas. There's no hidden formatting behind it, which is exactly why it's such a safe format to hand between different pieces of software, R included.
+
+## Getting data in
+
+### `read_csv()` and `here()`
+
+`readr`'s `read_csv()` reads a `.csv` file into R as a data frame. It needs a path telling it exactly where that file is, using the path skills from earlier in this chapter. Building that path with `here()`, from the `here` package, means the same code works on any machine, regardless of where the project folder actually sits on that machine's disk: `here()` starts from the project folder and adds the pieces you give it, one folder at a time.
+
+This chapter needs three packages: `readr` for reading files, `here` for building paths, and `ggplot2` for the plot at the end. As P1 explained, installing a package and loading it are two different actions, so unless you've installed these already, run this once in the console, not inside this document:
+
+``` r
+install.packages(c("readr", "here", "ggplot2"))
+```
+
+After that, `library()` is all you need, in this session and every session after it:
+
+```{r}
+#| label: load-packages
+#| message: false
+library(readr)
+library(here)
+```
+
+`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in P1, nothing below will find its files, and this is where you'd find that out.
+
+### Four things that go wrong
+
+Almost every import problem you'll hit is one of four things. Each one below is deliberately broken, then fixed.
+
+**A wrong filename.** Close, but not exact:
+
+```{r}
+#| label: err-wrong-path
+#| error: true
+read_csv(here("data", "mph_nhanes_20241107_data.csv"))
+```
+
+The real file is called `mph_nhanes_20241107.csv`, no `_data` in the name. R's message states plainly that the file doesn't exist at the path it tried, which is exactly what P1's "file does not exist" error type looks like with a real file behind it.
+
+```{r}
+#| label: fix-wrong-path
+#| eval: false
+read_csv(here("data", "mph_nhanes_20241107.csv"))
+```
+
+**A path pasted straight from Windows Explorer.** Shift+right-click → *Copy as path*, from earlier in this chapter, gives you a full path using backslashes, for example `C:\Users\yourname\Documents\new_folder\mph_nhanes_20241107.csv`. Paste that directly into R as a string, without changing anything:
+
+```{r}
+#| label: err-backslash
+#| error: true
+read_csv("C:\Users\yourname\Documents\new_folder\mph_nhanes_20241107.csv")
+```
+
+This isn't even a "file not found" error. It never gets that far. `\U` is one of a handful of backslash sequences R's parser treats specially inside a string, and `\Users` isn't a valid one, so R refuses to parse the string at all. Every Windows path copied this way starts with `C:\Users\...`, so this isn't a rare edge case, it's the default shape of a pasted Windows path. The fix from earlier in this chapter still applies: replace every backslash with a forward slash before using a path in R. Better still, once the path is inside the project folder, `here()` avoids the problem entirely, since you never type the backslash-filled part of the path at all.
+
+**The right file, wrong location.** Forgetting which subfolder the file lives in:
+
+```{r}
+#| label: err-file-not-there
+#| error: true
+read_csv(here("mph_nhanes_20241107.csv"))
+```
+
+The filename is exactly right this time. What's missing is `"data"`, the subfolder it actually lives in. R's error message looks identical to the wrong-filename case above, which is worth noticing: the message tells you *that* nothing was found at that path, not *why* your path was wrong. You have to check that yourself.
+
+```{r}
+#| label: fix-file-not-there
+#| eval: false
+read_csv(here("data", "mph_nhanes_20241107.csv"))
+```
+
+**The wrong file type.** `data/p2_messy_clinic.xlsx`, from the exercise above, is an Excel file, not a CSV. Reading it with `read_csv()` doesn't throw an error at all.
+
+To see what actually came in, we need three functions. `dim()` reports how many rows and columns a dataset has, and `names()` lists its column names. Both get a proper introduction in the next section, where we use them on real data; here they're just the quickest way to look. `substr()`, from base R, takes a piece of text and keeps only part of it, given a starting and an ending position: `substr(x, 1, 50)` keeps the first 50 characters and throws the rest away. We need it because the column name that comes back is far too long to print in full.
+
+There's one extra argument in the call below, `show_col_types = FALSE`, and it's worth saying what it switches off rather than letting it slide past. `read_csv()` normally prints a short report of what it found and what type it guessed for each column. We meet that report properly in a moment, on the real data file, where it's useful. Here it would just be several lines of nonsense about a file that hasn't imported, so we turn it off to keep the broken result below the only thing on screen. That's the only reason it's there.
+
+```{r}
+#| label: wrong-filetype
+messy_attempt <- read_csv(here("data", "p2_messy_clinic.xlsx"),
+  show_col_types = FALSE)
+dim(messy_attempt)
+substr(names(messy_attempt), 1, 50)
+```
+
+No error, but nothing usable either: one column, zero rows, and a column name that's a fragment of raw XML. An `.xlsx` file is actually a small zip archive of several XML files bundled together, and `read_csv()` has gone looking inside that archive and started reading one of those XML files as if it were plain text. This is the quietest kind of import failure there is: nothing crashes, nothing complains, and the result still looks like a data frame at a glance. Always check what actually came in, which is exactly what the next section is for.
+
+Put right, all four attempts above collapse into the one call we actually want, and this is the real import we use for the rest of this book. The file holds `nhanes_mph`, an extract of a large American health survey in which adults were interviewed and then given a physical examination, so it carries measured values like cholesterol alongside things people reported about themselves. IES Week 7 introduces it properly, including one important simplification we make about it throughout. For today we only need it to be a real file with real data in it:
+
+```{r}
+#| label: read-nhanes
+#| message: false
+nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
+```
+
+### The block of output you'll see
+
+Run that line yourself and `read_csv()` prints eight lines the moment it finishes. This book hides them, because one of them is too wide to fit the page, so here they are as they'll appear in your console:
+
+```
+Rows: 41765 Columns: 27
+── Column specification ────────────────────────────────
+Delimiter: ","
+chr  (3): smoking, phq.c, lcod
+dbl (24): SEQN, age, gender, eth, edu, alc_wk, vpa_w, ...
+
+ℹ Use `spec()` to retrieve the full column specification
+  for this data.
+ℹ Specify the column types or set `show_col_types = FALSE`
+  to quiet this message.
+```
+
+It looks like something went wrong. Nothing did. This is a **message**, not a warning and not an error, and it appears every single time `read_csv()` reads a file successfully. It's worth reading once, properly, because it's the first thing you know about a dataset you've never opened.
+
+`Rows: 41765 Columns: 27` is the size of what came in. That's the same fact `dim()` gives us below, arriving before we ask for it. If a file you expected to have a few hundred rows reports three, you've learned that here rather than ten minutes later.
+
+`Delimiter: ","` is `read_csv()` confirming it split each line at commas, which is what the "comma" in "comma separated values" means, and what we saw for ourselves earlier in this chapter when we opened a CSV in a text editor.
+
+Then the column specification: `chr (3)` lists three columns read as character, that is text, and `dbl (24)` lists twenty-four read as numbers. `dbl` is short for "double", which is R's ordinary way of storing a number that can have decimal places. This is `read_csv()` telling us what it *guessed*, one column at a time, and that guess is the thing worth checking. Notice `smoking` and `phq.c` sitting in the character list, and `gender` and `eth` sitting in the number list, and hold onto that: it comes back in the next section but one.
+
+The two lines beginning with an `ℹ` are `read_csv()` offering you a way to see the full specification, and a way to make the whole message go away. That second one is `show_col_types = FALSE`, the argument we used on the broken `.xlsx` import above. Now you know what it silences. Use it when you already know what's in a file and don't want the report again, not to make untidy output go away, because "untidy output" and "the only warning you were going to get" often look identical.
+
+### A first look
+
+The message already told us the size and the column types. Four functions let us check that against what we actually have.
+
+```{r}
+#| label: inspect-dim-names
+dim(nhanes)
+names(nhanes)
+```
+
+`dim()` gives rows, then columns. `names()` lists every column name, in order, useful for checking a name before you type it.
+
+```{r}
+#| label: inspect-head
+head(nhanes)
+```
+
+`head()` prints the first six rows, so you can eyeball what real values actually look like.
+
+```{r}
+#| label: inspect-summary
+summary(nhanes$age)
+```
+
+`summary()`, run on one column, gives its minimum, maximum, quartiles, and mean in one line, plus a count of missing values if there are any. Run on the whole data frame instead of one column, it repeats this for every column at once, which is a fast way to eyeball the whole dataset in one go.
+
+Look at `gender` and `smoking` in the output above. `gender` is a plain number, 1 or 2, standing in for a category. `smoking` is already text, "Never", "Previous", or "Current". Neither is a proper R factor yet, a category R actually understands as one. IES Week 7 turns both, and four more columns like them, into real factors, checked against the dictionary file. For now we're only looking, not changing anything.
+
+### When R guesses the wrong type
+
+`read_csv()` decides each column's type by looking at the values in it. Most of the time that guess is right. It goes wrong in exactly the situation the messy spreadsheet exercise built on purpose: a column like `"72kg"`, units glued onto every value, reads in as text, because it isn't purely numbers. R has no way to know that `"kg"` should be split off and the rest treated as a number. It just sees text and stores text. This is why the clean version of that spreadsheet needed the unit moved into the column *name* (`weight_kg`) and out of every individual *value*: it's the only way `read_csv()` ends up with a column it can actually calculate on.
+
+### Spotting missing data
+
+`is.na()` checks each value in a vector and returns `TRUE` where it's missing, `FALSE` where it isn't. `sum()` on that result counts the `TRUE`s, since R treats `TRUE` as 1 and `FALSE` as 0 when you add them up.
+
+```{r}
+#| label: missing-vpa-w
+sum(is.na(nhanes$vpa_w))
+```
+
+That's how many participants have no value recorded for `vpa_w`, vigorous physical activity at work, out of `r format(nrow(nhanes), big.mark = ",")` participants in total. `nrow()`, from base R, returns just the row count on its own, the same number `dim()` gives as its first value above, useful whenever we want the total on its own rather than alongside the column count. It's a real gap, not a rounding artefact, and it matters: whatever we go on to calculate from `vpa_w` only ever describes the participants who actually have a value, and we should say so out loud whenever we report it, rather than letting it pass silently.
+
+### Using the dictionary file
+
+`nhanes_mph` arrives as two separate files. We've already read the data itself. The second file names every column and states what it means, and it's every bit as important as the data. Reading it prints the same column specification message we just unpacked, saying two columns of text this time instead of twenty-seven columns of mixed types. This book hides it from here on, since it says the same kind of thing every time and we've now read one properly. You'll still see it in your own console, and it's still worth a glance:
+
+```{r}
+#| label: read-dictionary
+#| message: false
+dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
+dictionary
+```
+
+The dictionary's first column is called `Variable names`, with a space in it, so referring to it needs backticks, exactly as P1 covered. `%in%`, from P1 as well, tests whether each value is a member of a set. Put inside square brackets after a data frame's column, with the row's index implied, this keeps only the rows where the condition is true:
+
+```{r}
+#| label: dictionary-lookup
+dictionary[dictionary$`Variable names` %in% c("age", "chol", "smoking"), ]
+```
+
+That's the habit worth building now: when a column's meaning isn't obvious from its name, the answer lives in this file, not in a guess. IES Week 7 uses this same file to build proper factors out of six of these columns; for today, just knowing how to look one up is enough.
+
+## A first analysis, and your first script
+
+### One summary statistic
+
+```{r}
+#| label: summary-chol
+mean(nhanes$chol, na.rm = TRUE)
+```
+
+`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it, the same kind of gap `vpa_w` had above. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in P1's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
+
+### A first taste of a grouped summary
+
+`nhanes$chol` pulls the whole cholesterol column out as a bare vector, exactly as `$` did in P1. Adding square brackets straight after it, with a condition inside, keeps only the values where that condition is `TRUE`:
+
+```{r}
+#| label: grouped-summary-preview
+summary(nhanes$chol[nhanes$smoking == "Never"])
+summary(nhanes$chol[nhanes$smoking == "Current"])
+```
+
+That's a genuine grouped summary, built entirely from tools already familiar: `$`, `==`, and now `[` with a condition inside it. It works, but it's clunky already with just two groups, and `smoking` has three. IES Week 7 introduces `group_by()` and `summarise()`, a far nicer way to do exactly this for as many groups as you like, in one line instead of several. This is only a preview of what's coming, not the tool you'll actually use going forward.
+
+### A first taste of a plot
+
+```{r}
+#| label: plot-preview
+#| message: false
+library(ggplot2)
+
+ggplot(nhanes, aes(x = chol)) +
+  geom_histogram(binwidth = 0.5)
+```
+
+`ggplot2` code is joined with `+`, not the pipe. That's a real inconsistency in R, not a mistake in this book, and IES Week 7 explains why and unpacks the rest of the grammar properly. For today, just notice the shape: cholesterol piles up around 4 to 6 mmol/L, with a long tail of higher values trailing off to the right.
+
+### That warning above the plot
+
+The plot came with a line starting `Warning:`, saying it removed `r format(sum(is.na(nhanes$chol)), big.mark = ",")` rows. Read it, because we'll see this one a lot, and then don't worry about it.
+
+First, a warning is not an error. An error means R gave up and produced nothing. A warning means R did the job and is telling you something about how. The plot is there and it's fine.
+
+Second, look at the number. It's `r format(sum(is.na(nhanes$chol)), big.mark = ",")`, exactly the count of participants with no cholesterol value that we found a moment ago. That's not a coincidence, it's the same fact arriving twice. A histogram puts each participant somewhere along the axis, and a missing value has no "somewhere" to go, so `ggplot2` left those participants out and told us how many it dropped.
+
+**Why we leave these warnings switched on.** R can be told to hide them, and plenty of people do, because they look untidy. This book doesn't, and neither should you for now. That warning is a free count of how much of your data a plot is actually based on. Hide it, and a plot built on half your dataset looks exactly like a plot built on all of it. It's the same reason we write `na.rm = TRUE` deliberately and say what it dropped, rather than typing it out of habit until it stops registering.
+
+**When it does need attention.** The number is the thing to check, not the warning itself. Compare it against what you expect, the way we just did with `is.na()`. If it matches, carry on. If it's much larger than expected, stop and find out why before trusting anything the plot shows: usually it means the wrong column, an import that didn't go as planned, or an earlier step that threw away more rows than intended. And whenever you report a result, say how many observations it's based on and how many were missing. A warning R printed for you is not the same as a reader being told.
+
+### From console to script
+
+Everything we've done so far in this chapter has been one line at a time. That's the right way to *try* something: type it in the console, look at what comes back, fix it if it's wrong. But P1 already made the argument against leaving it there. You will need to do this again, and you will not remember what you typed.
+
+So the working habit for the rest of this course is two steps, not one. Try the line in the console until it does what you want. Then move the line that worked into a script, and save it. The console is where you experiment; the script is what you keep.
+
+To build one now:
+
+1. In RStudio, go to **File → New File → R Script**. A blank file opens in the source pane, top-left.
+2. Type the lines you want to keep. For a first script, that's the `library()` calls, the `read_csv()` line, one summary, and one plot.
+3. Save it into the `scripts/` folder you built in P1, with a name that follows P1's conventions: no spaces, no `&` or `#`, something that says what it does. `first_analysis.R` is fine. `Untitled1.R` is not.
+
+Here's what a complete first script looks like, start to finish. Nothing in it is new; it's the pieces from earlier in this chapter, collected in the order they need to run:
+
+``` r
+library(readr)
+library(here)
+library(ggplot2)
+
+nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
+
+mean(nhanes$chol, na.rm = TRUE)
+sum(is.na(nhanes$chol))
+
+ggplot(nhanes, aes(x = chol)) +
+  geom_histogram(binwidth = 0.5)
+```
+
+Notice the shape of it. The `library()` calls come first, because nothing below them works until the packages are loaded. The `read_csv()` line comes next, because every line after it needs `nhanes` to exist. A script runs top to bottom, so the order isn't decoration, it's the thing that makes it work.
+
+### Proving it actually works
+
+Here's the part people skip, and it's the part that matters. A script that runs on your machine right now, in a session where you've been typing for an hour, is not yet proof of anything. Half of what it needs might already be sitting in memory from something you typed and forgot.
+
+So test it properly. In RStudio, go to **Session → Restart R**. That throws away every object and every loaded package, leaving you with an empty session, exactly like the one a colleague, a marker, or you-in-six-months would start from. Now run your script from the top.
+
+If it runs clean, the script is genuinely self-contained. If it fails, the error tells you precisely what you'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from P1, made concrete: not "scripts are good practice" but "here is how you find out whether yours actually is one."
+
+### How this book is put together
+
+Every chapter follows the same shape: learning objectives at the top, then worked content with the code and its output both visible, then a full worked example, then numbered exercises mapped back to those objectives. Solutions sit in a collapsed section at the very end, so you can have a real go before you look.
+
+The way to use it is to work along in a script of your own. Don't read the code, and don't copy and paste it either. Type it, run it, and see the same output appear in your console. When something breaks, that's not you falling behind, that's the part you're about to learn something from.
+
+## Exercises
+
+**Exercise 1** (ILOs 3, 4, 5). This `read_csv()` call is supposed to read the dictionary file but doesn't work:
+
+```r
+read_csv(here("data", "mph_nhanes_dictionary.csv"))
+```
+
+Work out what's wrong with the path and write the corrected call.
+
+**Exercise 2** (ILOs 6, 7). Check `mpa_w` (moderate physical activity at work): find its type with `class()`, and count how many values are missing with `is.na()` and `sum()`.
+
+**Exercise 3** (ILO 8). Produce one summary statistic and one plot for `wal_r` (walking, hours/day, outside work). Remember `na.rm = TRUE` if it turns out to have missing values.
+
+**Exercise 4** (ILO 9). Collect your answer to Exercise 3 into a proper script. Open a new R script, and write into it everything needed to go from a completely empty session to that summary and that plot: the `library()` calls, the `read_csv()` line, then the summary and the plot themselves. Save it into your `scripts/` folder with a sensible name.
+
+Then test it the way this chapter described. Go to **Session → Restart R**, and run your script from the top. If it errors, read the message, work out what the fresh session was missing, and add that line to the script rather than typing it into the console. Repeat until it runs clean from a restart. That is the point of the exercise, not the summary itself.
+
+## Self-check
+
+Five questions on the concepts this chapter leans on hardest: paths, file types, and reading a real import problem. Answers are in the Solutions section below.
+
+**1.** `read_csv(here("data", "mhp_nhanes_20241107.csv"))` fails, even though `mph_nhanes_20241107.csv` really is in the `data` folder. Which of the four import failures is this?
+
+a) The file is the wrong type
+b) A path pasted with backslashes
+c) A wrong filename, here a typo (`mhp` instead of `mph`)
+d) The file is in the wrong folder
+
+**2.** What's the actual difference between `dim(nhanes)` and `names(nhanes)`?
+
+a) They return exactly the same information in two formats
+b) `dim()` gives the number of rows and columns; `names()` lists every column name
+c) `names()` gives row and column counts; `dim()` lists column names
+d) `dim()` only works after `names()` has been run first
+
+**3.** `sum(is.na(nhanes$vpa_w))` returns `7354`. What does that number actually mean?
+
+a) The mean value of `vpa_w`
+b) 7,354 participants have `vpa_w` recorded as exactly zero
+c) 7,354 participants have no value recorded for `vpa_w`
+d) There are 7,354 participants in the dataset in total
+
+**4.** `read_csv()` is used to read both `mph_nhanes_20241107.csv` and `mph_nhanes_20241107_dictionary.csv`, in two separate calls. Why two calls, and not one?
+
+a) `read_csv()` can only read one row at a time
+b) They're two separate files, each holding a different table, so each needs its own call
+c) The dictionary file is not really needed, but the call is included anyway
+d) `read_csv()` automatically finds and reads both once you name one of them
+
+**5.** Reading `p2_messy_clinic.xlsx` with `read_csv()` produces a data frame with 1 column and 0 rows, and no error message. What does that tell you?
+
+a) The file is empty
+b) `read_csv()` refuses to read `.xlsx` files and stops immediately
+c) `.xlsx` is the wrong file type for `read_csv()`, and the lack of an error is exactly why you always check what actually came in
+d) The import worked correctly and the file genuinely has one column
+
+## Writing exercise
+
+Using the mean and the histogram from Exercise 3, write a short paragraph, about 60 words, describing `wal_r` as you would in the results section of a report. State the mean and its units, say how many participants have no value recorded, and describe the shape of the distribution the histogram shows. This is the smallest version of a habit the rest of this book builds on: a number on its own, with no sentence around it, is not yet a result.
+
+::: {.callout-note collapse="true"}
+## Solutions
+
+**Block 1 exercise**
+
+The fixes needed, matching each problem named earlier: split the merged title row and the merged "Vitals" sub-header back into one header row naming every column individually; move `kg` and `m` out of the Weight and Height values and into the column names instead (`weight_kg`, `height_m`), leaving plain numbers behind; replace the colour-only Smoker column with an actual word in every row ("Yes"/"No"); delete the blank spacer row; delete or relocate the stray note about Patient 5's missed follow-up, since it belongs in its own column, or nowhere in this table at all; and either delete the second table (the follow-up schedule) or save it as its own, separate CSV file, since one sheet should hold one table.
+
+**Exercise 1**
+
+```{r}
+#| label: sol-ex1
+#| message: false
+read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
+```
+
+The folder and filename were both fine. The problem was the letters `mph` typed as `mhp`.
+
+**Exercise 2**
+
+```{r}
+#| label: sol-ex2
+class(nhanes$mpa_w)
+sum(is.na(nhanes$mpa_w))
+```
+
+**Exercise 3**
+
+```{r}
+#| label: sol-ex3
+#| message: false
+mean(nhanes$wal_r, na.rm = TRUE)
+sum(is.na(nhanes$wal_r))
+
+library(ggplot2)
+ggplot(nhanes, aes(x = wal_r)) +
+  geom_histogram(binwidth = 0.5)
+```
+
+**Exercise 4**
+
+The finished script, in full. Saved as `scripts/wal_r_analysis.R`:
+
+``` r
+library(readr)
+library(here)
+library(ggplot2)
+
+nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
+
+mean(nhanes$wal_r, na.rm = TRUE)
+sum(is.na(nhanes$wal_r))
+
+ggplot(nhanes, aes(x = wal_r)) +
+  geom_histogram(binwidth = 0.5)
+```
+
+The two lines people most often leave out are the ones that were already true before they started: `library(readr)` and the `read_csv()` call. Both had been run earlier in the session, so `nhanes` existed and `read_csv()` worked, and neither felt like part of "the analysis." After a restart, neither is true any more, and the script fails on its first real line with `could not find function "read_csv"` or `object 'nhanes' not found`, both of which P1 covered. That's exactly what the restart is for: it finds the assumptions you didn't know you were making.
+
+**Self-check answers**
+
+1. **c.** `mhp` versus `mph` is a plain typo in the filename, not a folder problem, a file-type problem, or a backslash problem.
+2. **b.** `dim()` returns row and column counts. `names()` returns the column names themselves. Neither substitutes for the other.
+3. **c.** `is.na()` marks each missing value `TRUE`, and `sum()` adds those up. The number is a count of participants with no recorded value, nothing about the values that are present.
+4. **b.** `mph_nhanes_20241107.csv` and `mph_nhanes_20241107_dictionary.csv` are two separate files on disk, each holding a different table, so each needs its own `read_csv()` call.
+5. **c.** `.xlsx` is a zip archive of XML files, not a CSV, so `read_csv()` produces nonsense rather than a real dataset. The absence of an error is exactly the trap: always check what actually came in after reading a file, not just whether it "worked." `dim()`, used earlier in this chapter, is one way to do that. IES Week 7 introduces a second, `glimpse()` from `dplyr`, which shows every column with its type and first few values in one compact layout, better suited to a wide dataset like `nhanes_mph` than `dim()` alone.
+
+**Writing exercise (sample answer)**
+
+Participants reported a mean of 0.21 hours/day of walking outside work (`wal_r`), based on the 34,418 participants with a value recorded; 7,347 had none. The distribution is heavily right-skewed: most participants reported no walking outside work at all, and a small number reported several hours a day, pulling the mean above what a typical participant's value actually looks like.
+:::

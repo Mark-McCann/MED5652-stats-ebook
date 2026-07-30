@@ -1,0 +1,39 @@
+﻿Variable names,Description
+SEQN,Participant identifier
+age,Age in years
+gender,Gender (1=Male; 2=Female)
+eth,Ethnicity (1=Mexican; 2=Other Hispanic; 3=White; 4=Black; 5=Others)
+edu,Educaton (1=Less than high school; 2=high school graduate; 3=above high school)
+smoking,Smoking status (Never/Previous/Current)
+alc_wk,Alcohol drinking per week
+vpa_w,Vigourous physical activity (hour/day) at work
+mpa_w,Moderate physical activity (hour/day) at work
+wal_r,Walking (hour/day) outside work 
+vpa_r,Vigourous physical activity (hour/day) outside work
+mpa_r,Moderate physical activity (hour/day) outside work
+mpa_t,Moderate physical activity (hour/day) overall
+vpa_t,Vigourous physical activity (hour/day) overall
+met_w,MET-hour/day at work
+met_r,MET-hour/day outside work
+met_t,MET-hour/day overall
+sed,Sedentary behaviour (hour/day)
+chol,Total cholesterol (mmol/L)
+phq,Depressive symptoms - PHQ-2
+phq.c,Depression classification - PHQ-2 (0 Normal/1 Mild symptoms/2 Possible depression)
+blm.cvd,Baseline CVD (0=No; 1=Yes)
+dth,Death in follow-up
+lcod,"Leading cause of death: 
+hrt: heart diseases
+can: cancer
+res: respiratory diseases
+acc: accidents
+cbd: cerebrovascular diseases
+alz: alzheimer's disease
+dm: diabetes
+flu: influenza and pneumonia
+ckd: chronic kidney diseases
+oth: others
+"
+ucod_dm,Underlying cause of death - Diabetes
+ucod_ht,Underlying cause of death - Hypertension
+fu_month,Follow-up in months
