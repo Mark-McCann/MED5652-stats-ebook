@@ -1,4 +1,4 @@
-# Correlation and simple linear regression (IES Week 10) {#sec-w4-practical}
+# Correlation and simple linear regression (IES Week 10) {#sec-10-regression}
 
 This practical follows the IES Week 10 seminar of the same name. That seminar opened with scatterplots and Pearson's correlation coefficient, then made a deliberate shift: from describing how strongly two variables move together to modelling one variable as a function of the other. It stated the simple linear regression model, Y = α + βX + ε, introduced least squares and residuals, and showed how to interpret a slope, an intercept, and R². It also covered the assumptions behind the model, the diagnostic plots that check them, and the danger of using a fitted line to predict somewhere the data never reached. In this session we fit that model in R, check it properly, and use it to predict.
 
@@ -8,16 +8,15 @@ By the end of this session you will be able to:
 
 1. Produce and interpret a scatterplot with a fitted regression line
 2. Fit a simple linear regression with `lm()`
-3. Extract coefficients, confidence intervals, and model summaries
-4. Generate and interpret standard diagnostic plots
-5. Generate predictions and identify when a prediction constitutes extrapolation
-6. Report a simple regression result in journal format
+3. Generate and interpret standard diagnostic plots
+4. Generate predictions and identify when a prediction constitutes extrapolation
+5. Extract coefficients and confidence intervals, and report a simple regression result in journal format
 
 ## Setup
 
 As in IES Weeks 7 to 9, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
 
-This chapter adds one new package, `broom`. It isn't part of the tidyverse core, so if you haven't used it in an earlier chapter, it likely isn't installed yet. As P1 explained, installing a package and loading it are two different actions. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console, not inside this document. Once it's installed, `library(broom)` below makes its functions available for this session, exactly like every other package we load. `gtsummary` isn't used anywhere in this chapter, so it isn't loaded here. `dictionary` is read in even though no code below refers to it, for the reason IES Week 8 gave: it's there so it's to hand the moment you're unsure what a column means.
+This chapter adds one new package, `broom`. It isn't part of the tidyverse core, so if you haven't used it in an earlier chapter, it likely isn't installed yet. As IES Week 5 explained, installing a package and loading it are two different actions. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console, not inside this document. Once it's installed, `library(broom)` below makes its functions available for this session, exactly like every other package we load. `gtsummary` isn't used anywhere in this chapter, so it isn't loaded here. `dictionary` is read in even though no code below refers to it, for the reason IES Week 8 gave: it's there so it's to hand the moment you're unsure what a column means.
 
 ```{r}
 #| label: setup
@@ -247,11 +246,11 @@ Written as it would appear in a results section: sedentary time was not associat
 
 ## Exercises
 
-**Exercise 1** (ILOs 1, 2, 3). Using `vpa_r`, vigorous physical activity outside work (hours/day), produce a scatterplot of `chol` against `vpa_r` with a fitted regression line. Fit the model with `lm()`, and extract its coefficients and their 95% confidence intervals with `confint()` and `broom::tidy()`. Write one sentence reporting the slope as it would appear in a results section.
+**Exercise 1** (ILOs 1, 2, 5). Using `vpa_r`, vigorous physical activity outside work (hours/day), produce a scatterplot of `chol` against `vpa_r` with a fitted regression line. Fit the model with `lm()`, and extract its coefficients and their 95% confidence intervals with `confint()` and `broom::tidy()`. Write one sentence reporting the slope as it would appear in a results section.
 
-**Exercise 2** (ILO 4). For the model fitted in Exercise 1, produce a residuals-vs-fitted plot and a QQ plot. Write one sentence describing what each plot shows, and one sentence commenting on anything the plots reveal about the shape of `vpa_r` itself.
+**Exercise 2** (ILO 3). For the model fitted in Exercise 1, produce a residuals-vs-fitted plot and a QQ plot. Write one sentence describing what each plot shows, and one sentence commenting on anything the plots reveal about the shape of `vpa_r` itself.
 
-**Exercise 3** (ILO 5). Using the model fitted in Exercise 1, predict total cholesterol at `vpa_r` = 1 hour/day and at `vpa_r` = 24 hours/day. Write one sentence stating which of the two predictions can be trusted, and one sentence explaining why the other cannot, referring to the range of `vpa_r` actually observed in the data.
+**Exercise 3** (ILO 4). Using the model fitted in Exercise 1, predict total cholesterol at `vpa_r` = 1 hour/day and at `vpa_r` = 24 hours/day. Write one sentence stating which of the two predictions can be trusted, and one sentence explaining why the other cannot, referring to the range of `vpa_r` actually observed in the data.
 
 ## Writing exercise
 

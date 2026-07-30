@@ -1,18 +1,17 @@
-# Describing and visualising data (IES Week 7) {#sec-w1-practical}
+# Describing and visualising data (IES Week 7) {#sec-07-descriptive}
 
-This practical follows the IES Week 7 seminar of the same name. That seminar covered variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In P1 and P2 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this session we go straight to using that data.
+This practical follows the IES Week 7 seminar of the same name. That seminar covered variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In IES Weeks 5 and 6 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this session we go straight to using that data.
 
 ## Chapter intended learning outcomes
 
 By the end of this session you will be able to:
 
-1. Use `select()`, `filter()`, `mutate()`, and `arrange()` to manipulate a dataset
-2. Produce grouped summaries with `group_by()` and `summarise()`
-3. Construct frequency and cross-tabulations
-4. Build histograms, boxplots, bar charts, and scatterplots in `ggplot2`
-5. Modify a plot's bin width, scale, and labels, and describe the effect on interpretation
-6. Convert a character variable to a factor and set its reference level
-7. Produce a basic "Table 1" of participant characteristics
+1. Use `select()`, `filter()`, `mutate()`, and `arrange()` to manipulate a dataset, and produce grouped summaries with `group_by()` and `summarise()`
+2. Construct frequency and cross-tabulations
+3. Build histograms, boxplots, bar charts, and scatterplots in `ggplot2`
+4. Modify a plot's bin width, scale, and labels, and describe the effect on interpretation
+5. Convert a character variable to a factor and set its reference level
+6. Produce a basic "Table 1" of participant characteristics, and describe it in writing
 
 ## The data: `nhanes_mph`
 
@@ -32,9 +31,9 @@ You'll see this pattern repeatedly in the book: we name the simplification, say 
 
 ## Setup
 
-As in P2, we read the data with `read_csv()` from the `readr` package. We build the file path with `here()` from the `here` package. This builds a path from the project folder down to the file, so the code runs on any machine no matter where the project sits. `nhanes_mph` arrives as two files: the data itself, and a separate dictionary file that names every variable. Both are plain CSV files, so we read both with `read_csv()`.
+As in IES Week 6, we read the data with `read_csv()` from the `readr` package. We build the file path with `here()` from the `here` package. This builds a path from the project folder down to the file, so the code runs on any machine no matter where the project sits. `nhanes_mph` arrives as two files: the data itself, and a separate dictionary file that names every variable. Both are plain CSV files, so we read both with `read_csv()`.
 
-This chapter loads three packages P2 didn't: `dplyr` for manipulating data, `ggplot2` for plotting, and `gtsummary` for building tables. As P1 explained, installing a package and loading it are two different actions, so if you haven't installed these already, run this once in the console, not inside this document:
+This chapter loads three packages IES Week 6 didn't: `dplyr` for manipulating data, `ggplot2` for plotting, and `gtsummary` for building tables. As IES Week 5 explained, installing a package and loading it are two different actions, so if you haven't installed these already, run this once in the console, not inside this document:
 
 ``` r
 install.packages(c("dplyr", "ggplot2", "gtsummary"))
@@ -63,7 +62,7 @@ options(width = 76)
 source(here("R", "gtsummary-knitprint.R"))
 ```
 
-Running that in your own console prints more than it does on this page. The `library()` calls announce themselves, and each `read_csv()` prints the column specification message P2 unpacked. This book hides both from here on, because they say the same thing in every chapter and P2 already read one properly. Nothing is being kept from you: glance at the row and column counts in your own console the way P2 showed, and carry on.
+Running that in your own console prints more than it does on this page. The `library()` calls announce themselves, and each `read_csv()` prints the column specification message IES Week 6 unpacked. This book hides both from here on, because they say the same thing in every chapter and that earlier chapter already read one properly. Nothing is being kept from you: glance at the row and column counts in your own console the way it showed, and carry on.
 
 `glimpse()`, from `dplyr`, shows every column, its type, and its first few values. It's useful for checking what actually came in, rather than what we expected to come in.
 
@@ -205,7 +204,7 @@ nhanes |>
   )
 ```
 
-Three of those functions are new. `mean()` we already met in P1. `sd()`, from base R, returns the standard deviation: a measure of how spread out the values are, in the same units as the variable itself. `median()`, also base R, returns the middle value once everything is sorted, so half the participants sit below it and half above. Both are the summaries the seminar introduced, now with a function attached to each.
+Three of those functions are new. `mean()` we already met in IES Week 5. `sd()`, from base R, returns the standard deviation: a measure of how spread out the values are, in the same units as the variable itself. `median()`, also base R, returns the middle value once everything is sorted, so half the participants sit below it and half above. Both are the summaries the seminar introduced, now with a function attached to each.
 
 `na.rm = TRUE` tells `mean()` and `sd()` to drop missing values before calculating. Without it, a single `NA` in a column makes the whole result `NA`. The `filter()` step above drops rows where `gender` or `chol` itself is missing, so the group sizes reported in `n` reflect exactly the rows the means are calculated from. `n()`, used inside `summarise()`, counts the rows in each group.
 
@@ -269,7 +268,7 @@ ggplot(nhanes, aes(x = sed)) +
 
 There are three layers there. `ggplot()` names the data and the mapping, `geom_histogram()` says to draw it as a histogram, and `labs()` sets the axis labels. `labs()` is worth using every single time. Left out, the axes are labelled with the raw column name, so this one would have read `sed` rather than "Sedentary time (hours/day)", and nobody outside this course knows what `sed` means or what units it's in. A plot that needs explaining out loud isn't finished. Every plot from here on sets its labels, and so should yours.
 
-That warning about removed rows is the one P2 explained: `sed` has `r format(sum(is.na(nhanes$sed)), big.mark = ",")` participants with no recorded value, and they can't be placed on the axis, so `ggplot2` left them out and said so. It will appear above most plots in this chapter, with a different number each time depending on the variable. Glance at the number, check it's the size you expect, and carry on.
+That warning about removed rows is the one IES Week 6 explained: `sed` has `r format(sum(is.na(nhanes$sed)), big.mark = ",")` participants with no recorded value, and they can't be placed on the axis, so `ggplot2` left them out and said so. It will appear above most plots in this chapter, with a different number each time depending on the variable. Glance at the number, check it's the size you expect, and carry on.
 
 A boxplot of cholesterol by gender:
 
@@ -374,15 +373,15 @@ Age looks similar across the two gender groups, both in the boxplot and in the T
 
 **Exercise 1** (ILO 1). Using the four `dplyr` verbs, and a pipe, answer this: among participants aged 65 or over who have never smoked, what are the ten highest cholesterol values? Keep only `age`, `gender`, and `chol` in your answer. Then add a column called `chol_high` that is `TRUE` when `chol` is above 6 mmol/L and `FALSE` otherwise.
 
-**Exercise 2** (ILOs 2, 4). Describe the distribution of sedentary time (`sed`). Report the mean and SD or the median and IQR, whichever the shape justifies, and support your choice with a histogram and a boxplot. Then produce a scatterplot of `chol` against `sed`, label both axes with their units, and write one sentence on whether the plot suggests any relationship between the two.
+**Exercise 2** (ILOs 1, 3). Describe the distribution of sedentary time (`sed`). Report the mean and SD or the median and IQR, whichever the shape justifies, and support your choice with a histogram and a boxplot. Then produce a scatterplot of `chol` against `sed`, label both axes with their units, and write one sentence on whether the plot suggests any relationship between the two.
 
-**Exercise 3** (ILOs 4, 5). Build a histogram of total cholesterol (`chol`) with a `binwidth` of 0.5, labelled properly with `labs()`. Then produce two more versions of it: one with a `binwidth` of 0.05, and one with the original bin width but with `+ ylim(0, 1000)` added. Write one sentence for each of the two changes saying what it does to the impression the plot gives, and one sentence saying which of the three you would put in a report and why.
+**Exercise 3** (ILOs 3, 4). Build a histogram of total cholesterol (`chol`) with a `binwidth` of 0.5, labelled properly with `labs()`. Then produce two more versions of it: one with a `binwidth` of 0.05, and one with the original bin width but with `+ ylim(0, 1000)` added. Write one sentence for each of the two changes saying what it does to the impression the plot gives, and one sentence saying which of the three you would put in a report and why.
 
-**Exercise 4** (ILOs 2, 4, 6). Compare total cholesterol (`chol`) by gender. Produce a grouped summary and a boxplot, and write one sentence comparing the two groups. Then use `levels()` to state which gender is currently the reference level, and `relevel()` to make the other one the reference instead, assigning the result to a new object rather than overwriting `nhanes`.
+**Exercise 4** (ILOs 1, 3, 5). Compare total cholesterol (`chol`) by gender. Produce a grouped summary and a boxplot, and write one sentence comparing the two groups. Then use `levels()` to state which gender is currently the reference level, and `relevel()` to make the other one the reference instead, assigning the result to a new object rather than overwriting `nhanes`.
 
-**Exercise 5** (ILOs 3, 6, 7). Produce a Table 1 of `age`, `gender`, `eth`, `smoking`, and `chol`, stratified by depression classification (`phq.c`).
+**Exercise 5** (ILOs 2, 5, 6). Produce a Table 1 of `age`, `gender`, `eth`, `smoking`, and `chol`, stratified by depression classification (`phq.c`).
 
-**Exercise 6** (ILOs 3, 4). Build a cross-tabulation of smoking status (`smoking`) against education (`edu`) with `table()`. Produce both the row percentages and the column percentages with `prop.table()`.
+**Exercise 6** (ILOs 2, 3). Build a cross-tabulation of smoking status (`smoking`) against education (`edu`) with `table()`. Produce both the row percentages and the column percentages with `prop.table()`.
 
 Then answer this question using whichever of the two is appropriate: *among people who never smoked, how is education distributed?* State which of your two tables answers it, and say in one sentence why the other one doesn't. Finally, produce a bar chart of `edu`, labelled properly.
 
@@ -419,7 +418,7 @@ nhanes |>
   select(age, chol, chol_high)
 ```
 
-`chol > 6` is a comparison, exactly like the ones in P1, and it returns `TRUE` or `FALSE` for every row. Participants with no cholesterol value recorded get `NA` rather than `FALSE`, which is correct: we don't know whether they're above 6, and guessing "no" would be inventing data.
+`chol > 6` is a comparison, exactly like the ones in IES Week 5, and it returns `TRUE` or `FALSE` for every row. Participants with no cholesterol value recorded get `NA` rather than `FALSE`, which is correct: we don't know whether they're above 6, and guessing "no" would be inventing data.
 
 **Exercise 2**
 

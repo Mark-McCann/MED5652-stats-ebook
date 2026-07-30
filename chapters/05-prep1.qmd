@@ -1,4 +1,4 @@
-# R and R Studio (IES Week 5) {#sec-p1-practical}
+# R and R Studio (IES Week 5) {#sec-05-prep1}
 
 This is a preparatory chapter to learn about the basics of R, and the RStudio interface. It will cover what a script is, how to create things in R, and how to read the handful of error messages we'll all meet in the next ten weeks. Nothing here is about statistics yet, but these are an important foundation for applying statistical analysis to data.
 
@@ -6,17 +6,12 @@ This is a preparatory chapter to learn about the basics of R, and the RStudio in
 
 By the end of this session you will be able to:
 
-1. Install R and RStudio on your own device
-2. Identify the console, script editor, environment, and files panes, and describe what each is for
-3. Create an RStudio Project and explain how it relates to the folder structure built in this chapter
-4. Recognise R's basic data types and structures (numeric, character, logical, factor; vector, data frame), and build a vector with `c()`
-5. Call a function using positional and named arguments, and explain what a default argument value is
-6. Build a logical condition with comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`), negate one with `!`, combine conditions with `&`, and test membership with `%in%`
-7. Write and read a short piped sequence of steps with `|>`
-8. Extract a single column from a data frame with `$`, and explain how this differs from keeping a column with `select()`
-9. Install and load a package, and explain why these are two different actions
-10. Read an error message and identify which of the common failure types it represents
-11. Access a function's help page
+1. Install R and RStudio on your own device, and verify the installation by running code and loading a package
+2. Work in RStudio using a Project and a saved script, and explain why we script rather than work in the console
+3. Create objects by assignment, and recognise R's basic data types and structures (numeric, character, logical, factor; vector, data frame)
+4. Call a function using named arguments, explain what a default value is, and find its help page
+5. Write and read a short piped sequence that includes a logical condition and extracts a column from a data frame
+6. Diagnose a failed line of code from its error message
 
 ## Setup
 
@@ -49,7 +44,7 @@ RStudio's window is split into four panes. Where each one sits is consistent no 
 - **Bottom-right: a tabbed pane** holding the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
 
 ::: {.callout-tip appearance="simple"}
-**Screenshot placeholder** (`images/p1-panes.png`): RStudio's default layout with all four panes labelled.
+**Screenshot placeholder** (`images/05-prep1-panes.png`): RStudio's default layout with all four panes labelled.
 :::
 
 ### Building a project folder
@@ -66,10 +61,10 @@ An RStudio Project turns that folder into something RStudio understands directly
 4. RStudio reopens with that folder as the **working directory**. You can confirm this by checking the Files pane, bottom-right, which now shows the folder's contents, and the title bar, which now shows the project's name.
 
 ::: {.callout-tip appearance="simple"}
-**Screenshot placeholder** (`images/p1-new-project.png`): the New Project wizard, with Existing Directory highlighted.
+**Screenshot placeholder** (`images/05-prep1-new-project.png`): the New Project wizard, with Existing Directory highlighted.
 :::
 
-A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in P2, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
+A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in IES Week 6, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
 
 ### Console versus script
 
@@ -114,7 +109,7 @@ ages <- c(45, 62, 38, 71)
 ages
 ```
 
-A vector holds one type of value, several at once. A **data frame** holds several vectors side by side, as columns, which is the structure this course actually works with from P2 onward. Building one from two vectors previews what's coming:
+A vector holds one type of value, several at once. A **data frame** holds several vectors side by side, as columns, which is the structure this course actually works with from IES Week 6 onward. Building one from two vectors previews what's coming:
 
 ```{r}
 #| label: dataframe-preview
@@ -238,7 +233,7 @@ toy <- data.frame(`patient id` = c(1, 2, 3), check.names = FALSE)
 toy$`patient id`
 ```
 
-`data.frame()` normally cleans up column names automatically, turning a space into a dot. `check.names = FALSE` switches that off, purely so this example can show a genuine spaced name. When we read a CSV file with `read_csv()` in P2, column names come in exactly as written, spaces and all, with no automatic cleanup. P2's dictionary file has a column literally called `Variable names`, and backticks are exactly how we'll refer to it.
+`data.frame()` normally cleans up column names automatically, turning a space into a dot. `check.names = FALSE` switches that off, purely so this example can show a genuine spaced name. When we read a CSV file with `read_csv()` in IES Week 6, column names come in exactly as written, spaces and all, with no automatic cleanup. Its dictionary file has a column literally called `Variable names`, and backticks are exactly how we'll refer to it.
 
 ## The pipe
 
@@ -315,11 +310,11 @@ sum(c(1, 2, 3))
 read.csv("nonexistent_file.csv")
 ```
 
-The warning line above states the actual reason, a missing file, before the error itself. We'll meet this one properly in P2, once there's a real file to read. `read.csv()` is base R's own version of the function; from P2 onward we use `read_csv()` from the `readr` package instead, which behaves a little differently but fails the same way when a path is wrong.
+The warning line above states the actual reason, a missing file, before the error itself. We'll meet this one properly in IES Week 6, once there's a real file to read. `read.csv()` is base R's own version of the function; from there onward we use `read_csv()` from the `readr` package instead, which behaves a little differently but fails the same way when a path is wrong.
 
 ## Getting help
 
-Every function used in this course has a help page. Typing `?mean` in the console and pressing Enter opens `mean()`'s help page in the Help pane, bottom-right, showing exactly what arguments it takes and what it returns. It's usually faster than searching online, and it's always correct for the version of R actually installed. RStudio also keeps a set of cheat sheets under **Help → Cheatsheets**, one per major package. Beyond that, this book itself stays the main reference for the rest of the course. P2 explains how to find your way around it.
+Every function used in this course has a help page. Typing `?mean` in the console and pressing Enter opens `mean()`'s help page in the Help pane, bottom-right, showing exactly what arguments it takes and what it returns. It's usually faster than searching online, and it's always correct for the version of R actually installed. RStudio also keeps a set of cheat sheets under **Help → Cheatsheets**, one per major package. Beyond that, this book itself stays the main reference for the rest of the course. IES Week 6 explains how to find your way around it.
 
 ## Worked example: four clinic visits
 
@@ -365,13 +360,13 @@ Same values, different container: a bare vector from `$`, a one-column data fram
 
 ## Exercises
 
-**Exercise 1** (ILO 4). Create a vector called `heights` holding four numbers of your choosing, using `c()` and `<-`. Check its class with `class()`, and confirm `heights` appears in the Environment pane after you run your code.
+**Exercise 1** (ILO 3). Create a vector called `heights` holding four numbers of your choosing, using `c()` and `<-`. Check its class with `class()`, and confirm `heights` appears in the Environment pane after you run your code.
 
-**Exercise 2** (ILOs 5, 6, 11). Using `visits$weight_kg` from the worked example, round the values to one decimal place, naming the `digits` argument explicitly rather than relying on position. Then build a logical condition that identifies which visits are for a smoker weighing over 90 kg, combining a comparison operator with `&`.
+**Exercise 2** (ILOs 4, 5). Using `visits$weight_kg` from the worked example, round the values to one decimal place, naming the `digits` argument explicitly rather than relying on position. Then build a logical condition that identifies which visits are for a smoker weighing over 90 kg, combining a comparison operator with `&`.
 
 Then open `round()`'s help page by typing `?round` in the console. Find the **Usage** section at the top, and write down what value `digits` takes when you don't supply one. Check your answer by running `round()` on the same values with the `digits` argument left out entirely.
 
-**Exercise 3** (ILOs 7, 8). Write a piped sequence, using `|>`, that takes `visits$weight_kg`, rounds it to zero decimal places, and sums the result. Then use `select()` to keep just `visit_id` and `smoker` from `visits`, and write one sentence stating how the result differs from `visits$smoker`.
+**Exercise 3** (ILO 5). Write a piped sequence, using `|>`, that takes `visits$weight_kg`, rounds it to zero decimal places, and sums the result. Then use `select()` to keep just `visit_id` and `smoker` from `visits`, and write one sentence stating how the result differs from `visits$smoker`.
 
 ## Self-check
 

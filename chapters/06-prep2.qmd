@@ -1,24 +1,19 @@
-# Data and data handling (IES Week 6) {#sec-p2-practical}
+# Data and data handling (IES Week 6) {#sec-06-prep2}
 
-This session follows P1, where we learned the language itself: objects, functions, packages, and how to read an error message. Today we bring in real data for the first time. We'll take a spreadsheet apart to see what makes it usable, import it into R, look it over, spot what's missing, and produce one small piece of real analysis, start to finish. By the end you will have written and saved your own R script, and re-run it from a fresh session to prove it still works. That is the way you'll work for the rest of the course. IES Week 7 picks up from here and goes straight into using `nhanes_mph` properly.
+This session follows IES Week 5, where we learned the language itself: objects, functions, packages, and how to read an error message. Today we bring in real data for the first time. We'll take a spreadsheet apart to see what makes it usable, import it into R, look it over, spot what's missing, and produce one small piece of real analysis, start to finish. By the end you will have written and saved your own R script, and re-run it from a fresh session to prove it still works. That is the way you'll work for the rest of the course. IES Week 7 picks up from here and goes straight into using `nhanes_mph` properly.
 
 ## Chapter intended learning outcomes
 
 By the end of this session you will be able to:
 
 1. Identify features of a spreadsheet that will prevent it being analysed, and restructure it
-2. Locate a file you have downloaded, and state where your browser saves files by default
-3. Read, construct, and copy a full file path on your own operating system
-4. Import a CSV into R using a correctly specified path
-5. Diagnose and resolve the most common import failures
-6. Inspect an imported dataset's dimensions, variable names, and types
-7. Identify missing values in a dataset
-8. Produce a simple summary and a simple plot
-9. Write, save, and re-run an R script that imports data, summarises it, and produces a plot
+2. Import a CSV into R using a correctly specified path, and diagnose and resolve the most common import failures
+3. Inspect an imported dataset's dimensions, variable names, types, and missing values
+4. Write, save, and re-run an R script that imports data, summarises it, and produces a plot
 
 ## Setup
 
-There's nothing to read in yet, so, as in P1, this chunk only sets the console's print width.
+There's nothing to read in yet, so, as in IES Week 5, this chunk only sets the console's print width.
 
 ```{r}
 #| label: setup
@@ -43,7 +38,7 @@ A dataset R can work with follows three simple rules: one variable per column, o
 **Exercise (ILO 1).** `data/p2_messy_clinic.xlsx` is a small, made-up clinic visit log, built specifically to have every one of these problems at once. Open it in Excel, or whatever spreadsheet software you have.
 
 ::: {.callout-tip appearance="simple"}
-**Screenshot placeholder** (`images/p2-messy-spreadsheet.png`): `p2_messy_clinic.xlsx` open in a spreadsheet application, showing the merged title row, the merged "Vitals" sub-header, the colour-only Smoker column, and the second table below the gap.
+**Screenshot placeholder** (`images/06-prep2-messy-spreadsheet.png`): `p2_messy_clinic.xlsx` open in a spreadsheet application, showing the merged title row, the merged "Vitals" sub-header, the colour-only Smoker column, and the second table below the gap.
 :::
 
 Go through the sheet and list every feature above that you can find in it. Then build a clean version: one header row naming every column, one row per patient, weight and height as plain numbers with the units moved into the column name instead of the value, the smoker column holding an actual word, no stray notes, and the second table (the follow-up schedule) either removed or saved as a completely separate file. Save your clean version as a `.csv` file. The Solutions section describes the fixes, but building the file yourself, in spreadsheet software, is the actual point of this exercise. There's nothing to submit for it.
@@ -71,7 +66,7 @@ Before we can read anything into R, we need to know exactly where the file we wa
 
 `readr`'s `read_csv()` reads a `.csv` file into R as a data frame. It needs a path telling it exactly where that file is, using the path skills from earlier in this chapter. Building that path with `here()`, from the `here` package, means the same code works on any machine, regardless of where the project folder actually sits on that machine's disk: `here()` starts from the project folder and adds the pieces you give it, one folder at a time.
 
-This chapter needs three packages: `readr` for reading files, `here` for building paths, and `ggplot2` for the plot at the end. As P1 explained, installing a package and loading it are two different actions, so unless you've installed these already, run this once in the console, not inside this document:
+This chapter needs three packages: `readr` for reading files, `here` for building paths, and `ggplot2` for the plot at the end. As IES Week 5 explained, installing a package and loading it are two different actions, so unless you've installed these already, run this once in the console, not inside this document:
 
 ``` r
 install.packages(c("readr", "here", "ggplot2"))
@@ -86,7 +81,7 @@ library(readr)
 library(here)
 ```
 
-`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in P1, nothing below will find its files, and this is where you'd find that out.
+`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in IES Week 5, nothing below will find its files, and this is where you'd find that out.
 
 ### Four things that go wrong
 
@@ -100,7 +95,7 @@ Almost every import problem you'll hit is one of four things. Each one below is 
 read_csv(here("data", "mph_nhanes_20241107_data.csv"))
 ```
 
-The real file is called `mph_nhanes_20241107.csv`, no `_data` in the name. R's message states plainly that the file doesn't exist at the path it tried, which is exactly what P1's "file does not exist" error type looks like with a real file behind it.
+The real file is called `mph_nhanes_20241107.csv`, no `_data` in the name. R's message states plainly that the file doesn't exist at the path it tried, which is exactly what IES Week 5's "file does not exist" error type looks like with a real file behind it.
 
 ```{r}
 #| label: fix-wrong-path
@@ -239,7 +234,7 @@ dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
 dictionary
 ```
 
-The dictionary's first column is called `Variable names`, with a space in it, so referring to it needs backticks, exactly as P1 covered. `%in%`, from P1 as well, tests whether each value is a member of a set. Put inside square brackets after a data frame's column, with the row's index implied, this keeps only the rows where the condition is true:
+The dictionary's first column is called `Variable names`, with a space in it, so referring to it needs backticks, exactly as IES Week 5 covered. `%in%`, from the same chapter, tests whether each value is a member of a set. Put inside square brackets after a data frame's column, with the row's index implied, this keeps only the rows where the condition is true:
 
 ```{r}
 #| label: dictionary-lookup
@@ -257,11 +252,11 @@ That's the habit worth building now: when a column's meaning isn't obvious from 
 mean(nhanes$chol, na.rm = TRUE)
 ```
 
-`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it, the same kind of gap `vpa_w` had above. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in P1's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
+`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it, the same kind of gap `vpa_w` had above. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in IES Week 5's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
 
 ### A first taste of a grouped summary
 
-`nhanes$chol` pulls the whole cholesterol column out as a bare vector, exactly as `$` did in P1. Adding square brackets straight after it, with a condition inside, keeps only the values where that condition is `TRUE`:
+`nhanes$chol` pulls the whole cholesterol column out as a bare vector, exactly as `$` did in IES Week 5. Adding square brackets straight after it, with a condition inside, keeps only the values where that condition is `TRUE`:
 
 ```{r}
 #| label: grouped-summary-preview
@@ -298,7 +293,7 @@ Second, look at the number. It's `r format(sum(is.na(nhanes$chol)), big.mark = "
 
 ### From console to script
 
-Everything we've done so far in this chapter has been one line at a time. That's the right way to *try* something: type it in the console, look at what comes back, fix it if it's wrong. But P1 already made the argument against leaving it there. You will need to do this again, and you will not remember what you typed.
+Everything we've done so far in this chapter has been one line at a time. That's the right way to *try* something: type it in the console, look at what comes back, fix it if it's wrong. But IES Week 5 already made the argument against leaving it there. You will need to do this again, and you will not remember what you typed.
 
 So the working habit for the rest of this course is two steps, not one. Try the line in the console until it does what you want. Then move the line that worked into a script, and save it. The console is where you experiment; the script is what you keep.
 
@@ -306,7 +301,7 @@ To build one now:
 
 1. In RStudio, go to **File → New File → R Script**. A blank file opens in the source pane, top-left.
 2. Type the lines you want to keep. For a first script, that's the `library()` calls, the `read_csv()` line, one summary, and one plot.
-3. Save it into the `scripts/` folder you built in P1, with a name that follows P1's conventions: no spaces, no `&` or `#`, something that says what it does. `first_analysis.R` is fine. `Untitled1.R` is not.
+3. Save it into the `scripts/` folder you built in IES Week 5, with a name that follows its conventions: no spaces, no `&` or `#`, something that says what it does. `first_analysis.R` is fine. `Untitled1.R` is not.
 
 Here's what a complete first script looks like, start to finish. Nothing in it is new; it's the pieces from earlier in this chapter, collected in the order they need to run:
 
@@ -332,7 +327,7 @@ Here's the part people skip, and it's the part that matters. A script that runs 
 
 So test it properly. In RStudio, go to **Session → Restart R**. That throws away every object and every loaded package, leaving you with an empty session, exactly like the one a colleague, a marker, or you-in-six-months would start from. Now run your script from the top.
 
-If it runs clean, the script is genuinely self-contained. If it fails, the error tells you precisely what you'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from P1, made concrete: not "scripts are good practice" but "here is how you find out whether yours actually is one."
+If it runs clean, the script is genuinely self-contained. If it fails, the error tells you precisely what you'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from IES Week 5, made concrete: not "scripts are good practice" but "here is how you find out whether yours actually is one."
 
 ### How this book is put together
 
@@ -342,7 +337,7 @@ The way to use it is to work along in a script of your own. Don't read the code,
 
 ## Exercises
 
-**Exercise 1** (ILOs 3, 4, 5). This `read_csv()` call is supposed to read the dictionary file but doesn't work:
+**Exercise 1** (ILO 2). This `read_csv()` call is supposed to read the dictionary file but doesn't work:
 
 ```r
 read_csv(here("data", "mph_nhanes_dictionary.csv"))
@@ -350,11 +345,11 @@ read_csv(here("data", "mph_nhanes_dictionary.csv"))
 
 Work out what's wrong with the path and write the corrected call.
 
-**Exercise 2** (ILOs 6, 7). Check `mpa_w` (moderate physical activity at work): find its type with `class()`, and count how many values are missing with `is.na()` and `sum()`.
+**Exercise 2** (ILO 3). Check `mpa_w` (moderate physical activity at work): find its type with `class()`, and count how many values are missing with `is.na()` and `sum()`.
 
-**Exercise 3** (ILO 8). Produce one summary statistic and one plot for `wal_r` (walking, hours/day, outside work). Remember `na.rm = TRUE` if it turns out to have missing values.
+**Exercise 3** (ILO 4). Produce one summary statistic and one plot for `wal_r` (walking, hours/day, outside work). Remember `na.rm = TRUE` if it turns out to have missing values.
 
-**Exercise 4** (ILO 9). Collect your answer to Exercise 3 into a proper script. Open a new R script, and write into it everything needed to go from a completely empty session to that summary and that plot: the `library()` calls, the `read_csv()` line, then the summary and the plot themselves. Save it into your `scripts/` folder with a sensible name.
+**Exercise 4** (ILO 4). Collect your answer to Exercise 3 into a proper script. Open a new R script, and write into it everything needed to go from a completely empty session to that summary and that plot: the `library()` calls, the `read_csv()` line, then the summary and the plot themselves. Save it into your `scripts/` folder with a sensible name.
 
 Then test it the way this chapter described. Go to **Session → Restart R**, and run your script from the top. If it errors, read the message, work out what the fresh session was missing, and add that line to the script rather than typing it into the console. Repeat until it runs clean from a restart. That is the point of the exercise, not the summary itself.
 
@@ -457,7 +452,7 @@ ggplot(nhanes, aes(x = wal_r)) +
   geom_histogram(binwidth = 0.5)
 ```
 
-The two lines people most often leave out are the ones that were already true before they started: `library(readr)` and the `read_csv()` call. Both had been run earlier in the session, so `nhanes` existed and `read_csv()` worked, and neither felt like part of "the analysis." After a restart, neither is true any more, and the script fails on its first real line with `could not find function "read_csv"` or `object 'nhanes' not found`, both of which P1 covered. That's exactly what the restart is for: it finds the assumptions you didn't know you were making.
+The two lines people most often leave out are the ones that were already true before they started: `library(readr)` and the `read_csv()` call. Both had been run earlier in the session, so `nhanes` existed and `read_csv()` worked, and neither felt like part of "the analysis." After a restart, neither is true any more, and the script fails on its first real line with `could not find function "read_csv"` or `object 'nhanes' not found`, both of which IES Week 5 covered. That's exactly what the restart is for: it finds the assumptions you didn't know you were making.
 
 **Self-check answers**
 

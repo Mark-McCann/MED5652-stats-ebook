@@ -7,13 +7,13 @@ book:
   date: "29/07/2026"
   chapters:
     - index.qmd
-    - chapters/p1.qmd
-    - chapters/p2.qmd
-    - chapters/w1-practical.qmd
-    - chapters/w2-practical.qmd
-    - chapters/w3-practical.qmd
-    - chapters/w4-practical.qmd
-    - chapters/w5-practical.qmd
+    - chapters/05-prep1.qmd
+    - chapters/06-prep2.qmd
+    - chapters/07-descriptive.qmd
+    - chapters/08-estimation.qmd
+    - chapters/09-comparison.qmd
+    - chapters/10-regression.qmd
+    - chapters/11-adjustment.qmd
 
 format:
   html:
