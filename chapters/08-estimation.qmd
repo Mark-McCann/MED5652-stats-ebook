@@ -16,7 +16,7 @@ By the end of this session you will be able to:
 
 As in IES Week 7, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. This chapter also brings in a second dataset for the first time: `strep_tb`, from the `medicaldata` package. Unlike `nhanes_mph`, `strep_tb` doesn't live in a CSV file. It ships built into the package itself, so `library(medicaldata)` is enough to make it available. There is no `read_csv()` step for it. We'll explain what `strep_tb` contains properly below, the first time we use it.
 
-`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. As IES Week 5 explained, installing a package and loading it are two different actions, and the data living inside the package doesn't change that: you still have to install the package before you can load it. Run `install.packages("medicaldata")` once in the console, not inside this document. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
+`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. As IES Week 4 explained, installing a package and loading it are two different actions, and the data living inside the package doesn't change that: you still have to install the package before you can load it. Run `install.packages("medicaldata")` once in the console, not inside this document. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
 
 ```{r}
 #| label: setup
@@ -117,7 +117,7 @@ t.test(nhanes$sed)
 
 `t.test()` also reports a test statistic, degrees of freedom, and a p-value. These belong to a hypothesis test, which is IES Week 9's subject. For now, look only at the confidence interval, and check that it closely matches the interval we calculated by hand above.
 
-One thing `t.test()` does quietly is worth making loud. We passed it `nhanes$sed` whole, missing values and all, with no `filter()` and no `na.rm = TRUE`, and it ran anyway. It drops missing values itself, before calculating. The evidence is in the output: the degrees of freedom are `r format(sum(!is.na(nhanes$sed)) - 1, big.mark = ",")`, one less than the `r format(sum(!is.na(nhanes$sed)), big.mark = ",")` participants we filtered down to by hand, which is why the two intervals agree at all. That's a sensible default, but it's the same silent drop the histogram warnings in IES Week 6 and IES Week 7 made noisy, this time with nothing printed to tell you it happened. So count the missing values yourself before you report a result from `t.test()`, the way we did with `is.na()` and `sum()` in IES Week 6. The function won't do it for you.
+One thing `t.test()` does quietly is worth making loud. We passed it `nhanes$sed` whole, missing values and all, with no `filter()` and no `na.rm = TRUE`, and it ran anyway. It drops missing values itself, before calculating. The evidence is in the output: the degrees of freedom are `r format(sum(!is.na(nhanes$sed)) - 1, big.mark = ",")`, one less than the `r format(sum(!is.na(nhanes$sed)), big.mark = ",")` participants we filtered down to by hand, which is why the two intervals agree at all. That's a sensible default, but it's the same silent drop the histogram warnings in IES Week 5 and IES Week 7 made noisy, this time with nothing printed to tell you it happened. So count the missing values yourself before you report a result from `t.test()`, the way we did with `is.na()` and `sum()` in IES Week 5. The function won't do it for you.
 
 The two intervals are close but not identical, because `t.test()` doesn't use a fixed multiplier of 1.96. It uses a value from the t-distribution, which depends on the sample size through its degrees of freedom (`n - 1`), and which is very slightly wider than 1.96 for any finite sample. `qt()`, from base R, looks up that exact multiplier:
 
@@ -167,7 +167,7 @@ prop.table(table(strep_tb$improved))
 
 A proportion is an estimate like any other, so it has a standard error too. The formula is different from the one for a mean, because a proportion carries its own variability: once you know p, you know how spread out a yes/no variable is, so there's no separate SD to measure. The standard error of a proportion is the square root of p × (1 − p) ÷ n.
 
-`sum()` of a logical vector counts how many values are `TRUE`, since R stores `TRUE` as 1 and `FALSE` as 0. So `sum(strep_tb$improved)` is the number of patients who improved, out of `nrow(strep_tb)` in total. `nrow()` was met briefly in IES Week 6, returning just the row count on its own rather than rows and columns together the way `dim()` does:
+`sum()` of a logical vector counts how many values are `TRUE`, since R stores `TRUE` as 1 and `FALSE` as 0. So `sum(strep_tb$improved)` is the number of patients who improved, out of `nrow(strep_tb)` in total. `nrow()` was met briefly in IES Week 5, returning just the row count on its own rather than rows and columns together the way `dim()` does:
 
 ```{r}
 #| label: se-proportion
@@ -326,7 +326,7 @@ tt_10
 
 The point estimates are similar across all three, because all three are samples from the same population. But the confidence interval widens as the sample size drops.
 
-That's hard to see across three blocks of output, so let's put the three intervals in one small table. A `t.test()` result isn't a data frame, but `$` still works on it, pulling out one named piece at a time exactly as it pulls one column out of a data frame. `tt_full$conf.int` is the pair of numbers at the ends of the interval, and `[1]` and `[2]` take the lower and the upper one, the same square-bracket indexing we used in IES Week 6. `data.frame()`, from IES Week 5, builds the table out of them, and `mutate()` adds the column we actually care about:
+That's hard to see across three blocks of output, so let's put the three intervals in one small table. A `t.test()` result isn't a data frame, but `$` still works on it, pulling out one named piece at a time exactly as it pulls one column out of a data frame. `tt_full$conf.int` is the pair of numbers at the ends of the interval, and `[1]` and `[2]` take the lower and the upper one, the same square-bracket indexing we used in IES Week 5. `data.frame()`, from IES Week 4, builds the table out of them, and `mutate()` adds the column we actually care about:
 
 ```{r}
 #| label: width-table

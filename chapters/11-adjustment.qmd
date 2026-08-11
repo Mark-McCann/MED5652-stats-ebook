@@ -17,7 +17,7 @@ By the end of this session you will be able to:
 
 As in IES Weeks 7 to 10, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
 
-This chapter adds one new package underneath the scenes: `gtsummary`'s `tbl_regression()`, which we use for the first time here, depends on `broom.helpers`. It isn't part of the tidyverse or `gtsummary` itself, so if you haven't needed it before, it likely isn't installed yet. As IES Week 5 explained, installing a package and loading it are two different actions. If `broom.helpers` isn't already on your machine, run `install.packages("broom.helpers")` once in the console, not inside this document. We don't `library()` it directly; `gtsummary` finds it automatically once it's installed. As in IES Weeks 8 to 10, `dictionary` is read in even though no code below refers to it, so it's to hand the moment you're unsure what a column means.
+This chapter adds one new package underneath the scenes: `gtsummary`'s `tbl_regression()`, which we use for the first time here, depends on `broom.helpers`. It isn't part of the tidyverse or `gtsummary` itself, so if you haven't needed it before, it likely isn't installed yet. As IES Week 4 explained, installing a package and loading it are two different actions. If `broom.helpers` isn't already on your machine, run `install.packages("broom.helpers")` once in the console, not inside this document. We don't `library()` it directly; `gtsummary` finds it automatically once it's installed. As in IES Weeks 8 to 10, `dictionary` is read in even though no code below refers to it, so it's to hand the moment you're unsure what a column means.
 
 ```{r}
 #| label: setup

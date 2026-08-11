@@ -1,6 +1,6 @@
-# Data and data handling (IES Week 6) {#sec-06-prep2}
+# Data and data handling (IES Week 5) {#sec-05-prep2}
 
-This session follows IES Week 5, where we learned the language itself: objects, functions, packages, and how to read an error message. Today we bring in real data for the first time. We'll take a spreadsheet apart to see what makes it usable, import it into R, look it over, spot what's missing, and produce one small piece of real analysis, start to finish. By the end you will have written and saved your own R script, and re-run it from a fresh session to prove it still works. That is the way you'll work for the rest of the course. IES Week 7 picks up from here and goes straight into using `nhanes_mph` properly.
+This session follows IES Week 4, where we learned the language itself: objects, functions, packages, and how to read an error message. Today we bring in real data for the first time. We'll take a spreadsheet apart to see what makes it usable, import it into R, look it over, spot what's missing, and produce one small piece of real analysis, start to finish. By the end you will have written and saved your own R script, and re-run it from a fresh session to prove it still works. That is the way you'll work for the rest of the course. IES Week 6 is reading week, so there's no practical for it, and IES Week 7 picks up from here and goes straight into using `nhanes_mph` properly.
 
 ## Chapter intended learning outcomes
 
@@ -10,10 +10,11 @@ By the end of this session you will be able to:
 2. Import a CSV into R using a correctly specified path, and diagnose and resolve the most common import failures
 3. Inspect an imported dataset's dimensions, variable names, types, and missing values
 4. Write, save, and re-run an R script that imports data, summarises it, and produces a plot
+5. Locate a downloaded file on your own operating system, construct or copy a valid path to it, and explain what a CSV file physically contains
 
 ## Setup
 
-There's nothing to read in yet, so, as in IES Week 5, this chunk only sets the console's print width.
+There's nothing to read in yet, so, as in IES Week 4, this chunk only sets the console's print width.
 
 ```{r}
 #| label: setup
@@ -29,19 +30,19 @@ A dataset R can work with follows three simple rules: one variable per column, o
 ### What breaks an import
 
 - **Merged cells.** A heading merged across several columns looks fine to a person, but when R reads the underlying columns back out, most of them come back empty, because the merge only stored the value in one of the cells it covers.
-- **Colour used to carry information**, instead of a word or a number, for example filling a cell red to mean "smoker" with no text at all. R reads cell values, not cell colours. The information the colour was carrying disappears completely.
-- **Units mixed into the value**, like `"72kg"` in a column that should hold a plain number. R reads `"72kg"` as text, not as 72, and every ordinary calculation on that column, `mean()` included, stops working until it's a number on its own.
+- **Colour used to carry information**, instead of a word or a number. A whole row filled in, say, yellow to mean "smoker", with no column recording it at all, and the only place that tells you what the colour means is a caption sitting several rows away, disconnected from the table itself. R reads cell values, not cell fills, so the colour disappears completely on import, and the caption comes in as an isolated row of text with nothing left to connect it back to the patients it was describing.
+- **Units mixed into the value, and inconsistent with each other.** Most of a Weight or Height column might be plain numbers, `72`, `1.70`, and so on, but one row breaks the pattern: `195 lbs` and `6 ft` instead of kilograms and metres, or a height like `178` sitting uncommented among a column of metres, really centimetres in disguise. R reads a whole column as text the moment a single cell in it isn't a bare number, so it only takes one row like this to turn an otherwise clean numeric column into text throughout.
 - **Blank rows used for spacing.** A blank row inserted purely to separate two sections becomes a row of missing values, `NA`, in every column, once imported.
-- **Notes written in a stray cell**, off to the side of the actual table, with no column of their own.
+- **Notes written in a stray cell**, off to the side of the actual table, with no column of their own. This can be a note about one specific patient, or, as with the colour above, a caption meant to explain something elsewhere in the sheet that never made it into a proper column.
 - **More than one table on a single sheet.** R expects a sheet to be one table. A second, unrelated table lower down the same sheet gets read as more rows of the first table, and the result makes no sense.
 
-**Exercise (ILO 1).** `data/p2_messy_clinic.xlsx` is a small, made-up clinic visit log, built specifically to have every one of these problems at once. Open it in Excel, or whatever spreadsheet software you have.
+**Spreadsheet exercise (ILO 1).** `data/05-prep2-messy-clinic.xlsx` is a small, made-up clinic visit log, built specifically to have every one of these problems at once. Open it in Excel, or whatever spreadsheet software you have.
 
 ::: {.callout-tip appearance="simple"}
-**Screenshot placeholder** (`images/06-prep2-messy-spreadsheet.png`): `p2_messy_clinic.xlsx` open in a spreadsheet application, showing the merged title row, the merged "Vitals" sub-header, the colour-only Smoker column, and the second table below the gap.
+**Screenshot placeholder** (`images/05-prep2-messy-spreadsheet.png`): `05-prep2-messy-clinic.xlsx` open in a spreadsheet application, showing the merged title row, the merged sub-header over the Weight and Height columns, the yellow-highlighted rows with no `Smoker` column anywhere in sight, and the second table below the gap.
 :::
 
-Go through the sheet and list every feature above that you can find in it. Then build a clean version: one header row naming every column, one row per patient, weight and height as plain numbers with the units moved into the column name instead of the value, the smoker column holding an actual word, no stray notes, and the second table (the follow-up schedule) either removed or saved as a completely separate file. Save your clean version as a `.csv` file. The Solutions section describes the fixes, but building the file yourself, in spreadsheet software, is the actual point of this exercise. There's nothing to submit for it.
+Go through the sheet and list every feature above that you can find in it. Then build a clean version: one header row naming every column, one row per patient, weight and height as plain numbers in consistent units with the units moved into the column name instead of the value, a proper smoker column holding an actual word rather than a colour and a caption, no stray notes, and the second table (the follow-up schedule) either removed or saved as a completely separate file. Save your clean version as a `.csv` file. The Solutions section describes the fixes, but building the file yourself, in spreadsheet software, is the actual point of this exercise. There's nothing to submit for it.
 
 ## Finding a file, and telling R where it is
 
@@ -66,7 +67,7 @@ Before we can read anything into R, we need to know exactly where the file we wa
 
 `readr`'s `read_csv()` reads a `.csv` file into R as a data frame. It needs a path telling it exactly where that file is, using the path skills from earlier in this chapter. Building that path with `here()`, from the `here` package, means the same code works on any machine, regardless of where the project folder actually sits on that machine's disk: `here()` starts from the project folder and adds the pieces you give it, one folder at a time.
 
-This chapter needs three packages: `readr` for reading files, `here` for building paths, and `ggplot2` for the plot at the end. As IES Week 5 explained, installing a package and loading it are two different actions, so unless you've installed these already, run this once in the console, not inside this document:
+This chapter needs three packages: `readr` for reading files, `here` for building paths, and `ggplot2` for the plot at the end. As IES Week 4 explained, installing a package and loading it are two different actions, so unless you've installed these already, run this once in the console, not inside this document:
 
 ``` r
 install.packages(c("readr", "here", "ggplot2"))
@@ -81,7 +82,7 @@ library(readr)
 library(here)
 ```
 
-`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in IES Week 5, nothing below will find its files, and this is where you'd find that out.
+`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in IES Week 4, nothing below will find its files, and this is where you'd find that out.
 
 ### Four things that go wrong
 
@@ -95,7 +96,7 @@ Almost every import problem you'll hit is one of four things. Each one below is 
 read_csv(here("data", "mph_nhanes_20241107_data.csv"))
 ```
 
-The real file is called `mph_nhanes_20241107.csv`, no `_data` in the name. R's message states plainly that the file doesn't exist at the path it tried, which is exactly what IES Week 5's "file does not exist" error type looks like with a real file behind it.
+The real file is called `mph_nhanes_20241107.csv`, no `_data` in the name. R's message states plainly that the file doesn't exist at the path it tried, which is exactly what IES Week 4's "file does not exist" error type looks like with a real file behind it.
 
 ```{r}
 #| label: fix-wrong-path
@@ -129,7 +130,7 @@ The filename is exactly right this time. What's missing is `"data"`, the subfold
 read_csv(here("data", "mph_nhanes_20241107.csv"))
 ```
 
-**The wrong file type.** `data/p2_messy_clinic.xlsx`, from the exercise above, is an Excel file, not a CSV. Reading it with `read_csv()` doesn't throw an error at all.
+**The wrong file type.** `data/05-prep2-messy-clinic.xlsx`, from the exercise above, is an Excel file, not a CSV. Reading it with `read_csv()` doesn't throw an error at all.
 
 To see what actually came in, we need three functions. `dim()` reports how many rows and columns a dataset has, and `names()` lists its column names. Both get a proper introduction in the next section, where we use them on real data; here they're just the quickest way to look. `substr()`, from base R, takes a piece of text and keeps only part of it, given a starting and an ending position: `substr(x, 1, 50)` keeps the first 50 characters and throws the rest away. We need it because the column name that comes back is far too long to print in full.
 
@@ -137,7 +138,7 @@ There's one extra argument in the call below, `show_col_types = FALSE`, and it's
 
 ```{r}
 #| label: wrong-filetype
-messy_attempt <- read_csv(here("data", "p2_messy_clinic.xlsx"),
+messy_attempt <- read_csv(here("data", "05-prep2-messy-clinic.xlsx"),
   show_col_types = FALSE)
 dim(messy_attempt)
 substr(names(messy_attempt), 1, 50)
@@ -210,7 +211,7 @@ Look at `gender` and `smoking` in the output above. `gender` is a plain number, 
 
 ### When R guesses the wrong type
 
-`read_csv()` decides each column's type by looking at the values in it. Most of the time that guess is right. It goes wrong in exactly the situation the messy spreadsheet exercise built on purpose: a column like `"72kg"`, units glued onto every value, reads in as text, because it isn't purely numbers. R has no way to know that `"kg"` should be split off and the rest treated as a number. It just sees text and stores text. This is why the clean version of that spreadsheet needed the unit moved into the column *name* (`weight_kg`) and out of every individual *value*: it's the only way `read_csv()` ends up with a column it can actually calculate on.
+`read_csv()` decides each column's type by looking at the values in it. Most of the time that guess is right. It goes wrong in exactly the situation the messy spreadsheet exercise built on purpose: a column that's plain numbers for every patient except one, who was recorded as `"195 lbs"` instead of a number in kilograms. R has no way to know that `"lbs"` should be split off, converted, and the rest treated as a number. It just sees text and stores the whole column as text, one stray row is all it takes. This is why the clean version of that spreadsheet needed every patient converted to the same unit, with that unit moved into the column *name* (`weight_kg`) and out of every individual *value*: it's the only way `read_csv()` ends up with a column it can actually calculate on.
 
 ### Spotting missing data
 
@@ -234,7 +235,7 @@ dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
 dictionary
 ```
 
-The dictionary's first column is called `Variable names`, with a space in it, so referring to it needs backticks, exactly as IES Week 5 covered. `%in%`, from the same chapter, tests whether each value is a member of a set. Put inside square brackets after a data frame's column, with the row's index implied, this keeps only the rows where the condition is true:
+The dictionary's first column is called `Variable names`, with a space in it, so referring to it needs backticks, exactly as IES Week 4 covered. `%in%`, from the same chapter, tests whether each value is a member of a set. Put inside square brackets after a data frame's column, with the row's index implied, this keeps only the rows where the condition is true:
 
 ```{r}
 #| label: dictionary-lookup
@@ -252,11 +253,11 @@ That's the habit worth building now: when a column's meaning isn't obvious from 
 mean(nhanes$chol, na.rm = TRUE)
 ```
 
-`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it, the same kind of gap `vpa_w` had above. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in IES Week 5's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
+`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it, the same kind of gap `vpa_w` had above. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in IES Week 4's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
 
 ### A first taste of a grouped summary
 
-`nhanes$chol` pulls the whole cholesterol column out as a bare vector, exactly as `$` did in IES Week 5. Adding square brackets straight after it, with a condition inside, keeps only the values where that condition is `TRUE`:
+`nhanes$chol` pulls the whole cholesterol column out as a bare vector, exactly as `$` did in IES Week 4. Adding square brackets straight after it, with a condition inside, keeps only the values where that condition is `TRUE`:
 
 ```{r}
 #| label: grouped-summary-preview
@@ -293,7 +294,7 @@ Second, look at the number. It's `r format(sum(is.na(nhanes$chol)), big.mark = "
 
 ### From console to script
 
-Everything we've done so far in this chapter has been one line at a time. That's the right way to *try* something: type it in the console, look at what comes back, fix it if it's wrong. But IES Week 5 already made the argument against leaving it there. You will need to do this again, and you will not remember what you typed.
+Everything we've done so far in this chapter has been one line at a time. That's the right way to *try* something: type it in the console, look at what comes back, fix it if it's wrong. But IES Week 4 already made the argument against leaving it there. You will need to do this again, and you will not remember what you typed.
 
 So the working habit for the rest of this course is two steps, not one. Try the line in the console until it does what you want. Then move the line that worked into a script, and save it. The console is where you experiment; the script is what you keep.
 
@@ -301,7 +302,7 @@ To build one now:
 
 1. In RStudio, go to **File → New File → R Script**. A blank file opens in the source pane, top-left.
 2. Type the lines you want to keep. For a first script, that's the `library()` calls, the `read_csv()` line, one summary, and one plot.
-3. Save it into the `scripts/` folder you built in IES Week 5, with a name that follows its conventions: no spaces, no `&` or `#`, something that says what it does. `first_analysis.R` is fine. `Untitled1.R` is not.
+3. Save it into the `scripts/` folder you built in IES Week 4, with a name that follows its conventions: no spaces, no `&` or `#`, something that says what it does. `first_analysis.R` is fine. `Untitled1.R` is not.
 
 Here's what a complete first script looks like, start to finish. Nothing in it is new; it's the pieces from earlier in this chapter, collected in the order they need to run:
 
@@ -327,7 +328,7 @@ Here's the part people skip, and it's the part that matters. A script that runs 
 
 So test it properly. In RStudio, go to **Session → Restart R**. That throws away every object and every loaded package, leaving you with an empty session, exactly like the one a colleague, a marker, or you-in-six-months would start from. Now run your script from the top.
 
-If it runs clean, the script is genuinely self-contained. If it fails, the error tells you precisely what you'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from IES Week 5, made concrete: not "scripts are good practice" but "here is how you find out whether yours actually is one."
+If it runs clean, the script is genuinely self-contained. If it fails, the error tells you precisely what you'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from IES Week 4, made concrete: not "scripts are good practice" but "here is how you find out whether yours actually is one."
 
 ### How this book is put together
 
@@ -385,7 +386,7 @@ b) They're two separate files, each holding a different table, so each needs its
 c) The dictionary file is not really needed, but the call is included anyway
 d) `read_csv()` automatically finds and reads both once you name one of them
 
-**5.** Reading `p2_messy_clinic.xlsx` with `read_csv()` produces a data frame with 1 column and 0 rows, and no error message. What does that tell you?
+**5.** Reading `05-prep2-messy-clinic.xlsx` with `read_csv()` produces a data frame with 1 column and 0 rows, and no error message. What does that tell you?
 
 a) The file is empty
 b) `read_csv()` refuses to read `.xlsx` files and stops immediately
@@ -399,9 +400,9 @@ Using the mean and the histogram from Exercise 3, write a short paragraph, about
 ::: {.callout-note collapse="true"}
 ## Solutions
 
-**Block 1 exercise**
+**Spreadsheet exercise**
 
-The fixes needed, matching each problem named earlier: split the merged title row and the merged "Vitals" sub-header back into one header row naming every column individually; move `kg` and `m` out of the Weight and Height values and into the column names instead (`weight_kg`, `height_m`), leaving plain numbers behind; replace the colour-only Smoker column with an actual word in every row ("Yes"/"No"); delete the blank spacer row; delete or relocate the stray note about Patient 5's missed follow-up, since it belongs in its own column, or nowhere in this table at all; and either delete the second table (the follow-up schedule) or save it as its own, separate CSV file, since one sheet should hold one table.
+The fixes needed, matching each problem named earlier: split the merged title row and the merged "Measurements" sub-header back into one header row naming every column individually; convert every patient's weight and height to the same units (kilograms and metres), then move those units out of the values and into the column names instead (`weight_kg`, `height_m`), leaving plain numbers behind; add a proper Smoker column holding an actual word ("Yes"/"No"), decoded from which rows were highlighted and the caption that explained what the highlighting meant; delete both blank spacer rows; delete or relocate the stray note about Patient 5's missed follow-up, since it belongs in its own column, or nowhere in this table at all; and either delete the second table (the follow-up schedule) or save it as its own, separate CSV file, since one sheet should hold one table.
 
 **Exercise 1**
 
@@ -452,7 +453,7 @@ ggplot(nhanes, aes(x = wal_r)) +
   geom_histogram(binwidth = 0.5)
 ```
 
-The two lines people most often leave out are the ones that were already true before they started: `library(readr)` and the `read_csv()` call. Both had been run earlier in the session, so `nhanes` existed and `read_csv()` worked, and neither felt like part of "the analysis." After a restart, neither is true any more, and the script fails on its first real line with `could not find function "read_csv"` or `object 'nhanes' not found`, both of which IES Week 5 covered. That's exactly what the restart is for: it finds the assumptions you didn't know you were making.
+The two lines people most often leave out are the ones that were already true before they started: `library(readr)` and the `read_csv()` call. Both had been run earlier in the session, so `nhanes` existed and `read_csv()` worked, and neither felt like part of "the analysis." After a restart, neither is true any more, and the script fails on its first real line with `could not find function "read_csv"` or `object 'nhanes' not found`, both of which IES Week 4 covered. That's exactly what the restart is for: it finds the assumptions you didn't know you were making.
 
 **Self-check answers**
 

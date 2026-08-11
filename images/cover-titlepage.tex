@@ -1,0 +1,17 @@
+% The book's own PDF title page, standing in for the plain-text one
+% \maketitle would otherwise produce. images/cover.png already carries the
+% title, course code, and subtitle as part of its design (see
+% images/make-cover.R), so this page just centres it and adds the author
+% and date, pulled from the \author{} and \date{} already set from
+% _quarto.yml's book: metadata rather than typed out again here.
+\begin{titlepage}
+\centering
+\vspace*{0.1\textheight}
+\par\includegraphics[width=0.62\textwidth]{images/cover.png}\par
+\vspace{0.06\textheight}
+\makeatletter
+{\large \@author\par}
+\vspace{0.5em}
+{\large \@date\par}
+\makeatother
+\end{titlepage}

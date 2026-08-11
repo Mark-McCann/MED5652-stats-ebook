@@ -16,7 +16,7 @@ By the end of this session you will be able to:
 
 As in IES Weeks 7 to 9, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
 
-This chapter adds one new package, `broom`. It isn't part of the tidyverse core, so if you haven't used it in an earlier chapter, it likely isn't installed yet. As IES Week 5 explained, installing a package and loading it are two different actions. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console, not inside this document. Once it's installed, `library(broom)` below makes its functions available for this session, exactly like every other package we load. `gtsummary` isn't used anywhere in this chapter, so it isn't loaded here. `dictionary` is read in even though no code below refers to it, for the reason IES Week 8 gave: it's there so it's to hand the moment you're unsure what a column means.
+This chapter adds one new package, `broom`. It isn't part of the tidyverse core, so if you haven't used it in an earlier chapter, it likely isn't installed yet. As IES Week 4 explained, installing a package and loading it are two different actions. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console, not inside this document. Once it's installed, `library(broom)` below makes its functions available for this session, exactly like every other package we load. `gtsummary` isn't used anywhere in this chapter, so it isn't loaded here. `dictionary` is read in even though no code below refers to it, for the reason IES Week 8 gave: it's there so it's to hand the moment you're unsure what a column means.
 
 ```{r}
 #| label: setup
@@ -308,5 +308,5 @@ The prediction at `vpa_r` = 1 hour/day (about 4.80 mmol/L) can be trusted, becau
 
 **Writing exercise (sample answer)**
 
-Sedentary time was not significantly associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). The confidence interval includes zero, so these data are consistent with no true association, but they do not rule one out either; a genuinely small effect could still be present and undetected at this sample size. This model adjusts for nothing else, so it cannot say whether age, sex, or other characteristics are masking or accounting for this result.
+Sedentary time was not significantly associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). The confidence interval includes zero, so these data are consistent with no true association, but they do not rule one out either; a genuinely small effect could still be present and undetected at this sample size. This model adjusts for nothing else, so it cannot say whether age, gender, or other characteristics are masking or accounting for this result.
 :::

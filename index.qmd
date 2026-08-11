@@ -1,6 +1,8 @@
 # Introduction {.unnumbered}
 
+::: {.content-visible unless-format="pdf"}
 ![](images/cover.png){fig-alt="IES Statistical Practicals: MED5652, Introduction to Epidemiology & Statistics" width="58%" fig-align="center"}
+:::
 
 ## What this book is
 
@@ -25,10 +27,10 @@ Two parts. First, two preparatory practicals, worked through before seminars on 
 
 | IES week | What it covers |
 |---|---|
-| 5 | R and R Studio |
-| 6 | Data and data handling |
+| 4 | R and R Studio |
+| 5 | Data and data handling |
 
-Then five weekly practicals, one per statistics week, each following that week's seminar:
+IES Week 6 is reading week, so there's no practical for it. Then five weekly practicals, one per statistics week, each following that week's seminar:
 
 | IES week | What it covers |
 |---|---|
@@ -44,11 +46,13 @@ That list looks like five separate topics, but it isn't. Each week is a stage of
 
 Every chapter in this book follows the same structure, so once you've worked through one, you know what to expect from the rest. It opens with a short list of learning objectives, then a setup chunk that reads in the data. After that comes the content itself, worked through with code and output, followed by a full worked example that puts several pieces together at once. Numbered exercises come next, each one tied to a specific ILO. Each of the five weekly chapters then ends with a writing exercise: a short results-section paragraph, not a calculation. These aren't decoration. The statistics assessment is a structured question and answer, combining analysis with written interpretation, and the writing exercises are deliberate practices for that.
 
-The preparatory chapters work a little differently: each include multiple-choice questions instead, aimed at the places R's syntax most often trips people up, and IES Week 6 has a small writing exercise as well. Solutions to the numbered exercises, the self-checks, and the writing exercise sit in a collapsed section at the very end of each chapter. Chapters also carry the 'Try it yourself' box, which is a prompt to change one thing in code you've just run and see what happens. Those don't have written answers.
+Two chapters fold the worked example into the chapter's own shape rather than setting it apart as its own section. IES Week 5 builds toward one continuously, ending in your own first script. IES Week 11 opens with an exercise instead, deriving the outcome every model in that chapter needs, and its crude-versus-adjusted and sensitivity-analysis sections do the work a worked example would elsewhere.
+
+The preparatory chapters work a little differently: each include multiple-choice questions instead, aimed at the places R's syntax most often trips people up, and IES Week 5 has a small writing exercise as well. Solutions to the numbered exercises, the self-checks, and the writing exercise usually sit in a collapsed section at the very end of each chapter. IES Week 11 is the one exception: its opening exercise is answered inline, right where it's set, so you can attempt it before reading on rather than jumping to the end. Chapters also carry the 'Try it yourself' box, which is a prompt to change one thing in code you've just run and see what happens. Those don't have written answers.
 
 ## The two datasets
 
-Almost everything in this book runs on one of two datasets. `nhanes_mph` is a curated extract of real health survey data, used from IES Week 7 onward. `strep_tb`, from the `medicaldata` package, is the 1948 MRC streptomycin trial, a historic randomised controlled trial, used from IES Week 8 onward wherever a binary outcome and a genuine trial design are useful. Both get introduced properly, in context, the first time we use them. Learning two datasets well, rather than a new one every week, means you spend your attention on the method, not on re-orienting yourself to unfamiliar data.
+Almost everything in this book runs on one of two datasets. `nhanes_mph` is a curated extract of real health survey data. IES Week 5 reads it in for the first time and gets you comfortable with it as data; IES Week 7 introduces it properly and is where it becomes the dataset the rest of the book runs on. `strep_tb`, from the `medicaldata` package, is the 1948 MRC streptomycin trial, a historic randomised controlled trial, used from IES Week 8 onward wherever a binary outcome and a genuine trial design are useful. Both get introduced properly, in context, the first time that matters. Learning two datasets well, rather than a new one every week, means you spend your attention on the method, not on re-orienting yourself to unfamiliar data.
 
 ## Not the be-all and end-all
 
@@ -56,4 +60,4 @@ This book gets you to a working, applied floor in statistics for an MPH graduate
 
 ## How to actually use it
 
-Work through the chapters in order. Each one assumes you've already met whatever came before it, and later chapters build on earlier code without re-explaining it. Attempt the exercises yourself before you open the solutions; the point of a collapsed solution is that you look at it after you've tried, not instead of trying. Work along in a script of your own as you go, the same way IES Week 6 shows you how to, typing the code rather than copying it. And keep this book open for the rest of the module, not just read once and set aside. It stays the reference you come back to whenever you need a reminder of how something works.
+Work through the chapters in order. Each one assumes you've already met whatever came before it, and later chapters build on earlier code without re-explaining it. Attempt the exercises yourself before you open the solutions; the point of a collapsed solution is that you look at it after you've tried, not instead of trying. Work along in a script of your own as you go, the same way IES Week 5 shows you how to, typing the code rather than copying it. And keep this book open for the rest of the module, not just read once and set aside. It stays the reference you come back to whenever you need a reminder of how something works.

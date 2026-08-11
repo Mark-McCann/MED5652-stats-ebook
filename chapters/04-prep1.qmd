@@ -1,4 +1,4 @@
-# R and R Studio (IES Week 5) {#sec-05-prep1}
+# R and R Studio (IES Week 4) {#sec-04-prep1}
 
 This is a preparatory chapter to learn about the basics of R, and the RStudio interface. It will cover what a script is, how to create things in R, and how to read the handful of error messages we'll all meet in the next ten weeks. Nothing here is about statistics yet, but these are an important foundation for applying statistical analysis to data.
 
@@ -12,6 +12,7 @@ By the end of this session you will be able to:
 4. Call a function using named arguments, explain what a default value is, and find its help page
 5. Write and read a short piped sequence that includes a logical condition and extracts a column from a data frame
 6. Diagnose a failed line of code from its error message
+7. Build a project folder, following sensible file and folder naming conventions
 
 ## Setup
 
@@ -24,13 +25,13 @@ options(width = 76)
 
 ## Installing R and RStudio
 
-R is the programming language itself, the thing that actually runs your code. RStudio is a separate, free program that sits on top of R and makes it far nicer to work in: a proper editor, a console, and the panes we look at next. Install R first, then RStudio, in that order. RStudio is a front end that needs R already present on your machine to attach itself to, so installing them the other way round doesn't work.
+R is the programming language itself, and is the software program that actually runs your code. RStudio is a separate, free program that sits on top of R and makes it far nicer to work in: a proper editor, a console, and the panes we look at next. Install R first, then RStudio, in that order. You can use R without RStudio (even though it's harder for a beginner) but not the other way round. 
 
-**Installing R.** Go to <https://cran.r-project.org> and choose the download link for your operating system, "Download R for Windows" or "Download R for macOS." Run the installer and accept every default option; there's nothing here worth changing.
+**Installing R.** Go to <https://cran.r-project.org> and choose the download link for your operating system, "Download R for Windows" or "Download R for macOS." For most people, you can run the installer and accept every default option.
 
 **Installing RStudio.** Go to <https://posit.co/download/rstudio-desktop/> and download the free RStudio Desktop installer for your operating system. Run it the same way, accepting the defaults throughout.
 
-**The smoke test.** Installed isn't the same as working, so check before moving on. Open RStudio, type `2 + 2` into the console, the panel where typed commands run, covered properly in a moment, and press Enter. You should see `[1] 4`. Then confirm a package installs and loads too: run `install.packages("dplyr")` once, then `library(dplyr)`. Both get a proper explanation later in this chapter, under Packages; for now, just check that neither one throws an error. If anything here fails, get it fixed before going on, since nothing later in this chapter works without it.
+**Verification.** Installed isn't the same as working, so check before moving on. Open RStudio, type `2 + 2` into the console, the panel where typed commands run, covered properly in a moment, and press Enter. You should see `[1] 4`. Then confirm a package installs and loads too: run `install.packages("dplyr")` once, then `library(dplyr)`. Both get a proper explanation later in this chapter, under Packages; for now, just check that neither throws an error. If anything here fails, get it fixed before going on, since nothing later in this chapter works without it.
 
 ## Finding your way around RStudio
 
@@ -38,18 +39,16 @@ R is the programming language itself, the thing that actually runs your code. RS
 
 RStudio's window is split into four panes. Where each one sits is consistent no matter what you're doing, so it's worth learning the layout by position, not just by name.
 
-- **Top-left: the source pane.** This is where you write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; you have to tell RStudio to run it, which is the next thing we cover.
+- **Top-left: the source pane.** This only shows when you have an active script, so you most likely won't see this in RStudio out of the box. This is where you write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; you have to tell RStudio to run it, which is the next thing we cover.
 - **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. You can type directly into the console, but anything typed there is gone once you close RStudio, which is exactly why the source pane exists.
-- **Top-right: the environment pane.** This lists every object that currently exists in your R session, its type, and a preview of its contents. Every time you create something with `<-` (covered below), it appears here. When something you expected to see isn't listed, that's usually the first clue something went wrong.
-- **Bottom-right: a tabbed pane** holding the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
+- **Top-right: the environment pane.** This lists every object that currently exists in your R session, its type, and a preview of its contents. Every time you create something, it appears here. When something you expected to see isn't listed, that's usually the first clue something went wrong.
+- **Bottom-right: a tabbed pane.** This holds the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
 
-::: {.callout-tip appearance="simple"}
-**Screenshot placeholder** (`images/05-prep1-panes.png`): RStudio's default layout with all four panes labelled.
-:::
+![RStudio's four panes: source (top-left), console (bottom-left), environment (top-right), and a tabbed pane for files, plots, packages, and help (bottom-right). This particular window is shown in a dark colour theme rather than RStudio's own light default; it's the layout and position of the four panes that matters here, not the colours.](../images/04-prep1-panes.png){fig-alt="An RStudio window with the four panes labelled: source, console, environment, and a tabbed files/plots/packages/help pane." width="90%" fig-align="center"}
 
 ### Building a project folder
 
-Before RStudio can turn a folder into a Project, the folder needs to exist. Pick somewhere sensible on your machine, for example inside Documents, and avoid a folder that's synced automatically to OneDrive or iCloud: syncing can lock a file mid-upload at exactly the moment R tries to read or write it, and that failure is confusing to debug later. Create a new folder there and give it a short, sensible name, for example `ies_mph`, following the naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it.
+Working with R means you have to manage at least a couple of files, most likely some data files and an R script file. It is usually a good idea to put them into a 'project folder'. Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`, following the naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
 
 ### Creating an RStudio Project
 
@@ -60,11 +59,9 @@ An RStudio Project turns that folder into something RStudio understands directly
 3. Browse to the project folder you just built, and click **Create Project**.
 4. RStudio reopens with that folder as the **working directory**. You can confirm this by checking the Files pane, bottom-right, which now shows the folder's contents, and the title bar, which now shows the project's name.
 
-::: {.callout-tip appearance="simple"}
-**Screenshot placeholder** (`images/05-prep1-new-project.png`): the New Project wizard, with Existing Directory highlighted.
-:::
+![The New Project wizard, with Existing Directory highlighted.](../images/04-prep1-new-project.png){fig-alt="RStudio's New Project wizard, showing New Directory, Existing Directory, and Version Control, with Existing Directory highlighted." width="70%" fig-align="center"}
 
-A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in IES Week 6, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
+A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in IES Week 5, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk. 
 
 ### Console versus script
 
@@ -109,7 +106,7 @@ ages <- c(45, 62, 38, 71)
 ages
 ```
 
-A vector holds one type of value, several at once. A **data frame** holds several vectors side by side, as columns, which is the structure this course actually works with from IES Week 6 onward. Building one from two vectors previews what's coming:
+A vector holds one type of value, several at once. A **data frame** holds several vectors side by side, as columns, which is the structure this course actually works with from the next chapter onward. Building one from two vectors previews what's coming:
 
 ```{r}
 #| label: dataframe-preview
@@ -117,6 +114,8 @@ smoker <- c("No", "Yes", "No", "Yes")
 toy_data <- data.frame(ages, smoker)
 toy_data
 ```
+
+Note that both vectors have to have the same length of data (4 values each), otherwise R will complain when you create a data frame. 
 
 ## Data types
 
@@ -139,7 +138,9 @@ Four types matter throughout this course:
 
 ## Functions and arguments
 
-A function's arguments can be matched two ways: by **position**, in the order the function expects them, or by **name**, in any order at all.
+A function is a machine to process something. Most functions take some input, process it, and output it. In the example below, `round()` is a function to round numeric values. Note that a function is always followed by a pair of parentheses `()`.
+
+A function takes different **arguments**, basically the inputs the machine runs on. A function's arguments can be matched two ways: by **position**, in the order the function expects them, or by **name**, in any order at all.
 
 ```{r}
 #| label: positional-named
@@ -149,6 +150,14 @@ round(digits = 2, x = 3.14159)
 ```
 
 All three lines return the same result. The first matches purely by position: `round()`'s first argument is `x`, its second is `digits`. The second and third name `digits` explicitly, so its position in the call no longer matters, which is why the third line can put `digits` before `x` without changing the answer.
+
+The examples above simply run the function, so the output is shown in the console. If you're going to reuse the output later, you'll have to save it, the same way as the assignment above:
+
+```{r}
+#| label: function-assignment
+x <- round(3.14159, 2)
+x * 2
+```
 
 Some arguments have a **default**: a value the function uses automatically if you don't supply one.
 
@@ -233,7 +242,7 @@ toy <- data.frame(`patient id` = c(1, 2, 3), check.names = FALSE)
 toy$`patient id`
 ```
 
-`data.frame()` normally cleans up column names automatically, turning a space into a dot. `check.names = FALSE` switches that off, purely so this example can show a genuine spaced name. When we read a CSV file with `read_csv()` in IES Week 6, column names come in exactly as written, spaces and all, with no automatic cleanup. Its dictionary file has a column literally called `Variable names`, and backticks are exactly how we'll refer to it.
+Backticks aren't easy to work with, and generally it's not recommended to have variable names containing a space. `data.frame()` normally cleans up column names automatically, turning a space into a dot. `check.names = FALSE` switches that off, purely so this example can show a genuine spaced name. When we read a CSV file with `read_csv()` in IES Week 5, column names come in exactly as written, spaces and all, with no automatic cleanup. Its dictionary file has a column literally called `Variable names`, and backticks are exactly how we'll refer to it.
 
 ## The pipe
 
@@ -246,9 +255,13 @@ c(16, 25, 36) |> sqrt() |> sum()
 
 Take these three numbers, and then take the square root of each, and then add up what's left. Written without the pipe, the same calculation reads inside-out: `sum(sqrt(c(16, 25, 36)))`. The pipe exists so a sequence of steps can be read in the order they actually happen, which is how every multi-step `dplyr` sequence in this book, starting in IES Week 7, is written.
 
+There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). You'll likely write a lot of pipes, so it's worth remembering.
+
+It's also worth knowing that `%>%` is the older pipe, and is only available once you've loaded the `dplyr` package. Practically, both pipes can be treated the same.
+
 ## Reading errors
 
-Everyone hits errors constantly, including experienced R users. The skill worth building now is reading the message rather than panicking at it. R, by way of the `rlang` package installed alongside the tidyverse, formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything you'll see in this course.
+You will encounter a lot of errors when you work with R, and that's normal. Even a very experienced R user will encounter errors. The skill worth building now is reading the message rather than panicking at it. R, by way of the `rlang` package installed alongside the tidyverse, formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything you'll see in this course.
 
 **Object not found.** R can't find something by that name, usually a typo or a variable that was never created:
 
@@ -276,7 +289,7 @@ Mean(ages)
 mean(ages)
 ```
 
-**Unexpected symbol.** R's parser found something it couldn't make sense of, usually a missing operator or a missing comma between two things that were meant to be one call:
+**Unexpected symbol.** R's interpreter (the machine that reads your code and executes it) found something it couldn't make sense of, usually a missing operator or a missing comma between two things that were meant to be one call:
 
 ```{r}
 #| label: err-unexpected-symbol
@@ -310,22 +323,22 @@ sum(c(1, 2, 3))
 read.csv("nonexistent_file.csv")
 ```
 
-The warning line above states the actual reason, a missing file, before the error itself. We'll meet this one properly in IES Week 6, once there's a real file to read. `read.csv()` is base R's own version of the function; from there onward we use `read_csv()` from the `readr` package instead, which behaves a little differently but fails the same way when a path is wrong.
+The warning line above states the actual reason, a missing file, before the error itself. We'll meet this one properly in IES Week 5, once there's a real file to read. `read.csv()` is base R's own version of the function; from there onward we use `read_csv()` from the `readr` package instead, which behaves a little differently but fails the same way when a path is wrong.
 
 ## Getting help
 
-Every function used in this course has a help page. Typing `?mean` in the console and pressing Enter opens `mean()`'s help page in the Help pane, bottom-right, showing exactly what arguments it takes and what it returns. It's usually faster than searching online, and it's always correct for the version of R actually installed. RStudio also keeps a set of cheat sheets under **Help → Cheatsheets**, one per major package. Beyond that, this book itself stays the main reference for the rest of the course. IES Week 6 explains how to find your way around it.
+Every function used in this course has a help page. Typing `?mean` in the console and pressing Enter opens `mean()`'s help page in the Help pane, bottom-right, showing exactly what arguments it takes and what it returns. It's usually faster than searching online, and it's always correct for the version of R actually installed. RStudio also keeps a set of cheat sheets under **Help → Cheatsheets**, one per major package. Beyond that, this book itself stays the main reference for the rest of the course. IES Week 5 explains how to find your way around it.
 
 ## Worked example: four clinic visits
 
-Let's put several of today's pieces together on one small, made-up example: four clinic visits, invented purely to practise on. From IES Week 7 onward, everything in this book runs on `nhanes_mph` or `strep_tb` instead; today's numbers exist only to give the syntax something to run on before either dataset has been introduced.
+Let's put several of today's pieces together on one small, made-up example: four clinic visits, invented purely to practise on. From IES Week 7 onward, everything in this book runs on real-world data (`nhanes_mph` or `strep_tb`) instead; today's numbers exist only to give the syntax something to run on before either dataset has been introduced.
 
 ```{r}
 #| label: worked-build
 visit_id <- c(101, 102, 103, 104)
 patient_age <- c(45, 62, 38, 71)
 smoker <- c("No", "Yes", "No", "Yes")
-weight_kg <- c(81.456, 95.204, 68.933, 102.118)
+weight_kg <- c(81.456, 50.204, 68.933, 73.118) 
 
 visits <- data.frame(visit_id, patient_age, smoker, weight_kg)
 visits
@@ -360,21 +373,23 @@ Same values, different container: a bare vector from `$`, a one-column data fram
 
 ## Exercises
 
-**Exercise 1** (ILO 3). Create a vector called `heights` holding four numbers of your choosing, using `c()` and `<-`. Check its class with `class()`, and confirm `heights` appears in the Environment pane after you run your code.
+**Exercise 1** (ILO 3). Create a vector called `height_cm` holding the values of 177, 155, 168, 181, using `c()` and `<-`. Check its class with `class()`, and confirm `height_cm` appears in the Environment pane after you run your code.
 
-**Exercise 2** (ILOs 4, 5). Using `visits$weight_kg` from the worked example, round the values to one decimal place, naming the `digits` argument explicitly rather than relying on position. Then build a logical condition that identifies which visits are for a smoker weighing over 90 kg, combining a comparison operator with `&`.
+**Exercise 2** (ILOs 4, 5). Using `visits$weight_kg` from the worked example, round the values to one decimal place, naming the `digits` argument explicitly rather than relying on position. Then build a logical condition that identifies which visits are for a smoker weighing over 70 kg, combining a comparison operator with `&`.
 
 Then open `round()`'s help page by typing `?round` in the console. Find the **Usage** section at the top, and write down what value `digits` takes when you don't supply one. Check your answer by running `round()` on the same values with the `digits` argument left out entirely.
 
-**Exercise 3** (ILO 5). Write a piped sequence, using `|>`, that takes `visits$weight_kg`, rounds it to zero decimal places, and sums the result. Then use `select()` to keep just `visit_id` and `smoker` from `visits`, and write one sentence stating how the result differs from `visits$smoker`.
+**Exercise 3** (ILOs 4, 5). Update the data frame `visits` to include the new `height_cm` variable. Calculate the BMI (weight in kg divided by height in metres, squared) of all the patients by using the `$` sign.
+
+**Exercise 4** (ILO 5). Write a piped sequence, using `|>`, that takes `visits$weight_kg`, rounds it to zero decimal places, and sums the result. Then use `select()` to keep just `visit_id` and `smoker` from `visits`, and write one sentence stating how the result differs from `visits$smoker`.
 
 ## Self-check
 
 A short multiple-choice check, not a writing exercise. There's no statistical result yet to interpret in a sentence. That starts in IES Week 7. Instead, these five questions target the places students most often get tripped up in R's syntax. Answers are in the Solutions callout below.
 
-**1.** In `mean(x, na.rm = TRUE)`, what's the real difference between `<-` and `=`?
+**1.** In `mean_x <- mean(x, na.rm = TRUE)`, what's the difference between `<-` and `=`?
 
-a) They mean exactly the same thing everywhere in R
+a) They mean exactly the same thing
 b) `<-` creates or updates an object; `=` here only names an argument inside the function call
 c) `<-` only works inside a function call, `=` only works outside one
 d) `=` creates an object; `<-` only names an argument
@@ -382,14 +397,14 @@ d) `=` creates an object; `<-` only names an argument
 **2.** `visits$smoker` and `select(visits, smoker)` return the same four values. What actually differs between them?
 
 a) Nothing, they always return identical output
-b) `$` returns a bare vector; `select()` returns a data frame with one column
-c) `$` only works on vectors, never on data frames
+b) `$` only works on vectors, never on data frames
+c) `$` returns a bare vector; `select()` returns a data frame with one column
 d) `select()` is base R; `$` is from `dplyr`
 
 **3.** In `round(x = 3.14159, digits = 2)`, what happens if you write `round(digits = 2, x = 3.14159)` instead?
 
-a) R throws an error, because the arguments are in the wrong order
-b) Nothing changes: named arguments can be given in any order
+a) Nothing changes: named arguments can be given in any order
+b) R throws an error, because the arguments are in the wrong order
 c) R silently ignores `digits` and uses its default instead
 d) It only works if `x` is written first, always
 
@@ -414,9 +429,9 @@ d) There's a missing comma somewhere in the call
 
 ```{r}
 #| label: sol-ex1
-heights <- c(160, 172, 158, 181)
-heights
-class(heights)
+height_cm <- c(177, 155, 168, 181)
+height_cm
+class(height_cm)
 ```
 
 **Exercise 2**
@@ -424,7 +439,7 @@ class(heights)
 ```{r}
 #| label: sol-ex2
 round(visits$weight_kg, digits = 1)
-visits$smoker == "Yes" & visits$weight_kg > 90
+visits$smoker == "Yes" & visits$weight_kg > 70
 ```
 
 `?round`'s Usage section reads `round(x, digits = 0)`, so `digits` defaults to 0: leave it out and R rounds to the nearest whole number. Running it both ways confirms that:
@@ -441,6 +456,15 @@ The two lines give identical results, which is what a default argument means in 
 
 ```{r}
 #| label: sol-ex3
+visits <- data.frame(visits, height_cm)
+bmi <- visits$weight_kg / (visits$height_cm / 100)^2
+bmi 
+```
+
+**Exercise 4**
+
+```{r}
+#| label: sol-ex4
 visits$weight_kg |> round(digits = 0) |> sum()
 select(visits, visit_id, smoker)
 ```
@@ -450,8 +474,8 @@ select(visits, visit_id, smoker)
 **Self-check answers**
 
 1. **b.** `<-` creates or updates an object. `=` inside a function call only names which argument a value belongs to; it never creates an object there.
-2. **b.** Same values, different container: `$` strips the data frame away and leaves a bare vector, `select()` keeps the data frame structure.
-3. **b.** Named arguments are matched by name, not position, so their order in the call makes no difference to the result.
+2. **c.** Same values, different container: `$` strips the data frame away and leaves a bare vector, `select()` keeps the data frame structure.
+3. **a.** Named arguments are matched by name, not position, so their order in the call makes no difference to the result.
 4. **b.** Installing is a one-off download. Loading has to happen at the start of every R session, since a fresh session starts with no packages loaded, even ones already installed.
 5. **b.** R is case-sensitive throughout. `Mean` and `mean` are different names as far as R is concerned, and only one of them is a real function.
 :::

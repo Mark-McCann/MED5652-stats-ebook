@@ -16,7 +16,7 @@ By the end of this session you will be able to:
 
 As in IES Weeks 7 and 8, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. We also bring back `strep_tb`, from the `medicaldata` package, for the categorical half of this chapter.
 
-This chapter adds one new package, `epitools`. It isn't part of the tidyverse, and it won't already be installed alongside the packages we've used so far. As IES Week 5 explained, installing a package and loading it are two different actions. If `epitools` isn't already on your machine, run `install.packages("epitools")` once in the console, not inside this document. Once it's installed, `library(epitools)` below makes its functions available for this session, exactly like every other package we load.
+This chapter adds one new package, `epitools`. It isn't part of the tidyverse, and it won't already be installed alongside the packages we've used so far. As IES Week 4 explained, installing a package and loading it are two different actions. If `epitools` isn't already on your machine, run `install.packages("epitools")` once in the console, not inside this document. Once it's installed, `library(epitools)` below makes its functions available for this session, exactly like every other package we load.
 
 ```{r}
 #| label: setup

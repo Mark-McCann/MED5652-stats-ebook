@@ -4,11 +4,11 @@ project:
 book:
   title: "IES Statistical Practicals"
   author: "Fred Ho"
-  date: "29/07/2026"
+  date: today
   chapters:
     - index.qmd
-    - chapters/05-prep1.qmd
-    - chapters/06-prep2.qmd
+    - chapters/04-prep1.qmd
+    - chapters/05-prep2.qmd
     - chapters/07-descriptive.qmd
     - chapters/08-estimation.qmd
     - chapters/09-comparison.qmd
@@ -17,11 +17,11 @@ book:
 
 format:
   html:
-    theme:
-      - cosmo
-      - brand
+    theme: cosmo
   pdf:
     documentclass: scrreprt
-
-
+    include-before-body:
+      - images/cover-titlepage.tex
+    header-includes:
+      - \renewcommand{\maketitle}{}
 
