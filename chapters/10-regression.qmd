@@ -1,6 +1,6 @@
 # Correlation and simple linear regression (IES Week 10) {#sec-10-regression}
 
-This practical follows the IES Week 10 seminar of the same name. That seminar opened with scatterplots and Pearson's correlation coefficient, then made a deliberate shift: from describing how strongly two variables move together to modelling one variable as a function of the other. It stated the simple linear regression model, Y = α + βX + ε, introduced least squares and residuals, and showed how to interpret a slope, an intercept, and R². It also covered the assumptions behind the model, the diagnostic plots that check them, and the danger of using a fitted line to predict somewhere the data never reached. In this session we fit that model in R, check it properly, and use it to predict.
+This practical follows the Week 10 seminar of the same name. That seminar opened with scatterplots and Pearson's correlation coefficient, then made a deliberate shift: from describing how strongly two variables move together to modelling one variable as a function of the other. It stated the simple linear regression model, Y = α + βX + ε, introduced least squares and residuals, and showed how to interpret a slope, an intercept, and R². It also covered the assumptions behind the model, the diagnostic plots that check them, and the danger of using a fitted line to predict somewhere the data never reached. In this session we fit that model in R, check it properly, and use it to predict.
 
 ## Chapter intended learning outcomes
 
@@ -14,9 +14,9 @@ By the end of this session you will be able to:
 
 ## Setup
 
-As in IES Weeks 7 to 9, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
+As in Weeks 7 to 9, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
 
-This chapter adds one new package, `broom`. It isn't part of the tidyverse core, so if you haven't used it in an earlier chapter, it likely isn't installed yet. As IES Week 4 explained, installing a package and loading it are two different actions. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console, not inside this document. Once it's installed, `library(broom)` below makes its functions available for this session, exactly like every other package we load. `gtsummary` isn't used anywhere in this chapter, so it isn't loaded here. `dictionary` is read in even though no code below refers to it, for the reason IES Week 8 gave: it's there so it's to hand the moment you're unsure what a column means.
+This chapter adds one new package, `broom`. It isn't part of the tidyverse core, so if you haven't used it in an earlier chapter, it likely isn't installed yet. As Week 4 explained, installing a package and loading it are two different actions. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console, not inside this document. Once it's installed, `library(broom)` below makes its functions available for this session, exactly like every other package we load. `gtsummary` isn't used anywhere in this chapter, so it isn't loaded here. `dictionary` is read in even though no code below refers to it, for the reason Week 8 gave: it's there so it's to hand the moment you're unsure what a column means.
 
 ```{r}
 #| label: setup
@@ -64,7 +64,7 @@ nhanes <- nhanes |>
   )
 ```
 
-This is the same recode we introduced in IES Week 7 and repeated in IES Weeks 8 and 9. See IES Week 7 for the reasoning behind each variable and each choice of `ordered = TRUE`. We repeat it here, unchanged, so this chapter stands on its own too.
+This is the same recode we introduced in Week 7 and repeated in Weeks 8 and 9. See Week 7 for the reasoning behind each variable and each choice of `ordered = TRUE`. We repeat it here, unchanged, so this chapter stands on its own too.
 
 ## Correlation: Pearson's r and Spearman's rho
 
@@ -100,7 +100,7 @@ Correlation is as far as this chapter takes `phq.c`. The rest of the chapter fol
 
 ## A scatterplot with a fitted line: cholesterol by age
 
-IES Week 7 plotted total cholesterol (`chol`, in mmol/L) against age (in years) as a plain scatterplot, with no line through it. `geom_smooth()`, from `ggplot2`, adds one. With `method = "lm"`, it fits exactly the simple linear regression this chapter is about, and draws the result:
+Week 7 plotted total cholesterol (`chol`, in mmol/L) against age (in years) as a plain scatterplot, with no line through it. `geom_smooth()`, from `ggplot2`, adds one. With `method = "lm"`, it fits exactly the simple linear regression this chapter is about, and draws the result:
 
 ```{r}
 #| label: scatter-age
@@ -122,7 +122,7 @@ Re-run the plot above with `geom_smooth(method = "lm", se = FALSE)`. Then try `g
 
 ## Fitting the model with `lm()`
 
-`lm()`, from base R, fits a linear model. Its first argument is a formula, in the same `y ~ x` form `t.test()` used in IES Week 9: the variable on the left is what we're modelling, and the variable on the right is what we're modelling it with. We drop the rows where either variable is missing first, the same habit we've used for every model and test so far:
+`lm()`, from base R, fits a linear model. Its first argument is a formula, in the same `y ~ x` form `t.test()` used in Week 9: the variable on the left is what we're modelling, and the variable on the right is what we're modelling it with. We drop the rows where either variable is missing first, the same habit we've used for every model and test so far:
 
 ```{r}
 #| label: lm-age
@@ -131,9 +131,9 @@ m_age <- lm(chol ~ age, data = age_complete)
 summary(m_age)
 ```
 
-As with `t.test()` in IES Week 8, there's no `$` anywhere in that call. `lm()`'s `data = ` argument tells it to look for `chol` and `age` inside `age_complete`, so it finds them there directly rather than us pulling either one out by hand first. Every model in this course, `lm()` and `glm()` alike, follows this same pattern: name the variables bare in the formula, and point `data = ` at wherever they live.
+As with `t.test()` in Week 8, there's no `$` anywhere in that call. `lm()`'s `data = ` argument tells it to look for `chol` and `age` inside `age_complete`, so it finds them there directly rather than us pulling either one out by hand first. Every model in this course, `lm()` and `glm()` alike, follows this same pattern: name the variables bare in the formula, and point `data = ` at wherever they live.
 
-`summary()` prints a lot at once. The `Coefficients` table has the two numbers that define the fitted line: the `(Intercept)`, the model's predicted cholesterol at age zero, and the slope on `age`, the predicted change in cholesterol for each additional year of age. Each has a standard error, a t-value, and a p-value attached, exactly the reporting standard from IES Week 9. The slope here is small but clearly non-zero: cholesterol tends to be about 0.0056 mmol/L higher for every extra year of age, and the p-value is far below 0.001.
+`summary()` prints a lot at once. The `Coefficients` table has the two numbers that define the fitted line: the `(Intercept)`, the model's predicted cholesterol at age zero, and the slope on `age`, the predicted change in cholesterol for each additional year of age. Each has a standard error, a t-value, and a p-value attached, exactly the reporting standard from Week 9. The slope here is small but clearly non-zero: cholesterol tends to be about 0.0056 mmol/L higher for every extra year of age, and the p-value is far below 0.001.
 
 `Multiple R-squared`, R², says what fraction of the variation in cholesterol this model accounts for. Here it's under 0.01: age explains under 1% of the variation in cholesterol between participants. That isn't a contradiction of the significant slope above. A relationship can be real, precisely estimated, and still leave most of the variation in the outcome unexplained. R² and a p-value answer different questions, and neither one substitutes for the other.
 
@@ -242,7 +242,7 @@ ggplot(sed_aug, aes(sample = .std.resid)) +
 
 The same pattern from the age model shows up again, more visibly: a handful of participants sit far from the fitted line, and `sed` itself carries a long right tail, including some participants recording well over 24 hours of sedentary time a day, which cannot be literally true and points to some noise in how this variable was recorded or reported. None of this overturns the conclusion above. It's a reason to hold the result loosely rather than to distrust the direction of the estimate.
 
-Written as it would appear in a results section: sedentary time was not associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). This is a genuinely unsatisfying result to end a chapter on, and that's deliberate. This model has exactly one predictor. It says nothing about age, nothing about gender, and nothing about anything else that might differ between people with more and less sedentary time. IES Week 11 puts those back in.
+Written as it would appear in a results section: sedentary time was not associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). This is a genuinely unsatisfying result to end a chapter on, and that's deliberate. This model has exactly one predictor. It says nothing about age, nothing about gender, and nothing about anything else that might differ between people with more and less sedentary time. Week 11 puts those back in.
 
 ## Exercises
 

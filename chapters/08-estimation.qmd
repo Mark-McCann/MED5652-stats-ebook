@@ -1,6 +1,6 @@
 # Estimation, precision, and study size (IES Week 8) {#sec-08-estimation}
 
-This practical follows the IES Week 8 seminar of the same name. That seminar introduced sampling variability through an interactive demonstration, stated the central limit theorem as a one-sentence summary of what that demonstration showed, and drew a sharp line between the standard deviation and the standard error. The SD describes the spread of the *data*. The SE describes the precision of an *estimate*. In this session we put those ideas to work. We'll calculate a standard error, build a confidence interval from it, check the calculation against R's own functions, and then use the same logic in reverse to size a study before it is run.
+This practical follows the Week 8 seminar of the same name. That seminar introduced sampling variability through an interactive demonstration, stated the central limit theorem as a one-sentence summary of what that demonstration showed, and drew a sharp line between the standard deviation and the standard error. The SD describes the spread of the *data*. The SE describes the precision of an *estimate*. In this session we put those ideas to work. We'll calculate a standard error, build a confidence interval from it, check the calculation against R's own functions, and then use the same logic in reverse to size a study before it is run.
 
 ## Chapter intended learning outcomes
 
@@ -14,9 +14,9 @@ By the end of this session you will be able to:
 
 ## Setup
 
-As in IES Week 7, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. This chapter also brings in a second dataset for the first time: `strep_tb`, from the `medicaldata` package. Unlike `nhanes_mph`, `strep_tb` doesn't live in a CSV file. It ships built into the package itself, so `library(medicaldata)` is enough to make it available. There is no `read_csv()` step for it. We'll explain what `strep_tb` contains properly below, the first time we use it.
+As in Week 7, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. This chapter also brings in a second dataset for the first time: `strep_tb`, from the `medicaldata` package. Unlike `nhanes_mph`, `strep_tb` doesn't live in a CSV file. It ships built into the package itself, so `library(medicaldata)` is enough to make it available. There is no `read_csv()` step for it. We'll explain what `strep_tb` contains properly below, the first time we use it.
 
-`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. As IES Week 4 explained, installing a package and loading it are two different actions, and the data living inside the package doesn't change that: you still have to install the package before you can load it. Run `install.packages("medicaldata")` once in the console, not inside this document. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
+`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. As Week 4 explained, installing a package and loading it are two different actions, and the data living inside the package doesn't change that: you still have to install the package before you can load it. Run `install.packages("medicaldata")` once in the console, not inside this document. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
 
 ```{r}
 #| label: setup
@@ -67,11 +67,11 @@ nhanes <- nhanes |>
   )
 ```
 
-This is the same recode we introduced in IES Week 7. See IES Week 7 for the reasoning behind each variable and each choice of `ordered = TRUE`. We repeat it here, unchanged, so this chapter stands on its own.
+This is the same recode we introduced in Week 7. See Week 7 for the reasoning behind each variable and each choice of `ordered = TRUE`. We repeat it here, unchanged, so this chapter stands on its own.
 
 ## Point estimate and standard error, by hand
 
-A point estimate on its own says nothing about how precise it is. The standard error attaches a precision to it, and we calculate it from three quantities already familiar from IES Week 7: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
+A point estimate on its own says nothing about how precise it is. The standard error attaches a precision to it, and we calculate it from three quantities already familiar from Week 7: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
 
 ```{r}
 #| label: se-by-hand
@@ -87,9 +87,9 @@ sed_stats <- nhanes |>
 sed_stats
 ```
 
-`sqrt()` is base R's square root function. The standard error of a mean is the standard deviation divided by the square root of the sample size. As `n` grows, the denominator grows and the standard error shrinks. That's the algebra behind IES Week 8's precision argument.
+`sqrt()` is base R's square root function. The standard error of a mean is the standard deviation divided by the square root of the sample size. As `n` grows, the denominator grows and the standard error shrinks. That's the algebra behind Week 8's precision argument.
 
-`sed` was shown in IES Week 7 to be right-skewed, with a long tail of participants reporting many sedentary hours. That skew doesn't disqualify it from a confidence interval on its *mean*. The seminar's interactive demonstration made the point with dice: the value of a single roll is flat, every face equally likely and nothing bell-shaped about it, yet the *average* of 25 rolls piles up into a bell anyway. The shape of the thing you're averaging and the shape of the average are two different questions.
+`sed` was shown in Week 7 to be right-skewed, with a long tail of participants reporting many sedentary hours. That skew doesn't disqualify it from a confidence interval on its *mean*. The seminar's interactive demonstration made the point with dice: the value of a single roll is flat, every face equally likely and nothing bell-shaped about it, yet the *average* of 25 rolls piles up into a bell anyway. The shape of the thing you're averaging and the shape of the average are two different questions.
 
 That's what licenses what we just did. `sed` is skewed where the die was flat, but both are a long way from normal, and neither has to be normal for the interval on the mean to behave. What does the work is the sample size, and with `r format(sum(!is.na(nhanes$sed)), big.mark = ",")` participants behind it, `sed` has far more of it than 25 dice.
 
@@ -115,9 +115,9 @@ R has a function that does this directly. `t.test()` expects a single numeric ve
 t.test(nhanes$sed)
 ```
 
-`t.test()` also reports a test statistic, degrees of freedom, and a p-value. These belong to a hypothesis test, which is IES Week 9's subject. For now, look only at the confidence interval, and check that it closely matches the interval we calculated by hand above.
+`t.test()` also reports a test statistic, degrees of freedom, and a p-value. These belong to a hypothesis test, which is Week 9's subject. For now, look only at the confidence interval, and check that it closely matches the interval we calculated by hand above.
 
-One thing `t.test()` does quietly is worth making loud. We passed it `nhanes$sed` whole, missing values and all, with no `filter()` and no `na.rm = TRUE`, and it ran anyway. It drops missing values itself, before calculating. The evidence is in the output: the degrees of freedom are `r format(sum(!is.na(nhanes$sed)) - 1, big.mark = ",")`, one less than the `r format(sum(!is.na(nhanes$sed)), big.mark = ",")` participants we filtered down to by hand, which is why the two intervals agree at all. That's a sensible default, but it's the same silent drop the histogram warnings in IES Week 5 and IES Week 7 made noisy, this time with nothing printed to tell you it happened. So count the missing values yourself before you report a result from `t.test()`, the way we did with `is.na()` and `sum()` in IES Week 5. The function won't do it for you.
+One thing `t.test()` does quietly is worth making loud. We passed it `nhanes$sed` whole, missing values and all, with no `filter()` and no `na.rm = TRUE`, and it ran anyway. It drops missing values itself, before calculating. The evidence is in the output: the degrees of freedom are `r format(sum(!is.na(nhanes$sed)) - 1, big.mark = ",")`, one less than the `r format(sum(!is.na(nhanes$sed)), big.mark = ",")` participants we filtered down to by hand, which is why the two intervals agree at all. That's a sensible default, but it's the same silent drop the histogram warnings in Week 5 and Week 7 made noisy, this time with nothing printed to tell you it happened. So count the missing values yourself before you report a result from `t.test()`, the way we did with `is.na()` and `sum()` in Week 5. The function won't do it for you.
 
 The two intervals are close but not identical, because `t.test()` doesn't use a fixed multiplier of 1.96. It uses a value from the t-distribution, which depends on the sample size through its degrees of freedom (`n - 1`), and which is very slightly wider than 1.96 for any finite sample. `qt()`, from base R, looks up that exact multiplier:
 
@@ -155,7 +155,7 @@ In practice the fix is easy, because the correct sentence is the shorter one. St
 glimpse(strep_tb)
 ```
 
-`arm` and `gender` are already factors. `improved`, the outcome we care about here, is **logical**: `TRUE` or `FALSE`, rather than a factor. R stores `TRUE` and `FALSE` as 1 and 0, which will matter again shortly. `table()`, already met in IES Week 7, counts how many patients fall into each category of `improved`, and `prop.table()` converts those counts to proportions:
+`arm` and `gender` are already factors. `improved`, the outcome we care about here, is **logical**: `TRUE` or `FALSE`, rather than a factor. R stores `TRUE` and `FALSE` as 1 and 0, which will matter again shortly. `table()`, already met in Week 7, counts how many patients fall into each category of `improved`, and `prop.table()` converts those counts to proportions:
 
 ```{r}
 #| label: prop-table-improved
@@ -167,7 +167,7 @@ prop.table(table(strep_tb$improved))
 
 A proportion is an estimate like any other, so it has a standard error too. The formula is different from the one for a mean, because a proportion carries its own variability: once you know p, you know how spread out a yes/no variable is, so there's no separate SD to measure. The standard error of a proportion is the square root of p × (1 − p) ÷ n.
 
-`sum()` of a logical vector counts how many values are `TRUE`, since R stores `TRUE` as 1 and `FALSE` as 0. So `sum(strep_tb$improved)` is the number of patients who improved, out of `nrow(strep_tb)` in total. `nrow()` was met briefly in IES Week 5, returning just the row count on its own rather than rows and columns together the way `dim()` does:
+`sum()` of a logical vector counts how many values are `TRUE`, since R stores `TRUE` as 1 and `FALSE` as 0. So `sum(strep_tb$improved)` is the number of patients who improved, out of `nrow(strep_tb)` in total. `nrow()` was met briefly in Week 5, returning just the row count on its own rather than rows and columns together the way `dim()` does:
 
 ```{r}
 #| label: se-proportion
@@ -215,7 +215,7 @@ t.test(chol ~ gender, data = nhanes |> filter(!is.na(gender)))
 
 Notice there's no `$` anywhere in that call, even though `chol` and `gender` both live inside `nhanes`. The `data = ` argument tells `t.test()` which data frame to search for bare names like `chol` and `gender`, so it looks them up there itself instead of us pulling each one out by hand first with `$`. `$` is still the right tool for getting a single column on its own, the way `nhanes$sed` was above; a formula's `data = ` argument does that lookup for every variable named in the formula at once.
 
-This is the same pairing we showed descriptively in IES Week 7's boxplot and Table 1: cholesterol by gender. Now it's attached to a confidence interval for the *difference* in means between the two groups. By default, `t.test()` doesn't assume the two groups have equal variance. That's a sensible default and not something we need to adjust here.
+This is the same pairing we showed descriptively in Week 7's boxplot and Table 1: cholesterol by gender. Now it's attached to a confidence interval for the *difference* in means between the two groups. By default, `t.test()` doesn't assume the two groups have equal variance. That's a sensible default and not something we need to adjust here.
 
 ### Which way round is the difference?
 
@@ -234,7 +234,7 @@ Two habits follow from this, and they save a lot of confusion later. Check the a
 
 ## Confidence interval for a difference in proportions
 
-The same idea extends to two proportions: how many improved in each trial arm. `group_by()` and `summarise()`, already familiar from IES Week 7, give us the count and the number improved in each arm:
+The same idea extends to two proportions: how many improved in each trial arm. `group_by()` and `summarise()`, already familiar from Week 7, give us the count and the number improved in each arm:
 
 ```{r}
 #| label: arm-summary
@@ -265,17 +265,15 @@ The confidence interval is for the difference in the proportion improved between
 levels(strep_tb$arm)
 ```
 
-`"Streptomycin"` is first, so `prop 1` is the streptomycin arm and `prop 2` is the control arm, and the difference runs streptomycin minus control. Both ends of the interval are positive, which therefore says the streptomycin arm improved *more*. Had the two levels been the other way round, every number in that interval would have carried a minus sign and meant exactly the same thing. IES Week 9 puts this same factor the other way round on purpose, so it's worth having looked at the levels here first.
+`"Streptomycin"` is first, so `prop 1` is the streptomycin arm and `prop 2` is the control arm, and the difference runs streptomycin minus control. Both ends of the interval are positive, which therefore says the streptomycin arm improved *more*. Had the two levels been the other way round, every number in that interval would have carried a minus sign and meant exactly the same thing. Week 9 puts this same factor the other way round on purpose, so it's worth having looked at the levels here first.
 
-Two more things in that output are worth naming rather than skipping. The heading says "with continuity correction": `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. IES Week 9 explains what it does and when it earns its place, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. And the p-value itself belongs to a hypothesis test, which is still IES Week 9's subject. Read the interval; the rest keeps.
+Two more things in that output are worth naming rather than skipping. The heading says "with continuity correction": `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. Week 9 explains what it does and when it earns its place, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. And the p-value itself belongs to a hypothesis test, which is still Week 9's subject. Read the interval; the rest keeps.
 
 Because `strep_tb` is a randomised trial rather than an observational study, a difference this large and this precisely estimated supports a causal reading in a way that an association in `nhanes_mph` would not. Randomisation, not statistical adjustment, is what licenses that conclusion here.
 
 ## `gtsummary::tbl_summary()` as shorthand
 
-`tbl_summary()`, met in IES Week 7, can be told which summary to use for a given variable with the `statistic` argument, which takes a `list()`. This is a way of bundling several named settings together, pairing a variable with the display it should use.
-
-The display itself is written as a piece of text with curly braces in it: `"{mean} ({sd})"`. The braces are placeholders. `gtsummary` works out the mean and the standard deviation, then drops each number into the spot where its name appears, and everything outside the braces, here a space and a pair of round brackets, is printed exactly as written. So `"{mean} ({sd})"` comes out as something like `5.05 (1.08)`. Writing the layout out this way means you decide how the cell reads, rather than accepting a default.
+Week 7 showed how to tell `tbl_summary()` to display mean and SD for every continuous variable at once, with `statistic = list(all_continuous() ~ "{mean} ({sd})")`. The same `statistic` argument works one variable at a time too, by naming the variable on the left of the `~` instead of `all_continuous()`:
 
 ```{r}
 #| label: tbl-summary-shorthand
@@ -284,7 +282,7 @@ nhanes |>
   tbl_summary(by = gender, statistic = list(chol ~ "{mean} ({sd})"))
 ```
 
-This forces mean (SD) display for `chol`, overriding whatever `tbl_summary()` would otherwise have chosen automatically.
+This forces mean (SD) display for `chol` alone, leaving every other variable in the table at `tbl_summary()`'s default.
 
 ## Width and sample size, without programming
 
@@ -326,7 +324,7 @@ tt_10
 
 The point estimates are similar across all three, because all three are samples from the same population. But the confidence interval widens as the sample size drops.
 
-That's hard to see across three blocks of output, so let's put the three intervals in one small table. A `t.test()` result isn't a data frame, but `$` still works on it, pulling out one named piece at a time exactly as it pulls one column out of a data frame. `tt_full$conf.int` is the pair of numbers at the ends of the interval, and `[1]` and `[2]` take the lower and the upper one, the same square-bracket indexing we used in IES Week 5. `data.frame()`, from IES Week 4, builds the table out of them, and `mutate()` adds the column we actually care about:
+That's hard to see across three blocks of output, so let's put the three intervals in one small table. A `t.test()` result isn't a data frame, but `$` still works on it, pulling out one named piece at a time exactly as it pulls one column out of a data frame. `tt_full$conf.int` is the pair of numbers at the ends of the interval, and `[1]` and `[2]` take the lower and the upper one, the same square-bracket indexing we used in Week 5. `data.frame()`, from Week 4, builds the table out of them, and `mutate()` adds the column we actually care about:
 
 ```{r}
 #| label: width-table
@@ -482,7 +480,7 @@ Check the direction before reading the interval, as above. `"Never"` comes first
 
 Mean total cholesterol was `r round(tt_smoking$estimate[1] - tt_smoking$estimate[2], 3)` mmol/L in never smokers compared with current smokers (95% CI: `r round(tt_smoking$conf.int[1], 3)` to `r round(tt_smoking$conf.int[2], 3)` mmol/L), so a little lower on average in those who had never smoked. Notice that the estimate sits inside its own interval, which is the check worth running on any result you write down: if it doesn't, a sign has been flipped somewhere. The interval includes zero, so these data are consistent with no difference between the two groups, though they don't rule out a small one either.
 
-The two intervals mean different things. The first is about a single quantity, mean cholesterol, and says how precisely this sample pins it down. The second is about a *comparison* between two groups, and the value that matters in it is zero: an interval containing zero is one where the data can't establish which group is higher. From IES Week 9 onward, almost every interval in this course is of the second kind.
+The two intervals mean different things. The first is about a single quantity, mean cholesterol, and says how precisely this sample pins it down. The second is about a *comparison* between two groups, and the value that matters in it is zero: an interval containing zero is one where the data can't establish which group is higher. From Week 9 onward, almost every interval in this course is of the second kind.
 
 **Exercise 2**
 
