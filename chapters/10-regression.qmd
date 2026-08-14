@@ -1,6 +1,6 @@
 # Correlation and simple linear regression (IES Week 10) {#sec-10-regression}
 
-This practical follows the Week 10 seminar of the same name. That seminar opened with scatterplots and Pearson's correlation coefficient, then made a deliberate shift: from describing how strongly two variables move together to modelling one variable as a function of the other. It stated the simple linear regression model, Y = α + βX + ε, introduced least squares and residuals, and showed how to interpret a slope, an intercept, and R². It also covered the assumptions behind the model, the diagnostic plots that check them, and the danger of using a fitted line to predict somewhere the data never reached. In this session we fit that model in R, check it properly, and use it to predict.
+This week centres on how a continuous outcome varies with a continuous predictor, in contrast with Weeks 8 and 9, where a continuous outcome was compared across the two groups of a binary variable. The tools include scatterplots, Pearson's correlation coefficient, and simple linear regression, specified as Y = α + βX + ε. Simple linear regression also introduces residuals, the intercept, the slope, and R². We discuss and check the model's assumptions. In this session we fit that model in R, check it properly, and use it to predict.
 
 ## Chapter intended learning outcomes
 
@@ -16,7 +16,7 @@ By the end of this session you will be able to:
 
 As in Weeks 7 to 9, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
 
-This chapter adds one new package, `broom`. It isn't part of the tidyverse core, so if you haven't used it in an earlier chapter, it likely isn't installed yet. As Week 4 explained, installing a package and loading it are two different actions. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console, not inside this document. Once it's installed, `library(broom)` below makes its functions available for this session, exactly like every other package we load. `gtsummary` isn't used anywhere in this chapter, so it isn't loaded here. `dictionary` is read in even though no code below refers to it, for the reason Week 8 gave: it's there so it's to hand the moment you're unsure what a column means.
+This chapter adds one new package, `broom`. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console.
 
 ```{r}
 #| label: setup
@@ -68,25 +68,25 @@ This is the same recode we introduced in Week 7 and repeated in Weeks 8 and 9. S
 
 ## Correlation: Pearson's r and Spearman's rho
 
-The seminar opened with scatterplots and Pearson's correlation coefficient, before shifting to regression. It's worth computing both correlation coefficients here in R before we make that same shift.
+The seminar opened with scatterplots and Pearson's correlation coefficient before shifting to regression. Here's the same shift, briefly, in R.
 
-`cor()`, from base R, calculates a correlation coefficient between two numeric variables. Its default method is Pearson's r, which measures the strength of a straight-line relationship between two continuous variables. We'll use the same pairing this chapter's first model uses, `age` and `chol`, so the connection between correlation and regression stays visible rather than assumed:
+`cor()`, from base R, calculates a correlation coefficient between two continuous variables. Its default method is Pearson's r, which measures the strength of a linear, or straight-line, relationship. We'll use the pairing this chapter's first model uses, `age` and `chol`:
 
 ```{r}
 #| label: cor-pearson
 cor(nhanes$age, nhanes$chol, use = "complete.obs")
 ```
 
-The `use = "complete.obs"` argument tells `cor()` to drop any participant missing either `age` or `chol` before calculating the coefficient; without it, a single missing value in either variable makes the whole calculation return `NA`. `cor.test()` adds a confidence interval and a p-value testing whether the true correlation in the population is zero, and it drops incomplete pairs automatically, so it needs no `use` argument of its own:
+`use = "complete.obs"` tells `cor()` to drop any participant missing either variable first; without it, a single missing value makes the whole calculation return `NA`. `cor.test()` adds a confidence interval and a p-value testing whether the true correlation is zero, and drops incomplete pairs automatically:
 
 ```{r}
 #| label: cortest-pearson
 cor.test(nhanes$age, nhanes$chol)
 ```
 
-Pearson's r here is about 0.094 (95% CI 0.084 to 0.104, p < 0.001): a weak but clearly non-zero positive correlation between age and cholesterol. Hold onto that t-value, 18.68 on 39,174 degrees of freedom: the next section fits `chol ~ age` with `lm()`, and its slope's t-value comes out identical. That's not a coincidence. With one continuous predictor and one continuous outcome, testing whether r differs from zero and testing whether the regression slope differs from zero are the same test, read on two different scales. r is unitless and treats both variables symmetrically, correlating `age` with `chol` gives the same number as correlating `chol` with `age`, while a regression slope is in the outcome's own units and only makes sense read in one direction. That's exactly the shift the seminar made, from describing how strongly two variables move together to modelling one as a function of the other.
+Pearson's r here is about 0.094 (95% CI 0.084 to 0.104, p < 0.001): a weak but clearly non-zero positive correlation between age and cholesterol. Worth noting once: for one predictor and one outcome, testing whether r differs from zero and testing whether the regression slope differs from zero are the same test, just read on two different scales.
 
-Pearson's r assumes both variables sit on a scale where equal-sized steps mean the same thing throughout its range, an interval or ratio scale. `phq.c`, the depression symptom category, doesn't: "Possible depression" isn't a fixed distance from "Mild symptoms" the way one extra year of age is from another, it's an ordered category, not a measurement. Spearman's rank correlation is the alternative for exactly this situation. Instead of correlating the raw values, it correlates their ranks, which only needs putting observations in order, not measuring a distance between them. `phq.c` is already an ordered factor, so `as.numeric()`, from base R, which converts whatever it's given into plain numbers, turns it into the numbers 1, 2, and 3 in the order the factor was built. That's exactly the ranking Spearman's correlation needs:
+Pearson's r assumes both variables sit on a scale where equal unit of increase/decrease mean the same thing throughout, i.e. an interval or ratio scale. `phq.c` doesn't: "Possible depression" isn't a fixed distance from "Mild symptoms" the way one extra year of age is from another, it's an ordered category, not a measurement. Spearman's rank correlation is the alternative, correlating ranks rather than raw values, so it only needs observations put in order, not a distance measured between them. `phq.c` is already an ordered factor, so `as.numeric()`, from base R, turns it into the numbers 1, 2, and 3 in the order the factor was built, exactly the ranking Spearman's correlation needs:
 
 ```{r}
 #| label: cor-spearman
@@ -94,9 +94,9 @@ phq_numeric <- as.numeric(nhanes$phq.c)
 cor.test(nhanes$age, phq_numeric, method = "spearman")
 ```
 
-Spearman's rho here is about 0.005, p = 0.37: close enough to zero, and far from significant, that age and depression symptom category show no clear monotonic relationship in this sample. The warning printed above, "cannot compute exact p-value with ties," is a computational detail rather than a problem: with tens of thousands of participants spread across only three `phq.c` categories, many participants necessarily share the same rank, so R falls back on an approximate p-value instead of an exact one. The approximate value is still valid here.
+Spearman's rho here is about 0.005, p = 0.37: close enough to zero, and far from significant, that age and depression symptom category show no clear monotonic relationship. `cor.test()` doesn't report a confidence interval for Spearman's rho the way it did for Pearson's r above; rho has no equivalent simple formula for one. The warning above, "cannot compute exact p-value with ties," isn't a problem: with tens of thousands of participants spread across only three `phq.c` categories, many necessarily share a rank, so R falls back on an approximate p-value, which is still valid.
 
-Correlation is as far as this chapter takes `phq.c`. The rest of the chapter follows the seminar's own shift, from measuring association to modelling it directly with regression.
+Correlation is as far as this chapter takes `phq.c`; the rest follows the seminar's own shift from measuring association to modelling it.
 
 ## A scatterplot with a fitted line: cholesterol by age
 
@@ -110,7 +110,7 @@ ggplot(nhanes |> filter(!is.na(age), !is.na(chol)), aes(x = age, y = chol)) +
   labs(x = "Age (years)", y = "Total cholesterol (mmol/L)")
 ```
 
-Above the plot, `ggplot2` printed `` `geom_smooth()` using formula = 'y ~ x' ``. That's a message rather than a warning, and nothing has gone wrong: it's simply reporting which formula it fitted, because `geom_smooth()` picks one for you if you don't say. Here it chose a straight line in `x`, which is exactly the simple linear regression we asked for with `method = "lm"`. It's worth a glance the first time, because on a plot where you meant to fit something more elaborate it would tell you that you hadn't. It appears above every `geom_smooth()` plot in this chapter and always says the same thing.
+Above the plot, `ggplot2` printed `` `geom_smooth()` using formula = 'y ~ x' ``. That's a message, not a warning: nothing has gone wrong, it's just reporting which formula it fitted, since `geom_smooth()` picks one for us if we don't say. Here it chose a straight line in `x`, exactly the simple linear regression we asked for with `method = "lm"`. Worth a glance the first time, since on a plot where we meant something more elaborate it would tell us that we hadn't. It appears above every `geom_smooth()` plot in this chapter and always says the same thing.
 
 The shaded band around the line is a 95% confidence interval for the line itself, the same idea as every other confidence interval in this course, just drawn as a band rather than printed as two numbers. The line slopes gently upward: cholesterol tends to be a little higher in older participants. The cloud of points around it is wide, though. Age clearly doesn't determine cholesterol on its own, and the next section puts a number on exactly how much of the picture the line accounts for.
 
@@ -122,7 +122,7 @@ Re-run the plot above with `geom_smooth(method = "lm", se = FALSE)`. Then try `g
 
 ## Fitting the model with `lm()`
 
-`lm()`, from base R, fits a linear model. Its first argument is a formula, in the same `y ~ x` form `t.test()` used in Week 9: the variable on the left is what we're modelling, and the variable on the right is what we're modelling it with. We drop the rows where either variable is missing first, the same habit we've used for every model and test so far:
+`lm()`, from base R, fits a linear model. Its first argument is a formula, in the same `y ~ x` form `t.test()` used in Week 8: the variable on the left is what we're modelling, and the variable on the right is what we're modelling it with. We drop the rows where either variable is missing first, the same habit we've used for every model and test so far:
 
 ```{r}
 #| label: lm-age
@@ -133,7 +133,7 @@ summary(m_age)
 
 As with `t.test()` in Week 8, there's no `$` anywhere in that call. `lm()`'s `data = ` argument tells it to look for `chol` and `age` inside `age_complete`, so it finds them there directly rather than us pulling either one out by hand first. Every model in this course, `lm()` and `glm()` alike, follows this same pattern: name the variables bare in the formula, and point `data = ` at wherever they live.
 
-`summary()` prints a lot at once. The `Coefficients` table has the two numbers that define the fitted line: the `(Intercept)`, the model's predicted cholesterol at age zero, and the slope on `age`, the predicted change in cholesterol for each additional year of age. Each has a standard error, a t-value, and a p-value attached, exactly the reporting standard from Week 9. The slope here is small but clearly non-zero: cholesterol tends to be about 0.0056 mmol/L higher for every extra year of age, and the p-value is far below 0.001.
+`summary()` prints a lot at once. The `Coefficients` table has the two numbers that define the fitted line: the `(Intercept)`, the model's predicted cholesterol at age zero, and the slope on `age`, the predicted change in cholesterol for each additional year of age. Each has a standard error, a t-value, and a p-value attached, exactly the reporting standard from Week 9. The slope here is small but non-zero: cholesterol tends to be about 0.0056 mmol/L higher for every extra year of age, and the p-value is far below 0.001.
 
 `Multiple R-squared`, R², says what fraction of the variation in cholesterol this model accounts for. Here it's under 0.01: age explains under 1% of the variation in cholesterol between participants. That isn't a contradiction of the significant slope above. A relationship can be real, precisely estimated, and still leave most of the variation in the outcome unexplained. R² and a p-value answer different questions, and neither one substitutes for the other.
 
@@ -156,7 +156,7 @@ Written as it would appear in a results section: total cholesterol was on averag
 
 ## Checking assumptions: diagnostic plots
 
-A fitted line is only trustworthy if the model's assumptions hold: linearity (a straight line is the right shape), constant variance (the scatter around the line doesn't change as you move along it), and normally distributed residuals (the vertical distances between the points and the line). A fourth assumption, independence between observations, isn't something a plot from one fitted model can check. It's a property of how the data were collected, and NHANES's sampling design is what would need inspecting for that, not this model's output.
+A fitted line is only trustworthy if the model's assumptions hold: linearity (a straight line is the right shape), constant variance (the scatter around the line doesn't change as we move along it), and normally distributed residuals (the vertical distances between the points and the line). A fourth assumption, independence between observations, isn't something a plot from one fitted model can check. It's a property of how the data were collected, and NHANES's sampling design is what would need inspecting for that, not this model's output.
 
 `broom::augment()` adds each observation's fitted value and residual back onto the original data, in columns named `.fitted` and `.resid`:
 
@@ -188,7 +188,7 @@ ggplot(age_aug, aes(sample = .std.resid)) +
 
 Points that fall on the line are consistent with normally distributed residuals. Here, the middle of the distribution sits close to the line, but the upper tail pulls away from it. That's the same small group of participants with unusually high cholesterol showing up again: the residuals are a little more heavy-tailed than a normal distribution would predict. With a sample this large, the model's estimates are still reliable despite this. With a much smaller sample, tail behaviour like this would be more of a concern.
 
-## Predicting from the model, and the danger of extrapolation
+## Prediction and extrapolation from the model
 
 `predict()`, from base R, uses a fitted model to generate a predicted value for a new set of inputs. Those inputs need to arrive as a data frame, with a column named to match each predictor in the model. `data.frame()`, also from base R, builds one directly from the values we supply, rather than reading one in from a file:
 
@@ -197,11 +197,13 @@ Points that fall on the line are consistent with normally distributed residuals.
 predict(m_age, newdata = data.frame(age = c(45, 150)), interval = "confidence")
 ```
 
-`interval = "confidence"` adds a confidence interval around each prediction. The first row, age 45, sits comfortably inside the range of ages actually observed in this sample (18 to 85), so this prediction is supported by data the model was fitted on. The second row, age 150, is not. Nobody in this dataset, or in any verified human population, is 150 years old. The model has no information about what happens at that age, and fitting a straight line through the data we do have says nothing reliable about what lies far outside it. The predicted value it returns looks like an ordinary number, which is exactly what makes extrapolation dangerous: a plausible-looking output doesn't mean the input that produced it was reasonable. Always check a prediction's input against the range the model was actually fitted on before trusting its output.
+`interval = "confidence"` adds a confidence interval around each prediction. This confidence interval describes the precision of the predicted **mean** value, not the precision for an **individual**. The precision around an individual prediction is called a **prediction interval**, and it's always wider than the confidence interval around the mean, since predicting one person's value is less certain than predicting the average across many. A prediction interval can be requested by stating `interval = "prediction"` instead.
+
+The first row, age 45, sits comfortably inside the range of ages actually observed in this sample (18 to 85), so this prediction is supported by data the model was fitted on. The second row, age 150, is not. Nobody in this dataset, or in any verified human population, is 150 years old. The model has no information about what happens at that age, and fitting a straight line through the data we do have says nothing reliable about what lies far outside it. The predicted value it returns looks like an ordinary number, which is exactly what makes extrapolation dangerous: a plausible-looking output doesn't mean the input that produced it was reasonable. Always check a prediction's input against the range the model was actually fitted on before trusting its output.
 
 ## Worked example: cholesterol by sedentary time
 
-Let's bring the whole workflow together on the pairing this course actually needs: total cholesterol (`chol`) modelled by sedentary time (`sed`, in hours/day).
+Let's bring the whole workflow together on another research question: is sedentary time (`sed`, in hours/day) associated with total cholesterol (`chol`)?
 
 ```{r}
 #| label: worked-scatter-sed
@@ -211,7 +213,7 @@ ggplot(nhanes |> filter(!is.na(sed), !is.na(chol)), aes(x = sed, y = chol)) +
   labs(x = "Sedentary time (hours/day)", y = "Total cholesterol (mmol/L)")
 ```
 
-The fitted line is nearly flat, and the confidence band around it is wide enough to include a line with no slope at all. Fitting the model directly confirms what the plot suggests:
+The fitted line is nearly flat, and the confidence band around it is wide enough to include a flat, horizontal line, that is, no relationship at all. Fitting the model directly confirms what the plot suggests:
 
 ```{r}
 #| label: worked-lm-sed
@@ -223,7 +225,7 @@ confint(m_sed)
 
 The slope is small and negative, about -0.0010 mmol/L for each additional hour/day of sedentary time, and the p-value is 0.073: above the conventional 0.05 threshold. The 95% confidence interval for the slope, -0.0021 to 0.0001 mmol/L, includes zero. R² is essentially zero. On this evidence alone, sedentary time and cholesterol show no clear linear relationship in this sample.
 
-The diagnostic plots are worth checking anyway, since a weak result is not the same as a well-behaved one:
+The diagnostic plots are worth checking anyway, since a weak result could be caused by violated assumptions:
 
 ```{r}
 #| label: worked-augment-sed
@@ -242,7 +244,7 @@ ggplot(sed_aug, aes(sample = .std.resid)) +
 
 The same pattern from the age model shows up again, more visibly: a handful of participants sit far from the fitted line, and `sed` itself carries a long right tail, including some participants recording well over 24 hours of sedentary time a day, which cannot be literally true and points to some noise in how this variable was recorded or reported. None of this overturns the conclusion above. It's a reason to hold the result loosely rather than to distrust the direction of the estimate.
 
-Written as it would appear in a results section: sedentary time was not associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). This is a genuinely unsatisfying result to end a chapter on, and that's deliberate. This model has exactly one predictor. It says nothing about age, nothing about gender, and nothing about anything else that might differ between people with more and less sedentary time. Week 11 puts those back in.
+Written as it would appear in a results section: sedentary time was not associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). But it would be a mistake to conclude from this alone that sedentary time has no bearing on cholesterol. This model adjusts for nothing else: age, gender, and other characteristics could still be masking a real association. Week 11 revisits this same pairing with those factors added back in.
 
 ## Exercises
 
@@ -308,5 +310,5 @@ The prediction at `vpa_r` = 1 hour/day (about 4.80 mmol/L) can be trusted, becau
 
 **Writing exercise (sample answer)**
 
-Sedentary time was not significantly associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). The confidence interval includes zero, so these data are consistent with no true association, but they do not rule one out either; a genuinely small effect could still be present and undetected at this sample size. This model adjusts for nothing else, so it cannot say whether age, gender, or other characteristics are masking or accounting for this result.
+Sedentary time was not significantly associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). The confidence interval includes zero, so these data are consistent with no true association. This model adjusts for nothing else, so it cannot say whether age, gender, or other characteristics are masking or accounting for this result.
 :::

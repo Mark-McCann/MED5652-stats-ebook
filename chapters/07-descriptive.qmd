@@ -1,6 +1,6 @@
 # Describing and visualising data (IES Week 7) {#sec-07-descriptive}
 
-This practical follows the Week 7 seminar of the same name. That seminar covered variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In Weeks 4 and 5 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this session we go straight to using that data.
+This week covers variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In Weeks 4 and 5 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this session we go straight to using that data.
 
 ## Chapter intended learning outcomes
 
@@ -25,6 +25,18 @@ NHANES is not a simple random sample of Americans. It's a **complex survey**. So
 
 This course ignores it. We treat `nhanes_mph` as though it were a simple cohort: every participant counts once, and counts the same. That's a real simplification, and it means the numbers we produce here would not be the right numbers to publish as estimates representative of the US population. We do it because the statistical ideas this course teaches are hard enough to learn once, without learning them and survey weighting at the same time. Survey weights will not be covered in the MPH curriculum.
 
+## Variable types
+
+The seminar classified every variable into one of two broad kinds, categorical or numeric, and it's worth having the vocabulary straight before we start describing any of them.
+
+A **categorical** variable puts each participant into one of a fixed set of groups. `gender` and `eth` are **nominal**: the categories have no natural order. `phq.c`, depression classification, is **ordinal**: normal, mild symptoms, and possible depression run in a genuine order, even though the gap between them isn't a measured distance.
+
+A **numeric** variable is a number, and numbers come in three shapes that matter differently for analysis. `blm.cvd`, baseline cardiovascular disease, is **binary**: it only ever takes the value 0 or 1. `phq`, the raw depression symptom score behind `phq.c`, is a **count**: whole numbers only, 0 through 6. `chol`, `age`, and `sed` are **continuous**: any value in a range is possible, 4.7 mmol/L as easily as 4.71.
+
+That distinction matters from here on. A mean and an SD, or a median and an IQR, describe a **continuous** variable. A **binary** or **count** variable, however few its possible values, still gets summarised as a proportion or a frequency table, not as a mean. This book says *continuous* from here on when that's specifically what's meant, rather than the vaguer *numeric*, since numeric alone doesn't say which of the three shapes above a variable has.
+
+A binary numeric variable and a categorical one with two categories describe the same kind of fact, present or absent, and that's exactly why `blm.cvd` gets turned into a factor in the setup below, alongside the five columns that were categorical from the start. Recoding it doesn't change what it is; it just replaces `0`/`1` with labels a reader can understand without the dictionary open, which is also why a result in this book should never show `blm.cvd = 1`.
+
 ## Setup
 
 As in Week 5, we read the data with `read_csv()` from the `readr` package. We build the file path with `here()` from the `here` package. This builds a path from the project folder down to the file, so the code runs on any machine no matter where the project sits. `nhanes_mph` arrives as two files: the data, and a separate dictionary that describes every variable. Both are plain CSV files, so we read both with `read_csv()`.
@@ -35,7 +47,7 @@ This chapter loads one package new to the book: `gtsummary`, for building tables
 install.packages("gtsummary")
 ```
 
-After that, the `library()` calls below are all you need, this session and every session after it.
+After that, the `library()` calls below are all we need, this session and every session after it.
 
 ```{r}
 #| label: setup
@@ -118,7 +130,7 @@ Let's actually examine the levels in a factor. `levels()`, from base R, lists a 
 levels(nhanes$smoking)
 ```
 
-`"Never"` is first, so `"Never"` is the reference. Everything else gets read against it: "Previous" means previous compared with never, and "Current" means current compared with never. That's the sensible choice here, and it isn't an accident. It's what we asked for when we wrote `levels = c("Never", "Previous", "Current")` in the recode above. Change the order in that line and you change the reference.
+`"Never"` is first, so `"Never"` is the reference. Everything else gets read against it: "Previous" means previous compared with never, and "Current" means current compared with never. That's the sensible choice here, and it isn't an accident. It's what we asked for when we wrote `levels = c("Never", "Previous", "Current")` in the recode above. Change the order in that line and we change the reference.
 
 Sometimes we want a different reference without rebuilding the factor. `relevel()`, also from base R, takes a factor and moves the level named in `ref` to the front:
 
@@ -198,7 +210,9 @@ nhanes |>
   )
 ```
 
-Four of those functions are new. `mean()` we already met in Week 4. `sd()`, from base R, returns the standard deviation: a measure of how spread out the values are, in the same units as the variable itself. `median()`, also base R, returns the middle value once everything is sorted, so half the participants sit below it and half above. `quantile()`, also base R, calculates any quantile you ask for: `probs = 0.25` and `probs = 0.75` ask for the first and third quartile, the two values the interquartile range sits between. There's a separate function, `IQR()`, that returns just the gap between them as a single number, in the same units as the variable itself, rather than the two quartiles. We'll use it in the worked example below.
+`filter()` here takes two conditions separated by a comma, which means the same as `&`: a row only stays if both are true. That's a shorter way to write `filter(!is.na(gender) & !is.na(chol))`, and it's the form used throughout this book whenever several conditions apply at once.
+
+Four of those functions are new. `mean()` we already met in Week 4. `sd()`, from base R, returns the standard deviation: a measure of how spread out the values are, in the same units as the variable itself. `median()`, also base R, returns the middle value once everything is sorted, so half the participants sit below it and half above. `quantile()`, also base R, calculates any quantile we ask for: `probs = 0.25` and `probs = 0.75` ask for the first and third quartile, the two values the interquartile range sits between. There's a separate function, `IQR()`, that returns just the gap between them as a single number, in the same units as the variable itself, rather than the two quartiles. We'll use it in the worked example below.
 
 `na.rm = TRUE` tells the functions to drop missing values before calculating. Without it, any `NA` in a column makes the whole result `NA`. The `filter()` step above drops rows where `gender` or `chol` itself is missing, so the group sizes reported in `n` reflect exactly the rows the means are calculated from. `n()`, used inside `summarise()`, counts the rows in each group.
 
@@ -261,9 +275,9 @@ ggplot(nhanes, aes(x = sed)) +
 
 To explain this code further: `ggplot()` names the data and the mapping, `geom_histogram()` says to draw it as a histogram, and `labs()` sets the axis labels. `labs()` is worth using every single time. Left out, the axes are labelled with the raw column name, so this one would have read `sed` rather than "Sedentary time (hours/day)", and people outside the course will have to guess what that is. We expect you to produce plots and tables that are properly labelled and as self-explanatory as possible.
 
-That warning about removed rows is the one Week 5 explained: `sed` has `r format(sum(is.na(nhanes$sed)), big.mark = ",")` missing values, so `ggplot2` left them out and said so. It will appear above most plots in this chapter, with a different number each time depending on the variable. Glance at the number, check it's the size you expect, and carry on.
+That warning about removed rows is the one Week 5 explained: `sed` has `r format(sum(is.na(nhanes$sed)), big.mark = ",")` missing values, so `ggplot2` left them out and said so. It will appear above most plots in this chapter, with a different number each time depending on the variable. Glance at the number, check it's the size we expect, and carry on.
 
-`ggplot2` is highly versatile and can produce probably all plots that you ever want. Some examples below:
+`ggplot2` is highly versatile and can produce nearly any plot we need. Some examples below:
 
 A bar chart of smoking status:
 
@@ -274,7 +288,7 @@ ggplot(nhanes |> filter(!is.na(smoking)), aes(x = smoking)) +
   labs(x = "Smoking status", y = "Count")
 ```
 
-This is like a histogram of a categorical variable, another way to represent the frequency table we built above. The code is very similar.
+`geom_bar()` is like a histogram for a categorical variable, another way to represent the frequency table we built above. The code is very similar.
 
 A boxplot of cholesterol by gender:
 
@@ -296,7 +310,7 @@ ggplot(nhanes, aes(x = age, y = chol)) +
   labs(x = "Age (years)", y = "Total cholesterol (mmol/L)")
 ```
 
-This is useful to examine the relationship between two continuous variables. `alpha = 0.1` makes each point mostly transparent. Where thousands of points overlap, the darker regions show where the data are dense. A plain scatterplot of this many points would otherwise just be a solid block of ink.
+`geom_point()` is useful to examine the relationship between two continuous variables. `alpha = 0.1` makes each point mostly transparent. Where thousands of points overlap, the darker regions show where the data are dense. A plain scatterplot of this many points would otherwise just be a solid block of ink.
 
 ::: {.callout-note}
 ## Try it yourself: bin width and scale
@@ -308,7 +322,7 @@ This is the first of several "Try it yourself" boxes in the book, and none of th
 
 ## A first Table 1
 
-A "Table 1" is a common first table in a health research report. It shows participant characteristics, often split by a grouping variable. You could do it manually with the descriptive statistics commands above (e.g. `mean()`, `table()`) and it is a good exercise. However, the more convenient way is to use `tbl_summary()`, from `gtsummary`.
+A "Table 1" is a common first table in a health research report. It shows participant characteristics, often split by a grouping variable. We could do it manually with the descriptive statistics commands above (e.g. `mean()`, `table()`) and it is a good exercise. However, the more convenient way is to use `tbl_summary()`, from `gtsummary`.
 
 The code below creates the summary table overall for the five selected variables.
 
@@ -328,7 +342,7 @@ nhanes |>
   tbl_summary(by = gender)
 ```
 
-`tbl_summary()`'s default display for a numeric variable is the median and IQR. To change it to mean and SD, we tell it what statistic to use with the `statistic` argument:
+`tbl_summary()`'s default display for a continuous variable is the median and IQR. To change it to mean and SD, we tell it what statistic to use with the `statistic` argument:
 
 ```{r}
 #| label: table1-by-gender-2
@@ -340,11 +354,11 @@ nhanes |>
   )
 ```
 
-Three things in that line are new. `list()`, from base R, bundles several settings together, one per variable or group of variables, which is what `statistic` needs when there's more than one display rule to give. `all_continuous()`, from `gtsummary`, means "every continuous variable in this table", so one line covers both `age` and `chol` at once rather than naming each separately. And `"{mean} ({sd})"` is a piece of text with slots in it: `gtsummary` works out the mean and the standard deviation for each variable, then drops each number into the spot where its name appears in curly braces, so it comes out as something like `47.3 (18.1)`. Everything outside the braces, here a space and a pair of round brackets, is printed exactly as written. `tbl_summary()` is highly customisable. You can change the statistic for any specific variable, or format different variables differently. That's outside the scope of this course, and left as an exploration exercise if you're interested.
+Three things in that line are new. `list()`, from base R, bundles several settings together, one per variable or group of variables, which is what `statistic` needs when there's more than one display rule to give. `all_continuous()`, from `gtsummary`, means "every continuous variable in this table", so one line covers both `age` and `chol` at once rather than naming each separately. And `"{mean} ({sd})"` is a piece of text with slots in it: `gtsummary` works out the mean and the standard deviation for each variable, then drops each number into the spot where its name appears in curly braces, so it comes out as something like `47.3 (18.1)`. Everything outside the braces, here a space and a pair of round brackets, is printed exactly as written. `tbl_summary()` is highly customisable. We can change the statistic for any specific variable, or format different variables differently. That's outside the scope of this course, and left as an exploration exercise for anyone interested.
 
 ## Worked example: describing age
 
-Now let's bring the tools above together, on a variable we haven't used elsewhere in this chapter: `age`.
+Let's bring the tools above together on a research question: how old are the participants in this sample, and how much does that vary? We'll use `age`, a variable not touched elsewhere in this chapter.
 
 ```{r}
 #| label: worked-summary
@@ -420,7 +434,7 @@ nhanes |>
   slice(1:10)
 ```
 
-`filter()` takes two conditions separated by a comma, which means the same as `&`: both have to be true. Then `arrange(desc(chol))` sorts from highest cholesterol down, `select()` keeps the three columns asked for, and `slice(1:10)` takes the top ten rows.
+The comma inside `filter()` still means `&`, both conditions have to be true. Then `arrange(desc(chol))` sorts from highest cholesterol down, `select()` keeps the three columns asked for, and `slice(1:10)` takes the top ten rows.
 
 The `mutate()` step is separate, because adding a column to ten hand-picked rows isn't much use. Applied to the whole dataset it is:
 
@@ -462,7 +476,7 @@ ggplot(nhanes, aes(x = sed, y = chol)) +
        y = "Total cholesterol (mmol/L)")
 ```
 
-The scatterplot shows no clear relationship. The cloud of points is roughly the same height right across the range of sedentary time, rather than drifting up or down as you move left to right. Whatever else predicts cholesterol here, sedentary time on its own doesn't look like much of it. Week 10 puts a number and a confidence interval on that impression instead of leaving it to the eye.
+The scatterplot shows no clear relationship. The cloud of points is roughly the same height right across the range of sedentary time, rather than drifting up or down as we move left to right. Whatever else predicts cholesterol here, sedentary time on its own doesn't look like much of it. Week 10 puts a number and a confidence interval on that impression instead of leaving it to the eye.
 
 **Exercise 3**
 
@@ -546,7 +560,7 @@ prop.table(smoking_edu, margin = 2)
 
 The row percentages are the ones that answer the question. `smoking` was given to `table()` first, so smoking is the rows, and `margin = 1` divides each row by its own total. The "Never" row then reads as the education breakdown *within* people who never smoked, which is exactly what was asked, and those three numbers add to 100%.
 
-The column percentages answer a different question: within each education group, what share smoke, used to smoke, and never smoked. That's a perfectly good question, just not this one. Both tables come from the same counts, so neither is more correct than the other in the abstract. What decides it is which total you want the percentages to be a share of, and that comes from the question, not from the data.
+The column percentages answer a different question: within each education group, what share smoke, used to smoke, and never smoked. That's a perfectly good question, just not this one. Both tables come from the same counts, so neither is more correct than the other in the abstract. What decides it is which total we want the percentages to be a share of, and that comes from the question, not from the data.
 
 ```{r}
 #| label: sol-ex6-bar

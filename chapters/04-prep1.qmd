@@ -1,6 +1,6 @@
 # R and R Studio (IES Week 4) {#sec-04-prep1}
 
-This is a preparatory chapter to learn about the basics of R, and the RStudio interface. It will cover what a script is, how to create things in R, and how to read the handful of error messages we'll all meet in the next ten weeks. Nothing here is about statistics yet, but these are an important foundation for applying statistical analysis to data.
+This session covers the basics of R and the RStudio interface: what a script is, how to create things in R, and how to read the handful of error messages we'll all meet in the next ten weeks. Nothing here is statistics yet, but it's the foundation everything after it stands on. In this session we install R, work in a Project, and write our first lines of code.
 
 ## Chapter intended learning outcomes
 
@@ -25,7 +25,7 @@ options(width = 76)
 
 ## Installing R and RStudio
 
-R is the programming language itself, and is the software program that actually runs your code. RStudio is a separate, free program that sits on top of R and makes it far nicer to work in: a proper editor, a console, and the panes we look at next. Install R first, then RStudio, in that order. You can use R without RStudio (even though it's harder for a beginner) but not the other way round. 
+R is the programming language itself, and is the software program that actually runs our code. RStudio is a separate, free program that sits on top of R and makes it far nicer to work in: a proper editor, a console, and the panes we look at next. Install R first, then RStudio, in that order. We can use R without RStudio, though it's harder for a beginner, but not the other way round.
 
 **Installing R.** Go to <https://cran.r-project.org> and choose the download link for your operating system, "Download R for Windows" or "Download R for macOS." For most people, you can run the installer and accept every default option.
 
@@ -33,22 +33,22 @@ R is the programming language itself, and is the software program that actually 
 
 **Verification.** Installed isn't the same as working, so check before moving on. Open RStudio, type `2 + 2` into the console, the panel where typed commands run, covered properly in a moment, and press Enter. You should see `[1] 4`. Then confirm a package installs and loads too: run `install.packages("dplyr")` once, then `library(dplyr)`. Both get a proper explanation later in this chapter, under Packages; for now, just check that neither throws an error. If anything here fails, get it fixed before going on, since nothing later in this chapter works without it.
 
-## Finding your way around RStudio
+## Finding our way around RStudio
 
 ### The four panes
 
-RStudio's window is split into four panes. Where each one sits is consistent no matter what you're doing, so it's worth learning the layout by position, not just by name.
+RStudio's window is split into four panes. Where each one sits is consistent no matter what we're doing, so it's worth learning the layout by position, not just by name.
 
-- **Top-left: the source pane.** This only shows when you have an active script, so you most likely won't see this in RStudio out of the box. This is where you write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; you have to tell RStudio to run it, which is the next thing we cover.
-- **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. You can type directly into the console, but anything typed there is gone once you close RStudio, which is exactly why the source pane exists.
-- **Top-right: the environment pane.** This lists every object that currently exists in your R session, its type, and a preview of its contents. Every time you create something, it appears here. When something you expected to see isn't listed, that's usually the first clue something went wrong.
+- **Top-left: the source pane.** This only shows when a script is open, so it likely won't appear in RStudio fresh out of the box. This is where we write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; we have to tell RStudio to run it, which is the next thing we cover.
+- **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. We can type directly into the console, but anything typed there is gone once RStudio closes, which is exactly why the source pane exists.
+- **Top-right: the environment pane.** This lists every object that currently exists in our R session, its type, and a preview of its contents. Every time we create something, it appears here. When something we expected to see isn't listed, that's usually the first clue something went wrong.
 - **Bottom-right: a tabbed pane.** This holds the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
 
 ![RStudio's four panes: source (top-left), console (bottom-left), environment (top-right), and a tabbed pane for files, plots, packages, and help (bottom-right). This particular window is shown in a dark colour theme rather than RStudio's own light default; it's the layout and position of the four panes that matters here, not the colours.](../images/04-prep1-panes.png){fig-alt="An RStudio window with the four panes labelled: source, console, environment, and a tabbed files/plots/packages/help pane." width="90%" fig-align="center"}
 
 ### Building a project folder
 
-Working with R means you have to manage at least a couple of files, most likely some data files and an R script file. It is usually a good idea to put them into a 'project folder'. Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`, following the naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
+Working with R means managing at least a couple of files, most likely some data files and an R script file. It is usually a good idea to put them into a 'project folder'. Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`, following the naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
 
 ### Creating an RStudio Project
 
@@ -61,11 +61,11 @@ An RStudio Project turns that folder into something RStudio understands directly
 
 ![The New Project wizard, with Existing Directory highlighted.](../images/04-prep1-new-project.png){fig-alt="RStudio's New Project wizard, showing New Directory, Existing Directory, and Version Control, with Existing Directory highlighted." width="70%" fig-align="center"}
 
-A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in Week 5, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk. 
+A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in Week 5, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
 
 ### Console versus script
 
-You can type a line directly into the console and press Enter, and it runs immediately. That's fine for a quick check, but it isn't saved anywhere. Close RStudio, and it's gone.
+We can type a line directly into the console and press Enter, and it runs immediately. That's fine for a quick check, but it isn't saved anywhere. Close RStudio, and it's gone.
 
 For anything worth keeping, we write it in a script in the source pane instead, then run it from there:
 
@@ -73,7 +73,7 @@ For anything worth keeping, we write it in a script in the source pane instead, 
 - Highlighting several lines and pressing the same shortcut runs all of them in order.
 - The **Source** button, top-right of the source pane, runs the entire script from top to bottom.
 
-The reason this course insists on scripts rather than the console is simple: you will need to do this again, and you will not remember exactly what you typed. A saved script is a record you, or anyone else, can rerun from scratch and get the same result. That's the whole idea behind reproducible work, and it's why every exercise in this book asks you to write and save a script rather than work directly in the console.
+The reason this course insists on scripts rather than the console is simple: we will need to do this again, and we won't remember exactly what we typed. A saved script is a record we, or anyone else, can rerun from scratch and get the same result. That's the whole idea behind reproducible work, and it's why every exercise in this book asks you to write and save a script rather than work directly in the console.
 
 ## Objects and assignment
 
@@ -85,7 +85,7 @@ age <- 45
 age
 ```
 
-`age` now holds the value 45. It appears in the Environment pane, top right, and stays there for the rest of the session, or until you overwrite it by assigning something else to the same name.
+`age` now holds the value 45. It appears in the Environment pane, top right, and stays there for the rest of the session, or until we overwrite it by assigning something else to the same name.
 
 `=` looks similar, but does a different job. Inside the parentheses of a function call, `=` doesn't create an object at all. It names which argument of the function a value belongs to:
 
@@ -115,7 +115,7 @@ toy_data <- data.frame(ages, smoker)
 toy_data
 ```
 
-Note that both vectors have to have the same length of data (4 values each), otherwise R will complain when you create a data frame. 
+Note that both vectors have to have the same length of data (4 values each), otherwise R will complain when we create a data frame.
 
 ## Data types
 
@@ -151,7 +151,7 @@ round(digits = 2, x = 3.14159)
 
 All three lines return the same result. The first matches purely by position: `round()`'s first argument is `x`, its second is `digits`. The second and third name `digits` explicitly, so its position in the call no longer matters, which is why the third line can put `digits` before `x` without changing the answer.
 
-The examples above simply run the function, so the output is shown in the console. If you're going to reuse the output later, you'll have to save it, the same way as the assignment above:
+The examples above simply run the function, so the output is shown in the console. If we're going to reuse the output later, we'll have to save it, the same way as the assignment above:
 
 ```{r}
 #| label: function-assignment
@@ -159,7 +159,7 @@ x <- round(3.14159, 2)
 x * 2
 ```
 
-Some arguments have a **default**: a value the function uses automatically if you don't supply one.
+Some arguments have a **default**: a value the function uses automatically if we don't supply one.
 
 ```{r}
 #| label: default-arg-demo
@@ -192,7 +192,7 @@ ages %in% c(45, 71)
 
 ## Packages
 
-Everything used so far, `c()`, `class()`, `round()`, `mean()`, comes built into R itself. Most of what this course does lives in add-on packages instead: `dplyr` for manipulating data, `ggplot2` for plotting, and others still to come. Getting a package ready to use is two separate actions. **Installing** downloads it onto this computer, once. **Loading**, with `library()`, makes its functions available in the current R session, and has to be done again every time you start a fresh session, even though you never need to install the same package twice.
+Everything used so far, `c()`, `class()`, `round()`, `mean()`, comes built into R itself. Most of what this course does lives in add-on packages instead: `dplyr` for manipulating data, `ggplot2` for plotting, and others still to come. Getting a package ready to use is two separate actions. **Installing** downloads it onto this computer, once. **Loading**, with `library()`, makes its functions available in the current R session, and has to be done again every time we start a fresh session, even though we never need to install the same package twice.
 
 Installing is typically a one-off, run in the console rather than saved in a script: `install.packages("dplyr")`. Loading is what actually goes in a script, since every script that uses `dplyr` needs it loaded first:
 
@@ -202,7 +202,7 @@ Installing is typically a one-off, run in the console rather than saved in a scr
 library(dplyr)
 ```
 
-Loading a package sometimes prints a short message, often about functions it's replacing from another package. It's suppressed here since it doesn't matter yet, but don't be alarmed if you see one later in the course. It's routine, not an error.
+Loading a package sometimes prints a short message, often about functions it's replacing from another package. It's suppressed here since it doesn't matter yet, but there's no need to worry if one appears later in the course. It's routine, not an error.
 
 ## `$` versus `select()`
 
@@ -255,13 +255,13 @@ c(16, 25, 36) |> sqrt() |> sum()
 
 Take these three numbers, and then take the square root of each, and then add up what's left. Written without the pipe, the same calculation reads inside-out: `sum(sqrt(c(16, 25, 36)))`. The pipe exists so a sequence of steps can be read in the order they actually happen, which is how every multi-step `dplyr` sequence in this book, starting in Week 7, is written.
 
-There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). You'll likely write a lot of pipes, so it's worth remembering.
+There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). We'll likely write a lot of pipes, so it's worth remembering.
 
-It's also worth knowing that `%>%` is the older pipe, and is only available once you've loaded the `dplyr` package. Practically, both pipes can be treated the same.
+It's also worth knowing that `%>%` is the older pipe, and is only available once we've loaded the `dplyr` package. Practically, both pipes can be treated the same.
 
 ## Reading errors
 
-You will encounter a lot of errors when you work with R, and that's normal. Even a very experienced R user will encounter errors. The skill worth building now is reading the message rather than panicking at it. R, by way of the `rlang` package installed alongside the tidyverse, formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything you'll see in this course.
+We will encounter a lot of errors when working with R, and that's normal. Even a very experienced R user encounters errors. The skill worth building now is reading the message rather than panicking at it. R, by way of the `rlang` package installed alongside the tidyverse, formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything we'll see in this course.
 
 **Object not found.** R can't find something by that name, usually a typo or a variable that was never created:
 
@@ -289,7 +289,7 @@ Mean(ages)
 mean(ages)
 ```
 
-**Unexpected symbol.** R's interpreter (the machine that reads your code and executes it) found something it couldn't make sense of, usually a missing operator or a missing comma between two things that were meant to be one call:
+**Unexpected symbol.** R's interpreter (the machine that reads our code and executes it) found something it couldn't make sense of, usually a missing operator or a missing comma between two things that were meant to be one call:
 
 ```{r}
 #| label: err-unexpected-symbol
@@ -302,7 +302,7 @@ c(1, 2) c(3, 4)
 c(1, 2, 3, 4)
 ```
 
-**Unexpected end of input.** A bracket was opened and never closed, so R keeps waiting for the rest of the expression that never arrives. In the console this shows up as a `+` prompt instead of the usual `>`, waiting for you to finish the line; here, where the code has to run to completion on its own, it shows as an error instead:
+**Unexpected end of input.** A bracket was opened and never closed, so R keeps waiting for the rest of the expression that never arrives. In the console this shows up as a `+` prompt instead of the usual `>`, waiting for us to finish the line; here, where the code has to run to completion on its own, it shows as an error instead:
 
 ```{r}
 #| label: err-missing-bracket
@@ -327,18 +327,18 @@ The warning line above states the actual reason, a missing file, before the erro
 
 ## Getting help
 
-Every function used in this course has a help page. Typing `?mean` in the console and pressing Enter opens `mean()`'s help page in the Help pane, bottom-right, showing exactly what arguments it takes and what it returns. It's usually faster than searching online, and it's always correct for the version of R actually installed. RStudio also keeps a set of cheat sheets under **Help → Cheatsheets**, one per major package. Beyond that, this book itself stays the main reference for the rest of the course. Week 5 explains how to find your way around it.
+Every function used in this course has a help page. Typing `?mean` in the console and pressing Enter opens `mean()`'s help page in the Help pane, bottom-right, showing exactly what arguments it takes and what it returns. It's usually faster than searching online, and it's always correct for the version of R actually installed. RStudio also keeps a set of cheat sheets under **Help → Cheatsheets**, one per major package. Beyond that, this book itself stays the main reference for the rest of the course.
 
 ## Worked example: four clinic visits
 
-Let's put several of today's pieces together on one small, made-up example: four clinic visits, invented purely to practise on. From Week 7 onward, everything in this book runs on real-world data (`nhanes_mph` or `strep_tb`) instead; today's numbers exist only to give the syntax something to run on before either dataset has been introduced.
+Let's put several of today's pieces together on one small, made-up example: four clinic visits, invented purely to practise on. From Week 5 onward, everything in this book runs on real-world data (`nhanes_mph` or `strep_tb`) instead; today's numbers exist only to give the syntax something to run on before either dataset has been introduced.
 
 ```{r}
 #| label: worked-build
 visit_id <- c(101, 102, 103, 104)
 patient_age <- c(45, 62, 38, 71)
 smoker <- c("No", "Yes", "No", "Yes")
-weight_kg <- c(81.456, 50.204, 68.933, 73.118) 
+weight_kg <- c(81.456, 50.204, 68.933, 73.118)
 
 visits <- data.frame(visit_id, patient_age, smoker, weight_kg)
 visits
@@ -369,7 +369,7 @@ visits$smoker
 select(visits, smoker)
 ```
 
-Same values, different container: a bare vector from `$`, a one-column data frame from `select()`. Every idea in this worked example, a vector, a data frame, `$`, a comparison, loading a package, the pipe, comes back constantly from Week 7 onward. Only the data changes.
+Same values, different container: a bare vector from `$`, a one-column data frame from `select()`. Every idea in this worked example, a vector, a data frame, `$`, a comparison, loading a package, the pipe, comes back constantly from Week 5 onward. Only the data changes.
 
 ## Exercises
 
@@ -450,7 +450,7 @@ round(visits$weight_kg)
 round(visits$weight_kg, digits = 0)
 ```
 
-The two lines give identical results, which is what a default argument means in practice. The help page is the fastest way to find out what a function does when you don't tell it, and it's always right for the version of R you actually have installed.
+The two lines give identical results, which is what a default argument means in practice. The help page is the fastest way to find out what a function does when we don't tell it, and it's always right for the version of R we actually have installed.
 
 **Exercise 3**
 
@@ -458,7 +458,7 @@ The two lines give identical results, which is what a default argument means in 
 #| label: sol-ex3
 visits <- data.frame(visits, height_cm)
 bmi <- visits$weight_kg / (visits$height_cm / 100)^2
-bmi 
+bmi
 ```
 
 **Exercise 4**
