@@ -1,10 +1,10 @@
-# R and R Studio (IES Week 4) {#sec-04-prep1}
+# R and R Studio (Week 4) {#sec-04-prep1}
 
-This session covers the basics of R and the RStudio interface: what a script is, how to create things in R, and how to read the handful of error messages we'll all meet in the next ten weeks. Nothing here is statistics yet, but it's the foundation everything after it stands on. In this session we install R, work in a Project, and write our first lines of code.
+This chapter covers the basics of R and the RStudio interface: what a script is, how to create things in R, and how to read the handful of error messages we'll all meet in the next ten weeks. Nothing here is statistics yet, but it's the foundation everything after it stands on. In this chapter we install R, work in a Project, and write our first lines of code.
 
 ## Chapter intended learning outcomes
 
-By the end of this session you will be able to:
+By the end of this chapter you will be able to:
 
 1. Install R and RStudio on your own device, and verify the installation by running code and loading a package
 2. Work in RStudio using a Project and a saved script, and explain why we script rather than work in the console

@@ -8,7 +8,7 @@
 
 This is a companion ebook for the statistical practicals of the course MED5652 Introduction to Epidemiology and Statistics for UofG MPH students. The principles and theories of statistics are taught in the seminars. This ebook, and the practical sessions, are to apply that knowledge in epidemiology and statistics to real data using R.
 
-The first two preparatory sessions help us ease into the analysis environment. R is primarily a programming language, so there is usually a steeper learning curve. We need to get familiar and comfortable with communicating with the computer using text commands, rather than through interacting with a mouse. However, this ebook and the practical are set up for complete beginners. No prior data analysis or programming experience is expected. From Week 7 on, every practical picks up from the theories taught in the seminars, but it doesn't replace the seminar's content. Think of the seminar as where an idea is introduced, and the practical as where we actually do it, in R, on real data.
+The first two preparatory sessions help us ease into the analysis environment. R is primarily a programming language, so there is usually a steeper learning curve. We need to get familiar and comfortable with communicating with the computer using text commands, rather than through interacting with a mouse. However, this ebook and its chapters are set up for complete beginners. No prior data analysis or programming experience is expected. From Week 7 on, every chapter picks up from the theories taught in the seminars, but it doesn't replace the seminar's content. Think of the seminar as where an idea is introduced, and the practical as where we actually do it, in R, on real data.
 
 ## Where this book sits against the module's outcomes
 
@@ -23,16 +23,18 @@ This book is built primarily to get us through ILO 3. Along the way, it also tou
 
 ## Structure of the book
 
-Two parts. Firstly, two preparatory practicals, worked through before seminars on statistics:
+Each chapter of this book is one teaching week. The week number is in the chapter title, and the chapters run in week order, so working through the book in order is working through the course in order. There is no chapter for Week 6, because Week 6 is reading week.
 
-| IES week | What it covers |
+Two parts. Firstly, two preparatory chapters, worked through before seminars on statistics:
+
+| Week | What it covers |
 |---|---|
 | 4 | R and R Studio |
 | 5 | Data and data handling |
 
-Week 6 is reading week, so there's no teaching. Then five weekly practicals, one per statistics week, each following that week's seminar:
+Week 6 is reading week, so there's no teaching. Then five weekly chapters, one per statistics week, each following that week's seminar:
 
-| IES week | What it covers |
+| Week | What it covers |
 |---|---|
 | 7 | Describing and visualising data |
 | 8 | Estimation, precision, and study size |

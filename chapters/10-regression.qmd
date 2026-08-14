@@ -1,10 +1,10 @@
-# Correlation and simple linear regression (IES Week 10) {#sec-10-regression}
+# Correlation and simple linear regression (Week 10) {#sec-10-regression}
 
-This week centres on how a continuous outcome varies with a continuous predictor, in contrast with Weeks 8 and 9, where a continuous outcome was compared across the two groups of a binary variable. The tools include scatterplots, Pearson's correlation coefficient, and simple linear regression, specified as Y = α + βX + ε. Simple linear regression also introduces residuals, the intercept, the slope, and R². We discuss and check the model's assumptions. In this session we fit that model in R, check it properly, and use it to predict.
+This chapter centres on how a continuous outcome varies with a continuous predictor, in contrast with Weeks 8 and 9, where a continuous outcome was compared across the two groups of a binary variable. The tools include scatterplots, Pearson's correlation coefficient, and simple linear regression, specified as Y = α + βX + ε. Simple linear regression also introduces residuals, the intercept, the slope, and R². We discuss and check the model's assumptions. In this chapter we fit that model in R, check it properly, and use it to predict.
 
 ## Chapter intended learning outcomes
 
-By the end of this session you will be able to:
+By the end of this chapter you will be able to:
 
 1. Produce and interpret a scatterplot with a fitted regression line
 2. Fit a simple linear regression with `lm()`

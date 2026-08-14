@@ -1,10 +1,10 @@
-# Data and data handling (IES Week 5) {#sec-05-prep2}
+# Data and data handling (Week 5) {#sec-05-prep2}
 
-This session covers what makes a dataset usable, how to tell R where a file lives, and how to check what actually came in after reading it. In this session we take a spreadsheet apart, import real data for the first time, spot what's missing, and end with a saved script we re-run from a fresh session to prove it works. Week 6 is reading week; Week 7 picks up from here.
+This chapter covers what makes a dataset usable, how to tell R where a file lives, and how to check what actually came in after reading it. In this chapter we take a spreadsheet apart, import real data for the first time, spot what's missing, and end with a saved script we re-run from a fresh session to prove it works. Week 6 is reading week; Week 7 picks up from here.
 
 ## Chapter intended learning outcomes
 
-By the end of this session you will be able to:
+By the end of this chapter you will be able to:
 
 1. Identify features of a spreadsheet that will prevent it being analysed, and restructure it
 2. Import a CSV into R using a correctly specified path, and diagnose and resolve the most common import failures

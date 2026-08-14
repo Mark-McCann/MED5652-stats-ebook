@@ -1,10 +1,10 @@
-# Multiple linear and logistic regression (IES Week 11) {#sec-11-adjustment}
+# Multiple linear and logistic regression (Week 11) {#sec-11-adjustment}
 
-This week extends Week 10's simple regression into a multivariable one, so an association can be adjusted for confounding, the epidemiology half's own treatment of bias applied inside a regression model. We interpret an adjusted coefficient, and read a categorical predictor's contrasts against a reference level. We then swap a continuous outcome for a binary one, fit a logistic regression instead of a linear one, and turn an exponentiated coefficient into an adjusted odds ratio. `blm.cvd` closes the chapter as a case the data cannot settle either way, a confounder or a mediator, reported both ways as a sensitivity analysis rather than resolved. In this session we fit all of that in R.
+This chapter extends Week 10's simple regression into a multivariable one, so an association can be adjusted for confounding, the epidemiology half's own treatment of bias applied inside a regression model. We interpret an adjusted coefficient, and read a categorical predictor's contrasts against a reference level. We then swap a continuous outcome for a binary one, fit a logistic regression instead of a linear one, and turn an exponentiated coefficient into an adjusted odds ratio. `blm.cvd` closes the chapter as a case the data cannot settle either way, a confounder or a mediator, reported both ways as a sensitivity analysis rather than resolved. In this chapter we fit all of that in R.
 
 ## Chapter intended learning outcomes
 
-By the end of this session you will be able to:
+By the end of this chapter you will be able to:
 
 1. Derive a fixed-window binary outcome from an event indicator and a follow-up time, and justify the exclusion rule it requires
 2. Fit a multivariable linear regression, including categorical predictors with a stated reference level
@@ -387,7 +387,7 @@ That's the end of the course. Worth stopping to say what you now have, and what 
 
 ### What the five weeks built
 
-Five practicals, one thing taken apart and put back together. Week 7 described a variable. Week 8 attached a confidence interval to that description, so we could say how precisely the sample pinned the population down. Week 9 compared two groups, reactivating the risk ratios and odds ratios the epidemiology half had already taught you to calculate by hand, now with uncertainty attached. Week 10 modelled one variable as a function of another. This week put several variables into that model at once, adjusted an association for the others, then swapped a continuous outcome for a binary one and got back an adjusted odds ratio, exactly the quantity Week 9 produced by hand from a 2×2 table. The pieces from Weeks 7 to 9 are now sitting inside one regression model.
+Five chapters, one thing taken apart and put back together. Week 7 described a variable. Week 8 attached a confidence interval to that description, so we could say how precisely the sample pinned the population down. Week 9 compared two groups, reactivating the risk ratios and odds ratios the epidemiology half had already taught you to calculate by hand, now with uncertainty attached. Week 10 modelled one variable as a function of another. This week put several variables into that model at once, adjusted an association for the others, then swapped a continuous outcome for a binary one and got back an adjusted odds ratio, exactly the quantity Week 9 produced by hand from a 2×2 table. The pieces from Weeks 7 to 9 are now sitting inside one regression model.
 
 That arc is the module's **ILO 3**, critically appraising and applying key statistical methods, and it's what this book exists for. Two other module outcomes ran alongside it: every writing exercise asked what a result *means* for a public health question, not just what the number is, which is **ILO 1**; and this chapter is where **ILO 4**, causality, stops being an abstraction. `blm.cvd` is equally arguable as a confounder and a mediator, the data can't settle it, and we reported both models rather than picking one. If one habit survives this course, make it that one: deciding what to adjust for is a judgement from subject knowledge and study design, made before the analysis. No software makes it for you, and no p-value tells you that you got it wrong.
 

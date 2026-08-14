@@ -1,10 +1,10 @@
-# Estimation, precision, and study size (IES Week 8) {#sec-08-estimation}
+# Estimation, precision, and study size (Week 8) {#sec-08-estimation}
 
-This week introduces sampling variability, the central limit theorem, and ways to quantify precision around estimations. The distinction between standard deviation (SD) and the standard error (SE) is also explained. Briefly, SD describes the spread of the *data*, and SE describes the precision of an *estimate*. In this session we calculate SE manually, build a confidence interval from it, and check the calculation against R's own functions. We also use the same logic in reverse to calculate the required sample size when a study hasn't been run.
+This chapter introduces sampling variability, the central limit theorem, and ways to quantify precision around estimations. The distinction between standard deviation (SD) and the standard error (SE) is also explained. Briefly, SD describes the spread of the *data*, and SE describes the precision of an *estimate*. In this chapter we calculate SE manually, build a confidence interval from it, and check the calculation against R's own functions. We also use the same logic in reverse to calculate the required sample size when a study hasn't been run.
 
 ## Chapter intended learning outcomes
 
-By the end of this session you will be able to:
+By the end of this chapter you will be able to:
 
 1. Calculate a standard error and construct a confidence interval by formula for a mean and for a proportion from first principle, and reproduce each using `t.test()` and `prop.test()`
 2. Obtain confidence intervals for a difference in means and a difference in proportions

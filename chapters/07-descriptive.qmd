@@ -1,10 +1,10 @@
-# Describing and visualising data (IES Week 7) {#sec-07-descriptive}
+# Describing and visualising data (Week 7) {#sec-07-descriptive}
 
-This week covers variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In Weeks 4 and 5 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this session we go straight to using that data.
+This chapter covers variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In Weeks 4 and 5 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this chapter we go straight to using that data.
 
 ## Chapter intended learning outcomes
 
-By the end of this session you will be able to:
+By the end of this chapter you will be able to:
 
 1. Use `select()`, `filter()`, `mutate()`, and `arrange()` to manipulate a dataset, and produce grouped summaries with `group_by()` and `summarise()`
 2. Construct frequency and cross-tabulations
@@ -414,7 +414,7 @@ Then answer this question using whichever of the two is appropriate: *among peop
 
 ## Writing exercise
 
-Every practical in this book ends with one of these, and it's worth knowing why before you write the first one. The course's assessment is a structured paper on a dataset you haven't seen, where every question asks for an analysis *and* an interpretation. So these exercises here can be treated as formative assessments.
+Every chapter in this book ends with one of these, and it's worth knowing why before you write the first one. The course's assessment is a structured paper on a dataset you haven't seen, where every question asks for an analysis *and* an interpretation. So these exercises here can be treated as formative assessments.
 
 Using the Table 1 from Exercise 5, write a short paragraph of a maximum of 150 words. Describe how participant characteristics differ, or don't, across the three depression classification groups. State which characteristics look similar across groups and which look different, and avoid overstating a difference the table doesn't support.
 

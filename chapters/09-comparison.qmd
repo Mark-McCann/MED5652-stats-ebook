@@ -1,10 +1,10 @@
-# Hypothesis tests and measures of association (IES Week 9) {#sec-09-comparison}
+# Hypothesis tests and measures of association (Week 9) {#sec-09-comparison}
 
-This week sets out the logic of a hypothesis test: stating a null and an alternative hypothesis, turning a test statistic into a p-value, and being precise about what a p-value is. It also shows that a confidence interval and a hypothesis test carry the same information, and it establishes the reporting standard we use from here on: an effect size, a 95% confidence interval, and a p-value, reported together. Finally, it revisits risk ratio and odds ratio from epidemiology, attaching a confidence interval and a p-value to numbers we can already calculate by hand. In this session we run these tests in R and practise writing up each result the way a public health journal expects.
+This chapter sets out the logic of a hypothesis test: stating a null and an alternative hypothesis, turning a test statistic into a p-value, and being precise about what a p-value is. It also shows that a confidence interval and a hypothesis test carry the same information, and it establishes the reporting standard we use from here on: an effect size, a 95% confidence interval, and a p-value, reported together. Finally, it revisits risk ratio and odds ratio from epidemiology, attaching a confidence interval and a p-value to numbers we can already calculate by hand. In this chapter we run these tests in R and practise writing up each result the way a public health journal expects.
 
 ## Chapter intended learning outcomes
 
-By the end of this session you will be able to:
+By the end of this chapter you will be able to:
 
 1. Perform and interpret an independent-samples t-test in R
 2. Perform and interpret a paired t-test, recognise from a data structure which is required, and distinguish paired measurements taken over time from two related measurements taken at once
