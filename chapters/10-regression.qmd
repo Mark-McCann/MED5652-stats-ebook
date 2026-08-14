@@ -1,6 +1,6 @@
 # Correlation and simple linear regression (Week 10) {#sec-10-regression}
 
-This chapter centres on how a continuous outcome varies with a continuous predictor, in contrast with Weeks 8 and 9, where a continuous outcome was compared across the two groups of a binary variable. The tools include scatterplots, Pearson's correlation coefficient, and simple linear regression, specified as Y = α + βX + ε. Simple linear regression also introduces residuals, the intercept, the slope, and R². We discuss and check the model's assumptions. In this chapter we fit that model in R, check it properly, and use it to predict.
+This chapter centres on how a continuous outcome varies with a continuous predictor, in contrast with Chapters 4 and 5, where a continuous outcome was compared across the two groups of a binary variable. The tools include scatterplots, Pearson's correlation coefficient, and simple linear regression, specified as Y = α + βX + ε. Simple linear regression also introduces residuals, the intercept, the slope, and R². We discuss and check the model's assumptions. In this chapter we fit that model in R, check it properly, and use it to predict.
 
 ## Chapter intended learning outcomes
 
@@ -14,7 +14,7 @@ By the end of this chapter you will be able to:
 
 ## Setup
 
-As in Weeks 7 to 9, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
+As in Chapters 3 to 5, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
 
 This chapter adds one new package, `broom`. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console.
 
@@ -64,7 +64,7 @@ nhanes <- nhanes |>
   )
 ```
 
-This is the same recode we introduced in Week 7 and repeated in Weeks 8 and 9. See Week 7 for the reasoning behind each variable and each choice of `ordered = TRUE`. We repeat it here, unchanged, so this chapter stands on its own too.
+This is the same recode we introduced in Chapter 3 and repeated in Chapters 4 and 5. See Chapter 3 for the reasoning behind each variable and each choice of `ordered = TRUE`. We repeat it here, unchanged, so this chapter stands on its own too.
 
 ## Correlation: Pearson's r and Spearman's rho
 
@@ -100,7 +100,7 @@ Correlation is as far as this chapter takes `phq.c`; the rest follows the semina
 
 ## A scatterplot with a fitted line: cholesterol by age
 
-Week 7 plotted total cholesterol (`chol`, in mmol/L) against age (in years) as a plain scatterplot, with no line through it. `geom_smooth()`, from `ggplot2`, adds one. With `method = "lm"`, it fits exactly the simple linear regression this chapter is about, and draws the result:
+Chapter 3 plotted total cholesterol (`chol`, in mmol/L) against age (in years) as a plain scatterplot, with no line through it. `geom_smooth()`, from `ggplot2`, adds one. With `method = "lm"`, it fits exactly the simple linear regression this chapter is about, and draws the result:
 
 ```{r}
 #| label: scatter-age
@@ -122,7 +122,7 @@ Re-run the plot above with `geom_smooth(method = "lm", se = FALSE)`. Then try `g
 
 ## Fitting the model with `lm()`
 
-`lm()`, from base R, fits a linear model. Its first argument is a formula, in the same `y ~ x` form `t.test()` used in Week 8: the variable on the left is what we're modelling, and the variable on the right is what we're modelling it with. We drop the rows where either variable is missing first, the same habit we've used for every model and test so far:
+`lm()`, from base R, fits a linear model. Its first argument is a formula, in the same `y ~ x` form `t.test()` used in Chapter 4: the variable on the left is what we're modelling, and the variable on the right is what we're modelling it with. We drop the rows where either variable is missing first, the same habit we've used for every model and test so far:
 
 ```{r}
 #| label: lm-age
@@ -131,9 +131,9 @@ m_age <- lm(chol ~ age, data = age_complete)
 summary(m_age)
 ```
 
-As with `t.test()` in Week 8, there's no `$` anywhere in that call. `lm()`'s `data = ` argument tells it to look for `chol` and `age` inside `age_complete`, so it finds them there directly rather than us pulling either one out by hand first. Every model in this course, `lm()` and `glm()` alike, follows this same pattern: name the variables bare in the formula, and point `data = ` at wherever they live.
+As with `t.test()` in Chapter 4, there's no `$` anywhere in that call. `lm()`'s `data = ` argument tells it to look for `chol` and `age` inside `age_complete`, so it finds them there directly rather than us pulling either one out by hand first. Every model in this course, `lm()` and `glm()` alike, follows this same pattern: name the variables bare in the formula, and point `data = ` at wherever they live.
 
-`summary()` prints a lot at once. The `Coefficients` table has the two numbers that define the fitted line: the `(Intercept)`, the model's predicted cholesterol at age zero, and the slope on `age`, the predicted change in cholesterol for each additional year of age. Each has a standard error, a t-value, and a p-value attached, exactly the reporting standard from Week 9. The slope here is small but non-zero: cholesterol tends to be about 0.0056 mmol/L higher for every extra year of age, and the p-value is far below 0.001.
+`summary()` prints a lot at once. The `Coefficients` table has the two numbers that define the fitted line: the `(Intercept)`, the model's predicted cholesterol at age zero, and the slope on `age`, the predicted change in cholesterol for each additional year of age. Each has a standard error, a t-value, and a p-value attached, exactly the reporting standard from Chapter 5. The slope here is small but non-zero: cholesterol tends to be about 0.0056 mmol/L higher for every extra year of age, and the p-value is far below 0.001.
 
 `Multiple R-squared`, R², says what fraction of the variation in cholesterol this model accounts for. Here it's under 0.01: age explains under 1% of the variation in cholesterol between participants. That isn't a contradiction of the significant slope above. A relationship can be real, precisely estimated, and still leave most of the variation in the outcome unexplained. R² and a p-value answer different questions, and neither one substitutes for the other.
 
@@ -244,7 +244,7 @@ ggplot(sed_aug, aes(sample = .std.resid)) +
 
 The same pattern from the age model shows up again, more visibly: a handful of participants sit far from the fitted line, and `sed` itself carries a long right tail, including some participants recording well over 24 hours of sedentary time a day, which cannot be literally true and points to some noise in how this variable was recorded or reported. None of this overturns the conclusion above. It's a reason to hold the result loosely rather than to distrust the direction of the estimate.
 
-Written as it would appear in a results section: sedentary time was not associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). But it would be a mistake to conclude from this alone that sedentary time has no bearing on cholesterol. This model adjusts for nothing else: age, gender, and other characteristics could still be masking a real association. Week 11 revisits this same pairing with those factors added back in.
+Written as it would appear in a results section: sedentary time was not associated with total cholesterol in this sample (slope -0.0010 mmol/L per hour/day, 95% CI: -0.0021 to 0.0001 mmol/L, p = 0.073). But it would be a mistake to conclude from this alone that sedentary time has no bearing on cholesterol. This model adjusts for nothing else: age, gender, and other characteristics could still be masking a real association. Chapter 7 revisits this same pairing with those factors added back in.
 
 ## Exercises
 

@@ -1,6 +1,6 @@
 # Describing and visualising data (Week 7) {#sec-07-descriptive}
 
-This chapter covers variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In Weeks 4 and 5 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this chapter we go straight to using that data.
+This chapter covers variable types, tables and plots for describing a single variable, and how to choose between mean and SD or median and IQR. In Chapters 1 and 2 we already covered installing R, finding our way around a project folder, and importing a spreadsheet into R. So in this chapter we go straight to using that data.
 
 ## Chapter intended learning outcomes
 
@@ -39,9 +39,9 @@ A binary numeric variable and a categorical one with two categories describe the
 
 ## Setup
 
-As in Week 5, we read the data with `read_csv()` from the `readr` package. We build the file path with `here()` from the `here` package. This builds a path from the project folder down to the file, so the code runs on any machine no matter where the project sits. `nhanes_mph` arrives as two files: the data, and a separate dictionary that describes every variable. Both are plain CSV files, so we read both with `read_csv()`.
+As in Chapter 2, we read the data with `read_csv()` from the `readr` package. We build the file path with `here()` from the `here` package. This builds a path from the project folder down to the file, so the code runs on any machine no matter where the project sits. `nhanes_mph` arrives as two files: the data, and a separate dictionary that describes every variable. Both are plain CSV files, so we read both with `read_csv()`.
 
-This chapter loads one package new to the book: `gtsummary`, for building tables. `dplyr`, for manipulating data, was loaded back in Week 4, and `ggplot2`, for plotting, in Week 5, so both are already familiar. As Week 4 explained, installing a package and loading it are two different actions, so if you haven't installed `gtsummary` already, run this once in the console. You don't need to put it in the script.
+This chapter loads one package new to the book: `gtsummary`, for building tables. `dplyr`, for manipulating data, was loaded back in Chapter 1, and `ggplot2`, for plotting, in Chapter 2, so both are already familiar. As Chapter 1 explained, installing a package and loading it are two different actions, so if you haven't installed `gtsummary` already, run this once in the console. You don't need to put it in the script.
 
 ``` r
 install.packages("gtsummary")
@@ -70,7 +70,7 @@ options(width = 76)
 source(here("R", "gtsummary-knitprint.R"))
 ```
 
-Running that in your own console prints more than it does on this page. The `library()` calls announce themselves, and each `read_csv()` prints the column specification message Week 5 unpacked. This book hides both from here on, as both have been explained.
+Running that in your own console prints more than it does on this page. The `library()` calls announce themselves, and each `read_csv()` prints the column specification message Chapter 2 unpacked. This book hides both from here on, as both have been explained.
 
 `glimpse()`, from `dplyr`, shows every column, its type, and its first few values. It's useful for checking what actually came in, rather than what we expected to come in.
 
@@ -87,9 +87,9 @@ dictionary |>
   filter(`Variable names` %in% c("gender", "eth", "edu", "smoking", "phq.c", "blm.cvd"))
 ```
 
-The dictionary gives a numeric code against each category for `gender`, `eth`, `edu`, and `blm.cvd`: `1=Male; 2=Female`, and so on. Those are the four we have to translate. For `smoking` and `phq.c` it just lists the categories, and `glimpse()` already told us why no translation is needed: they don't arrive as bare numbers at all. `smoking` is already the text "Never", "Previous", or "Current". `phq.c` is already a label too, with the original code number kept at the front of the string, for example `"0 Normal"`. The dictionary isn't exhaustive, either. `dth`, the death indicator we use in Week 11, has not had a coding given to it. But by programming convention, `0` is no (or the logical `FALSE`), and `1` is yes (or the logical `TRUE`).
+The dictionary gives a numeric code against each category for `gender`, `eth`, `edu`, and `blm.cvd`: `1=Male; 2=Female`, and so on. Those are the four we have to translate. For `smoking` and `phq.c` it just lists the categories, and `glimpse()` already told us why no translation is needed: they don't arrive as bare numbers at all. `smoking` is already the text "Never", "Previous", or "Current". `phq.c` is already a label too, with the original code number kept at the front of the string, for example `"0 Normal"`. The dictionary isn't exhaustive, either. `dth`, the death indicator we use in Chapter 7, has not had a coding given to it. But by programming convention, `0` is no (or the logical `FALSE`), and `1` is yes (or the logical `TRUE`).
 
-We turn every one of the six into a factor with `mutate()` and `factor()`, whether the raw values are numbers or text. `factor()` takes the raw values (`levels`) and the labels we want to give them (`labels`), in matching order. The labels are ours to choose, and we take one small liberty below: the dictionary abbreviates `eth`'s first category to "Mexican", and we write it out as "Mexican American", the full NHANES category name. One of the six, `phq.c`, is ordinal: its categories run from normal to possible depression in a natural order, so we build it with `ordered = TRUE`. `gender`, `eth`, `smoking`, and `blm.cvd` are nominal, with no natural order, so they're plain factors for the more familiar reason. By default, the first level listed becomes the *reference* level. This is the category everything else gets compared against once regression starts, in Week 11. For now the choice mostly affects how a bar chart or table orders its categories, but it's worth setting deliberately from the start rather than accepting whatever order R guesses.
+We turn every one of the six into a factor with `mutate()` and `factor()`, whether the raw values are numbers or text. `factor()` takes the raw values (`levels`) and the labels we want to give them (`labels`), in matching order. The labels are ours to choose, and we take one small liberty below: the dictionary abbreviates `eth`'s first category to "Mexican", and we write it out as "Mexican American", the full NHANES category name. One of the six, `phq.c`, is ordinal: its categories run from normal to possible depression in a natural order, so we build it with `ordered = TRUE`. `gender`, `eth`, `smoking`, and `blm.cvd` are nominal, with no natural order, so they're plain factors for the more familiar reason. By default, the first level listed becomes the *reference* level. This is the category everything else gets compared against once regression starts, in Chapter 7. For now the choice mostly affects how a bar chart or table orders its categories, but it's worth setting deliberately from the start rather than accepting whatever order R guesses.
 
 ```{r}
 #| label: recode
@@ -144,7 +144,7 @@ levels(eth_white_ref)
 
 Notice we assigned the result to a new object, `eth_white_ref`, rather than writing it back into `nhanes`. That's deliberate: every chapter in this book rebuilds `nhanes` with the same recode, so if we changed this factor here, this chapter's `nhanes` would stop matching the one later chapters build, and a table or model would come out different for no visible reason. When we're demonstrating something, we work on a copy.
 
-Right now the reference level only decides the order categories appear in a table, or along a bar chart's axis. In Week 11 it decides what every coefficient in a regression model means, so it's worth having the habit in place well before it starts to matter.
+Right now the reference level only decides the order categories appear in a table, or along a bar chart's axis. In Chapter 7 it decides what every coefficient in a regression model means, so it's worth having the habit in place well before it starts to matter.
 
 ## Manipulating a dataset: the `dplyr` verbs
 
@@ -212,7 +212,7 @@ nhanes |>
 
 `filter()` here takes two conditions separated by a comma, which means the same as `&`: a row only stays if both are true. That's a shorter way to write `filter(!is.na(gender) & !is.na(chol))`, and it's the form used throughout this book whenever several conditions apply at once.
 
-Four of those functions are new. `mean()` we already met in Week 4. `sd()`, from base R, returns the standard deviation: a measure of how spread out the values are, in the same units as the variable itself. `median()`, also base R, returns the middle value once everything is sorted, so half the participants sit below it and half above. `quantile()`, also base R, calculates any quantile we ask for: `probs = 0.25` and `probs = 0.75` ask for the first and third quartile, the two values the interquartile range sits between. There's a separate function, `IQR()`, that returns just the gap between them as a single number, in the same units as the variable itself, rather than the two quartiles. We'll use it in the worked example below.
+Four of those functions are new. `mean()` we already met in Chapter 1. `sd()`, from base R, returns the standard deviation: a measure of how spread out the values are, in the same units as the variable itself. `median()`, also base R, returns the middle value once everything is sorted, so half the participants sit below it and half above. `quantile()`, also base R, calculates any quantile we ask for: `probs = 0.25` and `probs = 0.75` ask for the first and third quartile, the two values the interquartile range sits between. There's a separate function, `IQR()`, that returns just the gap between them as a single number, in the same units as the variable itself, rather than the two quartiles. We'll use it in the worked example below.
 
 `na.rm = TRUE` tells the functions to drop missing values before calculating. Without it, any `NA` in a column makes the whole result `NA`. The `filter()` step above drops rows where `gender` or `chol` itself is missing, so the group sizes reported in `n` reflect exactly the rows the means are calculated from. `n()`, used inside `summarise()`, counts the rows in each group.
 
@@ -275,7 +275,7 @@ ggplot(nhanes, aes(x = sed)) +
 
 To explain this code further: `ggplot()` names the data and the mapping, `geom_histogram()` says to draw it as a histogram, and `labs()` sets the axis labels. `labs()` is worth using every single time. Left out, the axes are labelled with the raw column name, so this one would have read `sed` rather than "Sedentary time (hours/day)", and people outside the course will have to guess what that is. We expect you to produce plots and tables that are properly labelled and as self-explanatory as possible.
 
-That warning about removed rows is the one Week 5 explained: `sed` has `r format(sum(is.na(nhanes$sed)), big.mark = ",")` missing values, so `ggplot2` left them out and said so. It will appear above most plots in this chapter, with a different number each time depending on the variable. Glance at the number, check it's the size we expect, and carry on.
+That warning about removed rows is the one Chapter 2 explained: `sed` has `r format(sum(is.na(nhanes$sed)), big.mark = ",")` missing values, so `ggplot2` left them out and said so. It will appear above most plots in this chapter, with a different number each time depending on the variable. Glance at the number, check it's the size we expect, and carry on.
 
 `ggplot2` is highly versatile and can produce nearly any plot we need. Some examples below:
 
@@ -445,7 +445,7 @@ nhanes |>
   select(age, chol, chol_high)
 ```
 
-`chol > 6` is a comparison, exactly like the ones in Week 4, and it returns `TRUE` or `FALSE` for every row. Participants with no cholesterol value recorded get `NA` rather than `FALSE`, which is correct: we don't know whether they're above 6, and guessing "no" would be inventing data.
+`chol > 6` is a comparison, exactly like the ones in Chapter 1, and it returns `TRUE` or `FALSE` for every row. Participants with no cholesterol value recorded get `NA` rather than `FALSE`, which is correct: we don't know whether they're above 6, and guessing "no" would be inventing data.
 
 **Exercise 2**
 
@@ -476,7 +476,7 @@ ggplot(nhanes, aes(x = sed, y = chol)) +
        y = "Total cholesterol (mmol/L)")
 ```
 
-The scatterplot shows no clear relationship. The cloud of points is roughly the same height right across the range of sedentary time, rather than drifting up or down as we move left to right. Whatever else predicts cholesterol here, sedentary time on its own doesn't look like much of it. Week 10 puts a number and a confidence interval on that impression instead of leaving it to the eye.
+The scatterplot shows no clear relationship. The cloud of points is roughly the same height right across the range of sedentary time, rather than drifting up or down as we move left to right. Whatever else predicts cholesterol here, sedentary time on its own doesn't look like much of it. Chapter 6 puts a number and a confidence interval on that impression instead of leaving it to the eye.
 
 **Exercise 3**
 
@@ -571,5 +571,5 @@ ggplot(nhanes |> filter(!is.na(edu)), aes(x = edu)) +
 
 **Writing exercise (sample answer)**
 
-Depression classification was recorded for `r format(nrow(nhanes) - 4499, big.mark = ",")` of the `r format(nrow(nhanes), big.mark = ",")` participants, with the rest being excluded. Among those classified, age, gender, and ethnicity distributions were broadly similar across the three groups. Current smoking was more common among participants classified with possible depression than among those classified as normal. Mean total cholesterol was similar across all three groups. These are descriptive comparisons only, based on group summaries and counts, not any formal test of difference. Hypothesis tests come in Week 9.
+Depression classification was recorded for `r format(nrow(nhanes) - 4499, big.mark = ",")` of the `r format(nrow(nhanes), big.mark = ",")` participants, with the rest being excluded. Among those classified, age, gender, and ethnicity distributions were broadly similar across the three groups. Current smoking was more common among participants classified with possible depression than among those classified as normal. Mean total cholesterol was similar across all three groups. These are descriptive comparisons only, based on group summaries and counts, not any formal test of difference. Hypothesis tests come in Chapter 5.
 :::

@@ -1,6 +1,6 @@
 # Data and data handling (Week 5) {#sec-05-prep2}
 
-This chapter covers what makes a dataset usable, how to tell R where a file lives, and how to check what actually came in after reading it. In this chapter we take a spreadsheet apart, import real data for the first time, spot what's missing, and end with a saved script we re-run from a fresh session to prove it works. Week 6 is reading week; Week 7 picks up from here.
+This chapter covers what makes a dataset usable, how to tell R where a file lives, and how to check what actually came in after reading it. In this chapter we take a spreadsheet apart, import real data for the first time, spot what's missing, and end with a saved script we re-run from a fresh session to prove it works. Week 6 is reading week; Chapter 3 picks up from here.
 
 ## Chapter intended learning outcomes
 
@@ -14,7 +14,7 @@ By the end of this chapter you will be able to:
 
 ## Setup
 
-There's nothing to read in yet, so, as in Week 4, this chunk only sets the console's print width.
+There's nothing to read in yet, so, as in Chapter 1, this chunk only sets the console's print width.
 
 ```{r}
 #| label: setup
@@ -64,7 +64,7 @@ Before we can read anything into R, we need to know exactly where the file we wa
 
 `readr`'s `read_csv()` reads a `.csv` file into R as a data frame. It needs a path telling it exactly where that file is, using the path skills from earlier in this chapter. Building that path with `here()`, from the `here` package, means the same code works on any machine, regardless of where the project folder actually sits on that machine's disk: `here()` starts from the project folder and adds the pieces you give it, one folder at a time.
 
-This chapter needs three packages: `readr` for reading files, `here` for building paths, and `ggplot2` for the plot at the end. As Week 4 explained, installing a package and loading it are two different actions, so unless you've installed these already, run this once in the console, not inside this document:
+This chapter needs three packages: `readr` for reading files, `here` for building paths, and `ggplot2` for the plot at the end. As Chapter 1 explained, installing a package and loading it are two different actions, so unless you've installed these already, run this once in the console, not inside this document:
 
 ``` r
 install.packages(c("readr", "here", "ggplot2"))
@@ -79,7 +79,7 @@ library(readr)
 library(here)
 ```
 
-`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in Week 4, nothing below will find its files, and this is where you'd find that out.
+`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in Chapter 1, nothing below will find its files, and this is where you'd find that out.
 
 ### Four things that go wrong
 
@@ -93,7 +93,7 @@ Almost every import problem we'll see is one of four things.
 read_csv(here("data", "mph_nhanes_20241107_data.csv"))
 ```
 
-The real file is called `mph_nhanes_20241107.csv`, no `_data` in the name. R's message states plainly that the file doesn't exist at the path it tried, which is exactly what Week 4's "file does not exist" error type looks like with a real file behind it.
+The real file is called `mph_nhanes_20241107.csv`, no `_data` in the name. R's message states plainly that the file doesn't exist at the path it tried, which is exactly what Chapter 1's "file does not exist" error type looks like with a real file behind it.
 
 ```{r}
 #| label: fix-wrong-path
@@ -143,7 +143,7 @@ substr(names(messy_attempt), 1, 50)
 
 No error, but nothing usable either: one column, zero rows, and a column name that's a fragment of raw XML. An `.xlsx` file is actually a small zip archive of several XML files bundled together, and `read_csv()` has gone looking inside that archive and started reading one of those XML files as if it were plain text. This is the quietest kind of import failure there is: nothing crashes, nothing complains, and the result still looks like a data frame at a glance. Always check what actually came in, which is exactly what the next section is for.
 
-Put right, all four attempts above collapse into the one call we actually want, and this is the real import we use for the rest of this book. The file holds `nhanes_mph`, an extract of a large American health survey in which adults were interviewed and then given a physical examination. Week 7 introduces it properly. For today we only need it to be a real file with real data in it:
+Put right, all four attempts above collapse into the one call we actually want, and this is the real import we use for the rest of this book. The file holds `nhanes_mph`, an extract of a large American health survey in which adults were interviewed and then given a physical examination. Chapter 3 introduces it properly. For today we only need it to be a real file with real data in it:
 
 ```{r}
 #| label: read-nhanes
@@ -248,14 +248,14 @@ dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
 dictionary
 ```
 
-The dictionary's first column is called `Variable names`, with a space in it, so referring to it needs backticks, exactly as Week 4 covered. `%in%`, from the same chapter, tests whether each value is a member of a set. Put inside square brackets after a data frame's column, with the row's index implied, this keeps only the rows where the condition is true:
+The dictionary's first column is called `Variable names`, with a space in it, so referring to it needs backticks, exactly as Chapter 1 covered. `%in%`, from the same chapter, tests whether each value is a member of a set. Put inside square brackets after a data frame's column, with the row's index implied, this keeps only the rows where the condition is true:
 
 ```{r}
 #| label: dictionary-lookup
 dictionary[dictionary$`Variable names` %in% c("age", "chol", "smoking"), ]
 ```
 
-That's the habit worth building now: when a column's meaning isn't obvious from its name, the answer lives in this file, not in a guess. Week 7 uses this same file to build proper factors out of six of these columns; for today, just knowing how to look one up is enough.
+That's the habit worth building now: when a column's meaning isn't obvious from its name, the answer lives in this file, not in a guess. Chapter 3 uses this same file to build proper factors out of six of these columns; for today, just knowing how to look one up is enough.
 
 ## A first analysis, and your first script
 
@@ -266,11 +266,11 @@ That's the habit worth building now: when a column's meaning isn't obvious from 
 mean(nhanes$chol, na.rm = TRUE)
 ```
 
-`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in Week 4's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
+`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in Chapter 1's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
 
 ### A first taste of a grouped summary
 
-`nhanes$chol` pulls the whole cholesterol column out as a bare vector, as `$` did in Week 4. Adding square brackets straight after it, with a condition inside, keeps only the values where that condition is `TRUE`:
+`nhanes$chol` pulls the whole cholesterol column out as a bare vector, as `$` did in Chapter 1. Adding square brackets straight after it, with a condition inside, keeps only the values where that condition is `TRUE`:
 
 ```{r}
 #| label: grouped-summary-preview
@@ -278,7 +278,7 @@ summary(nhanes$chol[nhanes$smoking == "Never"])
 summary(nhanes$chol[nhanes$smoking == "Current"])
 ```
 
-That's a genuine grouped summary, built entirely from tools already familiar: `$`, `==`, and now `[` and `]` with a condition inside it. It works, but it's clunky already with just two groups, and `smoking` has three. Week 7 introduces `group_by()` and `summarise()`, a far nicer way to do exactly this for as many groups as we like, in one line instead of several. This is only a preview of what's coming, not the tool we'll actually use going forward.
+That's a genuine grouped summary, built entirely from tools already familiar: `$`, `==`, and now `[` and `]` with a condition inside it. It works, but it's clunky already with just two groups, and `smoking` has three. Chapter 3 introduces `group_by()` and `summarise()`, a far nicer way to do exactly this for as many groups as we like, in one line instead of several. This is only a preview of what's coming, not the tool we'll actually use going forward.
 
 ### A first taste of a plot
 
@@ -291,7 +291,7 @@ ggplot(nhanes, aes(x = chol)) +
   geom_histogram(binwidth = 0.5)
 ```
 
-`ggplot2` code is joined with `+`, not the pipe. That's a real inconsistency in R, not a mistake in this book, and Week 7 explains why and unpacks the rest of the grammar properly. For today, just notice the shape: cholesterol piles up around 4 to 6 mmol/L, with a long tail of higher values trailing off to the right.
+`ggplot2` code is joined with `+`, not the pipe. That's a real inconsistency in R, not a mistake in this book, and Chapter 3 explains why and unpacks the rest of the grammar properly. For today, just notice the shape: cholesterol piles up around 4 to 6 mmol/L, with a long tail of higher values trailing off to the right.
 
 ### That warning above the plot
 
@@ -307,7 +307,7 @@ Second, look at the number. It's `r format(sum(is.na(nhanes$chol)), big.mark = "
 
 ### From console to script
 
-Everything we've done so far in this chapter has been one line at a time. That's the right way to *try* something: type it in the console, look at what comes back, fix it if it's wrong. But Week 4 already made the argument against leaving it there. We will need to do this again, and we will not remember what we typed.
+Everything we've done so far in this chapter has been one line at a time. That's the right way to *try* something: type it in the console, look at what comes back, fix it if it's wrong. But Chapter 1 already made the argument against leaving it there. We will need to do this again, and we will not remember what we typed.
 
 So the working habit for the rest of this course is two steps, not one. Try the line in the console until it does what we want. Then move the line that worked into a script, and save it. The console is where we experiment; the script is what we keep.
 
@@ -315,7 +315,7 @@ To build one now:
 
 1. In RStudio, go to **File → New File → R Script**, or key in **Ctrl+Shift+N** or **Cmd+Shift+N**. A blank file opens in the source pane, top-left.
 2. Type the lines you want to keep. For a first script, that's the `library()` calls, the `read_csv()` line, one summary, and one plot.
-3. Save it into the `scripts/` folder you built in Week 4, with a name that follows its conventions: no spaces, no `&` or `#`, something that says what it does. `first_analysis.R` is fine. `Untitled1.R` is not.
+3. Save it into the `scripts/` folder you built in Chapter 1, with a name that follows its conventions: no spaces, no `&` or `#`, something that says what it does. `first_analysis.R` is fine. `Untitled1.R` is not.
 
 Here's what a complete first script looks like, start to finish. Nothing in it is new; it's the pieces from earlier in this chapter, collected in the order they need to run:
 
@@ -341,7 +341,7 @@ Here's the part people skip, and it's the part that matters. A script that runs 
 
 So test it properly. In RStudio, go to **Session → Restart R**. That throws away every object and every loaded package, leaving you with an empty session, exactly like the one a colleague, a marker, or you-in-six-months would start from. Now run your script from the top.
 
-If it runs clean, the script is genuinely self-contained. If it fails, the error tells us precisely what we'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from Week 4, made concrete: not "scripts are good practice" but "here is how we find out whether ours actually is one."
+If it runs clean, the script is genuinely self-contained. If it fails, the error tells us precisely what we'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from Chapter 1, made concrete: not "scripts are good practice" but "here is how we find out whether ours actually is one."
 
 ## Exercises
 
@@ -462,7 +462,7 @@ ggplot(nhanes, aes(x = wal_r)) +
   geom_histogram(binwidth = 0.5)
 ```
 
-The two lines people most often leave out are the ones that were already true before they started: `library(readr)` and the `read_csv()` call. Both had been run earlier in the session, so `nhanes` existed and `read_csv()` worked, and neither felt like part of "the analysis." After a restart, neither is true any more, and the script fails on its first real line with `could not find function "read_csv"` or `object 'nhanes' not found`, both of which Week 4 covered. That's exactly what the restart is for: it finds the assumptions we didn't know we were making.
+The two lines people most often leave out are the ones that were already true before they started: `library(readr)` and the `read_csv()` call. Both had been run earlier in the session, so `nhanes` existed and `read_csv()` worked, and neither felt like part of "the analysis." After a restart, neither is true any more, and the script fails on its first real line with `could not find function "read_csv"` or `object 'nhanes' not found`, both of which Chapter 1 covered. That's exactly what the restart is for: it finds the assumptions we didn't know we were making.
 
 **Self-check answers**
 
@@ -470,7 +470,7 @@ The two lines people most often leave out are the ones that were already true be
 2. **b.** `dim()` returns row and column counts. `names()` returns the column names themselves. Neither substitutes for the other.
 3. **c.** `is.na()` marks each missing value `TRUE`, and `sum()` adds those up. The number is a count of participants with no recorded value, nothing about the values that are present.
 4. **b.** `mph_nhanes_20241107.csv` and `mph_nhanes_20241107_dictionary.csv` are two separate files on disk, each holding a different table, so each needs its own `read_csv()` call.
-5. **c.** `.xlsx` is a zip archive of XML files, not a CSV, so `read_csv()` produces nonsense rather than a real dataset. The absence of an error is exactly the trap: always check what actually came in after reading a file, not just whether it "worked." `dim()`, used earlier in this chapter, is one way to do that. Week 7 introduces a second, `glimpse()` from `dplyr`, which shows every column with its type and first few values in one compact layout, better suited to a wide dataset like `nhanes_mph` than `dim()` alone.
+5. **c.** `.xlsx` is a zip archive of XML files, not a CSV, so `read_csv()` produces nonsense rather than a real dataset. The absence of an error is exactly the trap: always check what actually came in after reading a file, not just whether it "worked." `dim()`, used earlier in this chapter, is one way to do that. Chapter 3 introduces a second, `glimpse()` from `dplyr`, which shows every column with its type and first few values in one compact layout, better suited to a wide dataset like `nhanes_mph` than `dim()` alone.
 
 **Writing exercise (sample answer)**
 

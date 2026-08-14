@@ -14,7 +14,7 @@ By the end of this chapter you will be able to:
 
 ## Setup
 
-As in Weeks 7 and 8, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. We also bring back `strep_tb`, from the `medicaldata` package, for the categorical half of this chapter.
+As in Chapters 3 and 4, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. We also bring back `strep_tb`, from the `medicaldata` package, for the categorical half of this chapter.
 
 This chapter adds one new package, `epitools`. If `epitools` isn't already on your machine, run `install.packages("epitools")` once in the console, not inside this document. Once it's installed, `library(epitools)` below makes its functions available for this session.
 
@@ -34,7 +34,7 @@ nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
 dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
 ```
 
-As in Week 8, `dictionary` is read in even though no code below refers to it. It's there so it's to hand the moment we're unsure what a column means.
+As in Chapter 4, `dictionary` is read in even though no code below refers to it. It's there so it's to hand the moment we're unsure what a column means.
 
 ```{r}
 #| label: setup-hidden
@@ -69,20 +69,20 @@ nhanes <- nhanes |>
   )
 ```
 
-This is the same recode we introduced in Weeks 7 and 8. See Week 7 for the reasoning behind each variable.
+This is the same recode we introduced in Chapters 3 and 4. See Chapter 3 for the reasoning behind each variable.
 
 ## Independent-samples t-test: cholesterol by gender
 
-`t.test()` compares two independent groups directly. We already used it in Week 8 to build a confidence interval for the difference in total cholesterol (`chol`, in mmol/L) between men and women:
+`t.test()` compares two independent groups directly. We already used it in Chapter 4 to build a confidence interval for the difference in total cholesterol (`chol`, in mmol/L) between men and women:
 
 ```{r}
 #| label: ttest-chol-gender
 t.test(chol ~ gender, data = nhanes |> filter(!is.na(gender)))
 ```
 
-This is the exact same call as Week 8's. `t.test()` was already giving us a hypothesis test; Week 8 just hadn't introduced hypothesis testing yet, so we only looked at the confidence interval. Now we bring the rest into view: a t-statistic, degrees of freedom, and a p-value.
+This is the exact same call as Chapter 4's. `t.test()` was already giving us a hypothesis test; Chapter 4 just hadn't introduced hypothesis testing yet, so we only looked at the confidence interval. Now we bring the rest into view: a t-statistic, degrees of freedom, and a p-value.
 
-Before trusting a t-test, it's worth checking that the two groups aren't wildly different in spread or shape, the way Week 7's boxplot of `chol` by `gender` already let us do:
+Before trusting a t-test, it's worth checking that the two groups aren't wildly different in spread or shape, the way Chapter 3's boxplot of `chol` by `gender` already let us do:
 
 ```{r}
 #| label: boxplot-recheck
@@ -93,7 +93,7 @@ ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = chol)) +
 
 The two boxplots are similar in spread and shape, just shifted slightly. Nothing here rules out a t-test. If, instead, the shape of the boxplot looks very different between the two groups, a t-test might not be appropriate, since it only compares the sample means. `t.test()` also doesn't assume equal variance between the two groups by default, which protects us even where the spreads differ more than they do here.
 
-Before reading the interval, check the direction, exactly as Week 8 set out. The alternative-hypothesis line says *group Male and group Female*, because `"Male"` is the first level of `gender`, so R has printed men minus women and both ends come out negative. Reversing every sign together turns it into the more natural reading: mean total cholesterol was about 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19 mmol/L, p < 0.001). The two statements are the same result written from a different perspective. This is the reporting standard the seminar introduced: effect size, confidence interval, and p-value, together, every time, from here on. `p < 0.001` is how we write a p-value that R prints as something like `< 2.2e-16`. Convention in public health (or clinical medicine) reports a very small p-value this way rather than typing out the full number.
+Before reading the interval, check the direction, exactly as Chapter 4 set out. The alternative-hypothesis line says *group Male and group Female*, because `"Male"` is the first level of `gender`, so R has printed men minus women and both ends come out negative. Reversing every sign together turns it into the more natural reading: mean total cholesterol was about 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19 mmol/L, p < 0.001). The two statements are the same result written from a different perspective. This is the reporting standard the seminar introduced: effect size, confidence interval, and p-value, together, every time, from here on. `p < 0.001` is how we write a p-value that R prints as something like `< 2.2e-16`. Convention in public health (or clinical medicine) reports a very small p-value this way rather than typing out the full number.
 
 ## Paired t-test: two domains of activity in one person
 
@@ -145,7 +145,7 @@ The conclusion doesn't change here: both tests reject the null hypothesis convin
 
 ## Chi-squared test: `strep_tb`'s primary result
 
-`strep_tb`'s primary outcome is binary: did chest X-ray improve at six months (`improved`), and does that depend on trial arm (`arm`)? `table()` builds a two-way count, the same way it did in Week 7, and `chisq.test()`, from base R, tests whether the two variables are associated:
+`strep_tb`'s primary outcome is binary: did chest X-ray improve at six months (`improved`), and does that depend on trial arm (`arm`)? `table()` builds a two-way count, the same way it did in Chapter 3, and `chisq.test()`, from base R, tests whether the two variables are associated:
 
 ```{r}
 #| label: table-arm-improved
@@ -171,7 +171,7 @@ All four expected counts are comfortably above 5, so the test is on solid ground
 
 It's worth saying what `correct = FALSE` actually switches off. Left alone on a 2×2 table, `chisq.test()` applies **Yates' continuity correction** by default: a conservative adjustment that shrinks the test statistic slightly, to compensate for approximating whole-number counts with a smooth curve. It makes the p-value larger.
 
-We've already met it without being told what it was. Week 8's `prop.test()` on these same two arms was headed "with continuity correction" too, and printed a p-value of 0.0003548. The uncorrected test above gives 0.000166: same data, same comparison, two different numbers, purely from this one default.
+We've already met it without being told what it was. Chapter 4's `prop.test()` on these same two arms was headed "with continuity correction" too, and printed a p-value of 0.0003548. The uncorrected test above gives 0.000166: same data, same comparison, two different numbers, purely from this one default.
 
 The correction earns its place when expected counts run low, typically down around 5 to 10. Ours aren't: the smallest expected count is above 25. So we switch it off here, and it's also what makes this p-value match the one `epitools` reports for the same table in the next section.
 
@@ -203,7 +203,7 @@ They expect the table a particular way round, and that's worth knowing before bu
 levels(strep_tb$arm)
 ```
 
-`Streptomycin` is listed first, which would make it the reference, backwards from what we want here. `relevel()`, met in Week 7 when we checked the reference level on `eth`, moves the level named in `ref` to the front, making it the new reference level. There we were only demonstrating it; here it changes the answer:
+`Streptomycin` is listed first, which would make it the reference, backwards from what we want here. `relevel()`, met in Chapter 3 when we checked the reference level on `eth`, moves the level named in `ref` to the front, making it the new reference level. There we were only demonstrating it; here it changes the answer:
 
 ```{r}
 #| label: relevel-arm
@@ -211,7 +211,7 @@ arm_control_ref <- relevel(strep_tb$arm, ref = "Control")
 levels(arm_control_ref)
 ```
 
-`Control` is now first, so it becomes the reference row: the one everything else is compared against. This is the same reference level idea we met with factors in Week 7, now doing real work rather than being demonstrated on a copy, and it's worth having used twice before Week 11, where setting a sensible reference level is part of fitting a regression model.
+`Control` is now first, so it becomes the reference row: the one everything else is compared against. This is the same reference level idea we met with factors in Chapter 3, now doing real work rather than being demonstrated on a copy, and it's worth having used twice before Chapter 7, where setting a sensible reference level is part of fitting a regression model.
 
 We rebuild the table with the releveled factor, and pass it to `riskratio()`:
 
@@ -223,7 +223,7 @@ tab_arm_releveled
 riskratio(tab_arm_releveled)
 ```
 
-`oddsratio()` works the same way. We ask for `method = "wald"`, which uses the same normal-approximation logic behind the ± 1.96 × SE intervals from Week 8, and which matches the simple cross-product formula from the hand calculation directly:
+`oddsratio()` works the same way. We ask for `method = "wald"`, which uses the same normal-approximation logic behind the ± 1.96 × SE intervals from Chapter 4, and which matches the simple cross-product formula from the hand calculation directly:
 
 ```{r}
 #| label: oddsratio-arm
@@ -232,11 +232,11 @@ oddsratio(tab_arm_releveled, method = "wald")
 
 From the table above: 38 of 55 patients improved in the streptomycin arm (risk = 0.69), and 17 of 52 improved in the control arm (risk = 0.33). By hand, risk ratio = 0.69 / 0.33 = 2.11, and odds ratio = (38 × 35) / (17 × 17) = 4.60. Both match what `riskratio()` and `oddsratio()` just reported, with a confidence interval attached to each: a risk ratio of 2.11 (95% CI: 1.38 to 3.24) and an odds ratio of 4.60 (95% CI: 2.04 to 10.39). Neither interval comes close to including 1, the null value for both a risk ratio and an odds ratio, consistent with the chi-squared test above.
 
-`riskratio()` and `oddsratio()` each also report three p-values alongside the estimate: a mid-p exact test, Fisher's exact test, and a chi-squared test. All three agree closely here. The chi-squared one is 0.000166, exactly the p-value `chisq.test(tab_arm, correct = FALSE)` gave us above, to every digit printed. That's the payoff from switching the continuity correction off: the same test, run by two different packages, now gives one number instead of two. Had we left the correction on, `chisq.test()` would have reported 0.0003548, the number Week 8's `prop.test()` printed, while `epitools` reported 0.000166, and there'd be no way to tell from the output that the two functions had simply made different default choices.
+`riskratio()` and `oddsratio()` each also report three p-values alongside the estimate: a mid-p exact test, Fisher's exact test, and a chi-squared test. All three agree closely here. The chi-squared one is 0.000166, exactly the p-value `chisq.test(tab_arm, correct = FALSE)` gave us above, to every digit printed. That's the payoff from switching the continuity correction off: the same test, run by two different packages, now gives one number instead of two. Had we left the correction on, `chisq.test()` would have reported 0.0003548, the number Chapter 4's `prop.test()` printed, while `epitools` reported 0.000166, and there'd be no way to tell from the output that the two functions had simply made different default choices.
 
 ## `gtsummary::tbl_summary()` with a test attached
 
-`tbl_summary()`, already met in Week 7, can attach a test to a stratified table with `add_p()`, piped on afterwards:
+`tbl_summary()`, already met in Chapter 3, can attach a test to a stratified table with `add_p()`, piped on afterwards:
 
 ```{r}
 #| label: tbl-summary-addp
@@ -251,7 +251,7 @@ This single call reproduces the count, the percentage, and the p-value we built 
 ::: {.callout-note}
 ## Try it yourself: sample size and significance
 
-Using `slice_sample()` from Week 8, take a 10% random subsample of `nhanes` (remember to `set.seed()` first, so the subsample is reproducible) and re-run the `chol ~ gender` t-test from earlier in this chapter on it. Compare the p-value and the confidence interval to the ones from the full sample. Write one sentence on what changed and one sentence on what this means for judging whether a small p-value reflects a large effect or simply a large sample.
+Using `slice_sample()` from Chapter 4, take a 10% random subsample of `nhanes` (remember to `set.seed()` first, so the subsample is reproducible) and re-run the `chol ~ gender` t-test from earlier in this chapter on it. Compare the p-value and the confidence interval to the ones from the full sample. Write one sentence on what changed and one sentence on what this means for judging whether a small p-value reflects a large effect or simply a large sample.
 :::
 
 ## Worked example: sedentary time by gender
@@ -300,7 +300,7 @@ ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = age)) +
 t.test(age ~ gender, data = nhanes |> filter(!is.na(gender)))
 ```
 
-This time R's interval is already positive, and that's informative: the difference is still men minus women, so a positive interval means the first group is the higher one. Men in this sample were on average about 0.7 years older than women (95% CI: 0.4 to 1.1 years, p < 0.001), and no signs need reversing to say so. The difference is statistically significant but tiny relative to a population averaging around 47 years old. With a sample this large, tens of thousands of participants, even a very small true difference will produce a small p-value. Statistical significance here is not the same as a practically important difference, and it doesn't really contradict Week 7's impression that age looked similar across the two groups.
+This time R's interval is already positive, and that's informative: the difference is still men minus women, so a positive interval means the first group is the higher one. Men in this sample were on average about 0.7 years older than women (95% CI: 0.4 to 1.1 years, p < 0.001), and no signs need reversing to say so. The difference is statistically significant but tiny relative to a population averaging around 47 years old. With a sample this large, tens of thousands of participants, even a very small true difference will produce a small p-value. Statistical significance here is not the same as a practically important difference, and it doesn't really contradict Chapter 3's impression that age looked similar across the two groups.
 
 **Exercise 2**
 

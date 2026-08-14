@@ -1,4 +1,4 @@
-# Estimation, precision, and study size (Week 8) {#sec-08-estimation}
+# Estimation, precision, and sample size (Week 8) {#sec-08-estimation}
 
 This chapter introduces sampling variability, the central limit theorem, and ways to quantify precision around estimations. The distinction between standard deviation (SD) and the standard error (SE) is also explained. Briefly, SD describes the spread of the *data*, and SE describes the precision of an *estimate*. In this chapter we calculate SE manually, build a confidence interval from it, and check the calculation against R's own functions. We also use the same logic in reverse to calculate the required sample size when a study hasn't been run.
 
@@ -14,9 +14,9 @@ By the end of this chapter you will be able to:
 
 ## Setup
 
-As in Week 7, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. This chapter also brings in a second dataset for the first time: `strep_tb`. Unlike `nhanes_mph`, `strep_tb` is built into the `medicaldata` package.
+As in Chapter 3, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. This chapter also brings in a second dataset for the first time: `strep_tb`. Unlike `nhanes_mph`, `strep_tb` is built into the `medicaldata` package.
 
-`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. As Week 4 explained, installing a package and loading it are two different actions, and you have to install the package before you can load it. Run `install.packages("medicaldata")` once in the console. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
+`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. As Chapter 1 explained, installing a package and loading it are two different actions, and you have to install the package before you can load it. Run `install.packages("medicaldata")` once in the console. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
 
 ```{r}
 #| label: setup
@@ -65,11 +65,11 @@ nhanes <- nhanes |>
   )
 ```
 
-This is the same recode we introduced in Week 7. See Week 7 for the reasoning behind each variable. We repeat it here, unchanged, so this chapter stands on its own too.
+This is the same recode we introduced in Chapter 3. See Chapter 3 for the reasoning behind each variable. We repeat it here, unchanged, so this chapter stands on its own too.
 
 ## Point estimate and standard error, by hand
 
-A point estimate is our 'best guess' of the data. The most commonly used point estimate to describe data is the mean, a 'location' descriptor. However, a point estimate on its own says nothing about how precise it is. The standard error attaches a precision to it, and we calculate it from two quantities already familiar from Week 7: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
+A point estimate is our 'best guess' of the data. The most commonly used point estimate to describe data is the mean, a 'location' descriptor. However, a point estimate on its own says nothing about how precise it is. The standard error attaches a precision to it, and we calculate it from two quantities already familiar from Chapter 3: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
 
 ```{r}
 #| label: se-by-hand
@@ -89,7 +89,7 @@ This code chunk should look familiar by now. It takes the `nhanes` data, exclude
 
 `sqrt()` is base R's square root function. The standard error of a mean is the standard deviation divided by the square root of the sample size. As `n` grows, the denominator grows and the standard error shrinks. That's the algebra behind the seminar's precision argument.
 
-`sed` was shown in Week 7 to be right-skewed, with a long tail of participants reporting many sedentary hours. That skew doesn't disqualify it from a confidence interval on its *mean*, because of the Central Limit Theorem. As the sample size grows, the *sampling distribution* gets closer to a bell-shaped normal distribution.
+`sed` was shown in Chapter 3 to be right-skewed, with a long tail of participants reporting many sedentary hours. That skew doesn't disqualify it from a confidence interval on its *mean*, because of the Central Limit Theorem. As the sample size grows, the *sampling distribution* gets closer to a bell-shaped normal distribution.
 
 ## From standard error to a confidence interval
 
@@ -113,7 +113,7 @@ R has a function that does this directly. `t.test()` expects a single numeric ve
 t.test(nhanes$sed)
 ```
 
-`t.test()` also reports a test statistic, degrees of freedom, and a p-value. These belong to a hypothesis test, which is Week 9's subject. For now, look only at the confidence interval, and check that it closely matches the interval we calculated by hand above.
+`t.test()` also reports a test statistic, degrees of freedom, and a p-value. These belong to a hypothesis test, which is Chapter 5's subject. For now, look only at the confidence interval, and check that it closely matches the interval we calculated by hand above.
 
 One thing `t.test()` does quietly is it ignores all missing values. We passed it `nhanes$sed` whole, missing values and all, with no `filter()` and no `na.rm = TRUE`, and it ran anyway. It drops missing values itself, before calculating. The evidence is in the output: the degrees of freedom are `r format(sum(!is.na(nhanes$sed)) - 1, big.mark = ",")`, one less than the `r format(sum(!is.na(nhanes$sed)), big.mark = ",")` participants we filtered down to by hand, which is why the two intervals agree at all. So whenever we run a `t.test()` in R, we should count the missing values ourselves.
 
@@ -148,7 +148,7 @@ glimpse(strep_tb)
 
 `arm` and `gender` are already factors. `improved`, the outcome we care about here, is **logical**: `TRUE` or `FALSE`, rather than a factor. R stores `TRUE` and `FALSE` as 1 and 0, which will matter again shortly.
 
-Below we will look at the proportion of the outcome. `table()`, already met in Week 7, counts how many patients fall into each category of `improved`, and `prop.table()` converts those counts to proportions:
+Below we will look at the proportion of the outcome. `table()`, already met in Chapter 3, counts how many patients fall into each category of `improved`, and `prop.table()` converts those counts to proportions:
 
 ```{r}
 #| label: prop-table-improved
@@ -209,7 +209,7 @@ t.test(chol ~ gender, data = nhanes |> filter(!is.na(gender)))
 
 Notice there's no `$` anywhere in that call, even though `chol` and `gender` both are only found inside `nhanes`. The `data = ` argument tells `t.test()` which data frame to search for names like `chol` and `gender`, so it looks them up there itself instead of us pulling each one out by hand first with `$`. `$` is still the right tool for getting a single column on its own, the way `nhanes$sed` was above; a formula's `data = ` argument does that lookup for every variable named in the formula at once.
 
-This is the same pairing we showed descriptively in Week 7's boxplot and Table 1: cholesterol by gender. Now it's attached to a confidence interval for the *difference* in means between the two groups. By default, `t.test()` doesn't assume the two groups have equal variance, i.e. *Welch's t-test*. That's a sensible default and not something we need to adjust here.
+This is the same pairing we showed descriptively in Chapter 3's boxplot and Table 1: cholesterol by gender. Now it's attached to a confidence interval for the *difference* in means between the two groups. By default, `t.test()` doesn't assume the two groups have equal variance, i.e. *Welch's t-test*. That's a sensible default and not something we need to adjust here.
 
 ### Which way round is the difference?
 
@@ -228,7 +228,7 @@ It is useful to check the alternative-hypothesis line before reading any two-gro
 
 ## Confidence interval for a difference in proportions
 
-The same idea extends to two proportions: how many improved in each trial arm. `group_by()` and `summarise()`, already familiar from Week 7, give us the count and the number improved in each arm:
+The same idea extends to two proportions: how many improved in each trial arm. `group_by()` and `summarise()`, already familiar from Chapter 3, give us the count and the number improved in each arm:
 
 ```{r}
 #| label: arm-summary
@@ -259,9 +259,9 @@ The confidence interval is for the difference in the proportion improved between
 levels(strep_tb$arm)
 ```
 
-`"Streptomycin"` is first, so `prop 1` is the streptomycin arm and `prop 2` is the control arm, and the difference runs streptomycin minus control. Both ends of the interval are positive, which therefore says the streptomycin arm improved *more*. Had the two levels been the other way round, every number in that interval would have carried a minus sign and meant exactly the same thing. Week 9 puts this same factor the other way round on purpose, so it's worth having looked at the levels here first.
+`"Streptomycin"` is first, so `prop 1` is the streptomycin arm and `prop 2` is the control arm, and the difference runs streptomycin minus control. Both ends of the interval are positive, which therefore says the streptomycin arm improved *more*. Had the two levels been the other way round, every number in that interval would have carried a minus sign and meant exactly the same thing. Chapter 5 puts this same factor the other way round on purpose, so it's worth having looked at the levels here first.
 
-Two things in that output are worth explaining. First, the heading says "with continuity correction": `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. Week 9 explains what it does, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. Second, that p-value itself belongs to a hypothesis test, which is still Week 9's subject.
+Two things in that output are worth explaining. First, the heading says "with continuity correction": `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. Chapter 5 explains what it does, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. Second, that p-value itself belongs to a hypothesis test, which is still Chapter 5's subject.
 
 Because `strep_tb` is a randomised trial rather than an observational study, a difference this large and this precisely estimated supports a causal reading in a way that an association in `nhanes_mph` would not. We can quite safely conclude, from the findings, that streptomycin improved the proportion of patients with X-ray improvement by about `r round((strep_arm_summary$prop_improved[1] - strep_arm_summary$prop_improved[2]) * 100)` percentage points, compared with bed rest alone. We say percentage points rather than percent here: percent would describe how much bigger one proportion is relative to the other, not the size of the gap between them, which is what this interval actually estimates.
 
@@ -305,7 +305,7 @@ tt_10
 
 The point estimates are similar across all three, because all three are samples from the same population. But the confidence interval widens as the sample size drops.
 
-That's hard to see across three blocks of output, so let's put the three intervals in one small table. A `t.test()` result isn't a data frame, but `$` still works on it, pulling out one named piece at a time exactly as it pulls one column out of a data frame. `tt_full$conf.int` is the pair of numbers at the ends of the interval, and `[1]` and `[2]` take the lower and the upper one, the same square-bracket indexing we used in Week 5. `data.frame()`, from Week 4, builds the table out of them, and `mutate()` adds the column we actually care about:
+That's hard to see across three blocks of output, so let's put the three intervals in one small table. A `t.test()` result isn't a data frame, but `$` still works on it, pulling out one named piece at a time exactly as it pulls one column out of a data frame. `tt_full$conf.int` is the pair of numbers at the ends of the interval, and `[1]` and `[2]` take the lower and the upper one, the same square-bracket indexing we used in Chapter 2. `data.frame()`, from Chapter 1, builds the table out of them, and `mutate()` adds the column we actually care about:
 
 ```{r}
 #| label: width-table
@@ -461,7 +461,7 @@ Check the direction before reading the interval, as above. `"Never"` comes first
 
 Mean total cholesterol was `r round(tt_smoking$estimate[1] - tt_smoking$estimate[2], 3)` mmol/L in never smokers compared with current smokers (95% CI: `r round(tt_smoking$conf.int[1], 3)` to `r round(tt_smoking$conf.int[2], 3)` mmol/L), so a little lower on average in those who had never smoked. Notice that the estimate sits inside its own interval, which is always worth checking. If it doesn't, something is wrong, likely a sign has been flipped somewhere. The interval includes zero, so these data are consistent with no difference between the two groups, though they don't rule out a small one either.
 
-The two intervals mean different things. The first is about a single quantity, mean cholesterol, and says how precisely this sample pins it down. The second is about a *comparison* between two groups, and the value that matters in it is zero: an interval containing zero is one where the data can't establish which group is higher. From Week 9 onward, almost every interval in this course is of the second kind.
+The two intervals mean different things. The first is about a single quantity, mean cholesterol, and says how precisely this sample pins it down. The second is about a *comparison* between two groups, and the value that matters in it is zero: an interval containing zero is one where the data can't establish which group is higher. From Chapter 5 onward, almost every interval in this course is of the second kind.
 
 **Exercise 2**
 

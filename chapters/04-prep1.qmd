@@ -16,7 +16,7 @@ By the end of this chapter you will be able to:
 
 ## Setup
 
-There's no data to read yet, so this chapter's setup chunk is almost empty. The one thing we set is the console's print width, so that printed output stays narrow enough to fit this book's page. That's a setting for producing the book, not part of any analysis, and from Week 7 onward we keep it out of sight rather than opening every chapter with it. You don't need it in your own scripts.
+There's no data to read yet, so this chapter's setup chunk is almost empty. The one thing we set is the console's print width, so that printed output stays narrow enough to fit this book's page. That's a setting for producing the book, not part of any analysis, and from Chapter 3 onward we keep it out of sight rather than opening every chapter with it. You don't need it in your own scripts.
 
 ```{r}
 #| label: setup
@@ -61,7 +61,7 @@ An RStudio Project turns that folder into something RStudio understands directly
 
 ![The New Project wizard, with Existing Directory highlighted.](../images/04-prep1-new-project.png){fig-alt="RStudio's New Project wizard, showing New Directory, Existing Directory, and Version Control, with Existing Directory highlighted." width="70%" fig-align="center"}
 
-A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in Week 5, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
+A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in Chapter 2, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
 
 ### Console versus script
 
@@ -134,7 +134,7 @@ Four types matter throughout this course:
 - **numeric**: a number, like 45
 - **character**: text, like `"Yes"`, always in quotes
 - **logical**: `TRUE` or `FALSE`
-- **factor**: a set of categories. It looks like text but is stored with a fixed, known list of possible categories behind it. Week 7 turns six columns of `nhanes_mph` into factors, exactly this way, against the dictionary file.
+- **factor**: a set of categories. It looks like text but is stored with a fixed, known list of possible categories behind it. Chapter 3 turns six columns of `nhanes_mph` into factors, exactly this way, against the dictionary file.
 
 ## Functions and arguments
 
@@ -172,7 +172,7 @@ mean(readings, na.rm = TRUE)
 
 ## Comparison and logical operators
 
-These build a condition that's either `TRUE` or `FALSE` for each value in a vector, which is what every `filter()` from Week 7 onward runs on:
+These build a condition that's either `TRUE` or `FALSE` for each value in a vector, which is what every `filter()` from Chapter 3 onward runs on:
 
 ```{r}
 #| label: comparison-demo
@@ -220,7 +220,7 @@ toy_data$smoker
 select(toy_data, smoker)
 ```
 
-The values are the same either way. The difference is the container. `toy_data$smoker` is four bare values with nothing else attached. `select(toy_data, smoker)` is still a data frame, one column wide, four rows long. This matters practically from Week 8 onward: some functions, like `t.test()`, want a bare vector and expect `$`. Most of `dplyr`, starting in Week 7, works on data frames throughout and expects `select()`.
+The values are the same either way. The difference is the container. `toy_data$smoker` is four bare values with nothing else attached. `select(toy_data, smoker)` is still a data frame, one column wide, four rows long. This matters practically from Chapter 4 onward: some functions, like `t.test()`, want a bare vector and expect `$`. Most of `dplyr`, starting in Chapter 3, works on data frames throughout and expects `select()`.
 
 ## Quoting rules and backticks
 
@@ -242,7 +242,7 @@ toy <- data.frame(`patient id` = c(1, 2, 3), check.names = FALSE)
 toy$`patient id`
 ```
 
-Backticks aren't easy to work with, and generally it's not recommended to have variable names containing a space. `data.frame()` normally cleans up column names automatically, turning a space into a dot. `check.names = FALSE` switches that off, purely so this example can show a genuine spaced name. When we read a CSV file with `read_csv()` in Week 5, column names come in exactly as written, spaces and all, with no automatic cleanup. Its dictionary file has a column literally called `Variable names`, and backticks are exactly how we'll refer to it.
+Backticks aren't easy to work with, and generally it's not recommended to have variable names containing a space. `data.frame()` normally cleans up column names automatically, turning a space into a dot. `check.names = FALSE` switches that off, purely so this example can show a genuine spaced name. When we read a CSV file with `read_csv()` in Chapter 2, column names come in exactly as written, spaces and all, with no automatic cleanup. Its dictionary file has a column literally called `Variable names`, and backticks are exactly how we'll refer to it.
 
 ## The pipe
 
@@ -253,7 +253,7 @@ Backticks aren't easy to work with, and generally it's not recommended to have v
 c(16, 25, 36) |> sqrt() |> sum()
 ```
 
-Take these three numbers, and then take the square root of each, and then add up what's left. Written without the pipe, the same calculation reads inside-out: `sum(sqrt(c(16, 25, 36)))`. The pipe exists so a sequence of steps can be read in the order they actually happen, which is how every multi-step `dplyr` sequence in this book, starting in Week 7, is written.
+Take these three numbers, and then take the square root of each, and then add up what's left. Written without the pipe, the same calculation reads inside-out: `sum(sqrt(c(16, 25, 36)))`. The pipe exists so a sequence of steps can be read in the order they actually happen, which is how every multi-step `dplyr` sequence in this book, starting in Chapter 3, is written.
 
 There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). We'll likely write a lot of pipes, so it's worth remembering.
 
@@ -323,7 +323,7 @@ sum(c(1, 2, 3))
 read.csv("nonexistent_file.csv")
 ```
 
-The warning line above states the actual reason, a missing file, before the error itself. We'll meet this one properly in Week 5, once there's a real file to read. `read.csv()` is base R's own version of the function; from there onward we use `read_csv()` from the `readr` package instead, which behaves a little differently but fails the same way when a path is wrong.
+The warning line above states the actual reason, a missing file, before the error itself. We'll meet this one properly in Chapter 2, once there's a real file to read. `read.csv()` is base R's own version of the function; from there onward we use `read_csv()` from the `readr` package instead, which behaves a little differently but fails the same way when a path is wrong.
 
 ## Getting help
 
@@ -331,7 +331,7 @@ Every function used in this course has a help page. Typing `?mean` in the consol
 
 ## Worked example: four clinic visits
 
-Let's put several of today's pieces together on one small, made-up example: four clinic visits, invented purely to practise on. From Week 5 onward, everything in this book runs on real-world data (`nhanes_mph` or `strep_tb`) instead; today's numbers exist only to give the syntax something to run on before either dataset has been introduced.
+Let's put several of today's pieces together on one small, made-up example: four clinic visits, invented purely to practise on. From Chapter 2 onward, everything in this book runs on real-world data (`nhanes_mph` or `strep_tb`) instead; today's numbers exist only to give the syntax something to run on before either dataset has been introduced.
 
 ```{r}
 #| label: worked-build
@@ -369,7 +369,7 @@ visits$smoker
 select(visits, smoker)
 ```
 
-Same values, different container: a bare vector from `$`, a one-column data frame from `select()`. Every idea in this worked example, a vector, a data frame, `$`, a comparison, loading a package, the pipe, comes back constantly from Week 5 onward. Only the data changes.
+Same values, different container: a bare vector from `$`, a one-column data frame from `select()`. Every idea in this worked example, a vector, a data frame, `$`, a comparison, loading a package, the pipe, comes back constantly from Chapter 2 onward. Only the data changes.
 
 ## Exercises
 
@@ -385,7 +385,7 @@ Then open `round()`'s help page by typing `?round` in the console. Find the **Us
 
 ## Self-check
 
-A short multiple-choice check, not a writing exercise. There's no statistical result yet to interpret in a sentence. That starts in Week 7. Instead, these five questions target the places students most often get tripped up in R's syntax. Answers are in the Solutions callout below.
+A short multiple-choice check, not a writing exercise. There's no statistical result yet to interpret in a sentence. That starts in Chapter 3. Instead, these five questions target the places students most often get tripped up in R's syntax. Answers are in the Solutions callout below.
 
 **1.** In `mean_x <- mean(x, na.rm = TRUE)`, what's the difference between `<-` and `=`?
 
