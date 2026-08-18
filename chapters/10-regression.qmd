@@ -1,8 +1,12 @@
 # Correlation and simple linear regression (Week 10) {#sec-10-regression}
 
-This chapter centres on how a continuous outcome varies with a continuous predictor, in contrast with Chapters 4 and 5, where a continuous outcome was compared across the two groups of a binary variable. The tools include scatterplots, Pearson's correlation coefficient, and simple linear regression, specified as Y = α + βX + ε. Simple linear regression also introduces residuals, the intercept, the slope, and R². We discuss and check the model's assumptions. In this chapter we fit that model in R, check it properly, and use it to predict.
+**The problem.** Chapter 5 compared two groups directly against each other. But plenty of public health questions aren't about groups at all: does cholesterol change with age, or with hours of sedentary time? How do we put an exact number and a line on a relationship between two continuous variables in R, know whether that line is a fair description of the data at all, use it to predict a value we haven't observed, and recognise when a prediction has wandered somewhere the data can't support?
+
+We measure the relationship before modelling it, with a scatterplot and Pearson's correlation coefficient, plus Spearman's rank correlation for the case where one variable is ordered categories rather than a measurement. Then we model it, fitting a simple linear regression, Y = α + βX + ε, which turns that picture into an intercept, a slope with a confidence interval, and an R² saying how much of the outcome the line accounts for. A fitted line is only worth reading if its assumptions hold, so we check them with residual and QQ plots before trusting anything it says. Then we use the model to predict, and see what it returns when we ask it about an input the data never contained.
 
 ## Chapter intended learning outcomes
+
+Every ILO below is a step in doing that.
 
 By the end of this chapter you will be able to:
 
@@ -68,7 +72,7 @@ This is the same recode we introduced in Chapter 3 and repeated in Chapters 4 an
 
 ## Correlation: Pearson's r and Spearman's rho
 
-The seminar opened with scatterplots and Pearson's correlation coefficient before shifting to regression. Here's the same shift, briefly, in R.
+A correlation coefficient answers "do these two variables move together, and how strongly" without committing to which one explains which, which is exactly why it's worth measuring before we build a model that does commit to a direction. The seminar opened with scatterplots and Pearson's correlation coefficient before shifting to regression. Here's the same shift, briefly, in R.
 
 `cor()`, from base R, calculates a correlation coefficient between two continuous variables. Its default method is Pearson's r, which measures the strength of a linear, or straight-line, relationship. We'll use the pairing this chapter's first model uses, `age` and `chol`:
 

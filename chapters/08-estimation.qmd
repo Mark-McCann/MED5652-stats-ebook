@@ -1,8 +1,12 @@
 # Estimation, precision, and sample size (Week 8) {#sec-08-estimation}
 
-This chapter introduces sampling variability, the central limit theorem, and ways to quantify precision around estimations. The distinction between standard deviation (SD) and the standard error (SE) is also explained. Briefly, SD describes the spread of the *data*, and SE describes the precision of an *estimate*. In this chapter we calculate SE manually, build a confidence interval from it, and check the calculation against R's own functions. We also use the same logic in reverse to calculate the required sample size when a study hasn't been run.
+**The problem.** Chapter 3 taught us to describe a variable with statistics like the mean and the standard deviation, and to visualise it using graphs. But a mean calculated from one sample is just a single estimate, and it would come out slightly different from a different sample. How do we know if the mean is precise? And how do we find out how big a sample we need to achieve a certain precision?
+
+Both questions come from one idea: a sample is not the population, and an estimate built from one wobbles. So we start by reactivating the seminar's account of sampling variability and the central limit theorem, which is what makes that wobble predictable. From there comes the distinction this chapter turns on, between the standard deviation, which describes the spread of the *data*, and the standard error, which describes the precision of an *estimate*. We calculate a standard error by hand, build a confidence interval from it, check both against R's own functions, and practise saying in writing what such an interval does and doesn't claim. Then we watch an interval narrow as the sample grows, and run that same logic backwards to size a study that hasn't been run yet.
 
 ## Chapter intended learning outcomes
+
+Every ILO below is a piece of answering those two questions.
 
 By the end of this chapter you will be able to:
 
@@ -69,7 +73,7 @@ This is the same recode we introduced in Chapter 3. See Chapter 3 for the reason
 
 ## Point estimate and standard error, by hand
 
-A point estimate is our 'best guess' of the data. The most commonly used point estimate to describe data is the mean, a 'location' descriptor. However, a point estimate on its own says nothing about how precise it is. The standard error attaches a precision to it, and we calculate it from two quantities already familiar from Chapter 3: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
+A mean handed to a health board with no sense of how precise it is invites a decision the data may not actually support, which is why quantifying that precision is worth doing every time, not just when it's convenient. A point estimate is our 'best guess' of the data. The most commonly used point estimate to describe data is the mean, a 'location' descriptor. However, a point estimate on its own says nothing about how precise it is. The standard error attaches a precision to it, and we calculate it from two quantities already familiar from Chapter 3: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
 
 ```{r}
 #| label: se-by-hand

@@ -1,6 +1,10 @@
 # Data and data handling (Week 5) {#sec-05-prep2}
 
-This chapter covers what makes a dataset usable, how to tell R where a file lives, and how to check what actually came in after reading it. In this chapter we take a spreadsheet apart, import real data for the first time, spot what's missing, and end with a saved script we re-run from a fresh session to prove it works. Week 6 is reading week; Chapter 3 picks up from here.
+**The problem.** Chapter 1 stressed the importance of having reproducible work in statistics and public health. It also taught R's basic syntax on a handful of patients we typed in ourselves: a small, clean dataset, tidy by design. Real data almost never arrives that way. It's a spreadsheet that's been edited by hand for years, messy and full of errors. How do we turn a real, messy file into something R can work with reliably, and prove that our process actually works, not just this once but every time we run it?
+
+Answering that runs in three steps. First we take a real, messy clinic spreadsheet apart: the same clinic setting as Chapter 1's hand-typed log, but a version that has lived in the real world and been edited only by hand in Excel. We work out what makes a dataset usable, restructure it, and save it as a CSV. Then we step up to real data, learning how to tell R where a file lives, what the common import failures look like, and how to check what actually came in rather than what we expected. Last we collect the lines that worked into an R script, so the whole data pipeline, the process that manages and transforms our data, is written down and can be run again from nothing. Week 6 is reading week; Chapter 3 picks up from here.
+
+Every ILO below is a step in that.
 
 ## Chapter intended learning outcomes
 
@@ -14,10 +18,11 @@ By the end of this chapter you will be able to:
 
 ## Setup
 
-There's nothing to read in yet, so, as in Chapter 1, this chunk only sets the console's print width.
+There's nothing to read in yet, so there's nothing to set up in this chapter.
 
 ```{r}
-#| label: setup
+#| label: setup-hidden
+#| include: false
 options(width = 76)
 ```
 
@@ -29,11 +34,13 @@ A dataset R can work with follows three simple rules: one variable per column, o
 
 ### What breaks an import
 
-- **Merged cells.** A heading merged across several columns looks fine to a person, but when R reads the underlying columns back out, most of them come back empty, because the merge only stored the value in one of the cells it covers.
-- **Units mixed into the value, and inconsistent with each other.** Most of a Weight or Height column might be plain numbers, `72`, `1.70`, and so on, but one row breaks the pattern: `195 lbs` and `6 ft` instead of kilograms and metres, or a height like `178` sitting uncommented among a column of metres, really centimetres in disguise. R reads a whole column as text the moment a single cell in it isn't a bare number, so it only takes one row like this to turn an otherwise clean numeric column into text throughout.
-- **Blank rows used for spacing.** A blank row inserted purely to separate two sections becomes a row of missing values, `NA`, in every column, once imported.
-- **Notes written in a stray cell**, off to the side of the actual table, with no column of their own. This can be a note about one specific patient, or a caption meant to explain something elsewhere in the sheet that never made it into a proper column.
-- **More than one table on a single sheet.** R expects a sheet to be one table. A second, unrelated table lower down the same sheet gets read as more rows of the first table, and the result makes no sense.
+Picture reading the sheet in the screenshot below the way a person would, working down it row by row, and watching where it stops behaving like one clean table.
+
+Row 1 is a title, "Clinic Visit Log - Week 12", stretched across six columns as one merged cell. A heading merged like that looks fine to a person, but when R reads the underlying columns back out, most of them come back empty, because the merge only stored the value in one of the cells it covers. Row 2 does the same thing on a smaller scale, merging "Measurements" across just the Weight and Height columns, so a proper header for either one only turns up in row 3.
+
+Read on down the Weight and Height columns themselves and one row breaks the pattern. Most patients are plain numbers, kilograms and metres. One row is text instead: `195 lbs` and `6 ft`. R reads a whole column as text the moment a single cell in it isn't a bare number, so it only takes one row like that to turn an otherwise clean numeric column into text throughout, no matter how many other rows are perfectly formed. This is the same problem Chapter 1's `round()` example was quietly solving for us by hand, turning a raw scale reading into a clean whole-kilogram number before it ever went in the log; nobody has done that here, and R has no way to do it on our behalf.
+
+Off to the side, in a cell with no column of its own, sits a note about one specific patient's missed follow-up, disconnected from the table it's actually about. Further down, after a blank row inserted purely for visual spacing, which becomes a row of missing values, `NA`, in every column the moment it's imported, sits a second, smaller table: a follow-up schedule, unrelated to the patient log above it. R expects one table per sheet, so this second table gets read as more rows of the first one, and the result makes no sense.
 
 **Spreadsheet exercise (ILO 1).** `data/05-prep2-messy-clinic.xlsx` is a small, made-up clinic visit log, built specifically to have every one of these problems at once. Open it in Excel, or whatever spreadsheet software you have.
 
@@ -43,7 +50,7 @@ Go through the sheet and list every feature above that you can find in it. There
 
 ## Finding a file, and telling R where it is
 
-Before we can read anything into R, we need to know exactly where the file we want actually lives. This is the file system skill everything from here on assumes.
+We just saved a clean CSV in the exercise above. Before we can read it, or anything else, into R, we need to know exactly where the file we want actually lives. This is the file system skill everything from here on assumes.
 
 **Where downloads go.** When you download a file from a browser, most browsers save it into a folder called `Downloads` by default, without asking. On Windows that's usually `C:\Users\yourname\Downloads`; on a Mac it's usually `/Users/yourname/Downloads`. If you can't find a file you just downloaded, that folder is the first place to check, and it's worth confirming where your own browser is set to save to, since some let you change it.
 
@@ -83,7 +90,7 @@ library(here)
 
 ### Four things that go wrong
 
-Almost every import problem we'll see is one of four things.
+With the path skills just covered, we're ready to actually read a file in, and the fastest way to get comfortable with that is watching it fail a few ways on purpose first. Almost every import problem we'll see is one of four things.
 
 **A wrong filename.** Close, but not exact:
 
@@ -127,7 +134,7 @@ The filename is exactly right this time. What's missing is `"data"`, the subfold
 read_csv(here("data", "mph_nhanes_20241107.csv"))
 ```
 
-**The wrong file type.** `data/05-prep2-messy-clinic.xlsx`, from the exercise above, is an Excel file, not a CSV. Reading it with `read_csv()` doesn't throw an error at all.
+**The wrong file type.** `data/05-prep2-messy-clinic.xlsx`, our own clinic file from the exercise above, is an Excel file, not a CSV. Reading it with `read_csv()` doesn't throw an error at all.
 
 To see what actually came in, we need three functions. `dim()` reports how many rows and columns a dataset has, and `names()` lists its column names. Both get a proper introduction in the next section, where we use them on real data; here they're just the quickest way to look. `substr()`, from base R, takes a piece of text and keeps only part of it, given a starting and an ending position: `substr(x, 1, 50)` keeps the first 50 characters and throws the rest away. We need it because the column name that comes back is far too long to print in full.
 
@@ -143,7 +150,7 @@ substr(names(messy_attempt), 1, 50)
 
 No error, but nothing usable either: one column, zero rows, and a column name that's a fragment of raw XML. An `.xlsx` file is actually a small zip archive of several XML files bundled together, and `read_csv()` has gone looking inside that archive and started reading one of those XML files as if it were plain text. This is the quietest kind of import failure there is: nothing crashes, nothing complains, and the result still looks like a data frame at a glance. Always check what actually came in, which is exactly what the next section is for.
 
-Put right, all four attempts above collapse into the one call we actually want, and this is the real import we use for the rest of this book. The file holds `nhanes_mph`, an extract of a large American health survey in which adults were interviewed and then given a physical examination. Chapter 3 introduces it properly. For today we only need it to be a real file with real data in it:
+Put right, all four attempts above collapse into the one call we actually want, and this is the real import we use for the rest of this book. But first, notice what we're about to leave behind: four patients, hand typed in Chapter 1, were only ever enough to practise R's syntax on. No real public health question gets answered from four people. The file we're about to read holds `nhanes_mph` instead, an extract of a large American health survey in which adults were interviewed and then given a physical examination, tens of thousands of them rather than four. Chapter 3 introduces it properly. For today we only need it to be a real file with real data in it, at the scale our toy log never had:
 
 ```{r}
 #| label: read-nhanes
@@ -266,7 +273,7 @@ That's the habit worth building now: when a column's meaning isn't obvious from 
 mean(nhanes$chol, na.rm = TRUE)
 ```
 
-`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in Chapter 1's `mean()` example. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
+`chol` is total cholesterol, in mmol/L, and `r format(sum(is.na(nhanes$chol)), big.mark = ",")` participants have no value recorded for it. `na.rm = TRUE` drops those missing values before averaging the rest, exactly as it did back in Chapter 1's `mean()` example on our own clinic log. Leave it out and the whole calculation returns `NA`, since R won't silently guess what a missing value should have been.
 
 ### A first taste of a grouped summary
 
@@ -342,6 +349,8 @@ Here's the part people skip, and it's the part that matters. A script that runs 
 So test it properly. In RStudio, go to **Session → Restart R**. That throws away every object and every loaded package, leaving you with an empty session, exactly like the one a colleague, a marker, or you-in-six-months would start from. Now run your script from the top.
 
 If it runs clean, the script is genuinely self-contained. If it fails, the error tells us precisely what we'd forgotten to write down, and the fix belongs *in the script*, not typed into the console again. That restart is the reproducibility argument from Chapter 1, made concrete: not "scripts are good practice" but "here is how we find out whether ours actually is one."
+
+That's the script this whole chapter has been building toward, starting all the way back with a merged title row that wouldn't import cleanly: not just an import that runs once, but one a stranger, or you in six months, could pick up cold and trust. Chapter 3 starts from exactly this point, with `nhanes` already read in and ready.
 
 ## Exercises
 

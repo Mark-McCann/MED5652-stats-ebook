@@ -1,8 +1,12 @@
 # Multiple linear and logistic regression (Week 11) {#sec-11-adjustment}
 
-This chapter extends Chapter 6's simple regression into a multivariable one, so an association can be adjusted for confounding, the epidemiology half's own treatment of bias applied inside a regression model. We interpret an adjusted coefficient, and read a categorical predictor's contrasts against a reference level. We then swap a continuous outcome for a binary one, fit a logistic regression instead of a linear one, and turn an exponentiated coefficient into an adjusted odds ratio. `blm.cvd` closes the chapter as a case the data cannot settle either way, a confounder or a mediator, reported both ways as a sensitivity analysis rather than resolved. In this chapter we fit all of that in R.
+**The problem.** Chapter 6 introduced simple linear regression to describe the association between two continuous variables. But an association found that way is often not causal, as we have learnt in epidemiology: another variable can lie behind both, and a model with a single predictor has no way to account for it. How do we put several variables into one regression, so an association can be adjusted for the confounders we named in advance? And what do we do when the outcome isn't continuous at all, but whether someone lived or died?
+
+Both questions get answered by extending one model. We add predictors to Chapter 6's regression with `+`, then read an adjusted coefficient, holding the others constant, and read a categorical predictor's rows as contrasts against a stated reference level. Setting the crude estimate beside the adjusted one is what turns confounding from a definition into a number. Then we swap the continuous outcome for a binary one, which first has to be built: deriving a ten-year mortality outcome from a death indicator and a follow-up time is this chapter's opening exercise, and the exclusion rule it needs is the teaching point. We fit a logistic regression to it, and exponentiate a coefficient to get back the adjusted odds ratio the epidemiology half already taught us to read. `blm.cvd` closes the chapter as a case the data cannot settle, a confounder or a mediator, reported both ways as a sensitivity analysis rather than resolved.
 
 ## Chapter intended learning outcomes
+
+Every ILO below is a piece of one or the other.
 
 By the end of this chapter you will be able to:
 
