@@ -5,6 +5,7 @@ book:
   title: "IES Statistical Practicals"
   author: "Fred Ho"
   date: today
+  date-format: "D MMMM YYYY"
   chapters:
     - index.qmd
     - chapters/04-prep1.qmd

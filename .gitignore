@@ -4,6 +4,9 @@
 *_files/
 *_cache/
 
+# Chapter 1's write.csv() demo writes this next to the chapter file on every render
+/chapters/visits.csv
+
 # renv (activate.R, settings.json and lock file ARE tracked; see renv/.gitignore)
 renv/library/
 renv/local/

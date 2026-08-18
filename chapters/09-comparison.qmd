@@ -1,10 +1,8 @@
 # Hypothesis tests and measures of association (Week 9) {#sec-09-comparison}
 
-**The problem.** Chapter 4 taught us to attach a confidence interval to an estimate, or to the difference between two groups, so we could say how precise it was. But we often want to know whether a difference is 'real' or is just chance. The interval from Chapter 4 answers that indirectly, by showing whether the null value falls inside it. A hypothesis test answers it head on, and reported alongside the interval rather than instead of it, that is what this chapter builds. And once a difference looks real, how large is it? The risk ratio and the odds ratio from the epidemiology half answer that, and here each one gets a confidence interval and a p-value attached.
+Chapter 4 taught us to attach a confidence interval to an estimate, or to the difference between two groups, so we could say how precise it was. But we often want to know whether a difference is 'real' or is just chance. The interval from Chapter 4 answers that indirectly, by showing whether the null value falls inside it. A hypothesis test answers it head on, and reported alongside the interval rather than instead of it, that is what this chapter builds. And once a difference looks real, how large is it? The risk ratio and the odds ratio from the epidemiology half answer that, and here each one gets a confidence interval and a p-value attached.
 
 So we start with the logic of a test: a null and an alternative hypothesis, a test statistic turned into a p-value, and precision about what a p-value actually is. Then we run the tests themselves, choosing between them from the structure of the data: an independent-samples t-test for two separate groups, a paired t-test for two measurements taken on the same person, a non-parametric alternative when the distribution won't support either, and a chi-squared test for a two-way table of counts. Along the way it becomes clear that a confidence interval and a hypothesis test carry the same information, which is why the reporting standard from here on is an effect size, a 95% confidence interval, and a p-value, together. We finish on risk ratios and odds ratios, and practise writing up each result the way a public health journal expects.
-
-Every ILO below is a piece of answering that.
 
 ## Chapter intended learning outcomes
 

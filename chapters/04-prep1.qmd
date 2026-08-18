@@ -1,22 +1,20 @@
 # R and R Studio (Week 4) {#sec-04-prep1}
 
-**The problem.** We all know how to work with a spreadsheet, but a spreadsheet is not the best way to record, manage, and analyse data. A copy-and-paste error in an Excel-based model contributed to JPMorgan Chase's $6 billion loss in 2012, and Public Health England failed to log over 15,000 positive coronavirus test results in 2020, because they used an older Excel format template. The list goes on. A spreadsheet is useful for looking at the data and for some simple calculations, but is not designed to be reproducible, because the work done in one doesn't normally get tracked. Instead, in public health and statistics, we often use statistical software for data management and analysis, as the record is clearer and can make the process more reproducible. This is one of the many reasons why we learn R to manage, handle, and analyse statistical data. As an example, we will examine how we can properly interact with R and RStudio, and use it to build a toy clinic record.
+We all know how to work with a spreadsheet, but a spreadsheet is not the best way to record, manage, and analyse data. A copy-and-paste error in an Excel-based model contributed to JPMorgan Chase's \$6 billion loss in 2012, and Public Health England failed to log over 15,000 positive coronavirus test results in 2020, because they used an older Excel format template. The list goes on. A spreadsheet is useful for looking at the data and for some simple calculations, but it isn't designed for reproducible work: the work done in one doesn't normally get tracked, and there's no way to tell what has been done to a file just by looking at it. Instead, in public health and statistics, we often use statistical software for data management and analysis, as the record is clearer and can make the process more reproducible. This is one of the many reasons why we learn R to manage, handle, and analyse statistical data. As an example, we will examine how we can properly interact with R and RStudio, and use it to build a toy clinic record.
 
 Doing that systematically starts with somewhere to keep the work. So we install R and RStudio, build a project folder, and see why a saved script, rather than a line typed into the console and lost, is what makes an analysis repeatable at all. Then we learn how R holds data: objects, the types of value they store, the functions that act on them, and how to read the handful of error messages we'll all meet in the next ten weeks. We build every piece of it into a small clinic visit log, one column at a time, until we have a dataset of our own to ask questions of. Nothing here is statistics yet, but it's the foundation everything after it stands on.
-
-Every ILO below is one piece of getting there.
 
 ## Chapter intended learning outcomes
 
 By the end of this chapter you will be able to:
 
-1. Install R and RStudio on your own device, and verify the installation by running code and loading a package
-2. Work in RStudio using a Project and a saved script, and explain why we script rather than work in the console
-3. Create objects by assignment, and recognise R's basic data types and structures (numeric, character, logical, factor, vector, data frame)
-4. Call a function using named arguments, explain what a default value is, and find its help page
-5. Write and read a short piped sequence that includes a logical condition and extracts a column from a data frame
-6. Diagnose a failed line of code from its error message
-7. Build a project folder, following sensible file and folder naming conventions
+1.  Install R and RStudio on your own device, and verify the installation by running code and loading a package
+2.  Work in RStudio using a Project and a saved script, and explain why we script rather than work in the console
+3.  Create objects by assignment, and recognise R's basic data types and structures (numeric, character, logical, factor, vector, data frame)
+4.  Call a function using named arguments, explain what a default value is, and find its help page
+5.  Write and read a short piped sequence that includes a logical condition and extracts a column from a data frame
+6.  Diagnose a failed line of code from its error message
+7.  Build a project folder, following sensible file and folder naming conventions
 
 ## Setup
 
@@ -44,10 +42,10 @@ R is the programming language itself, and is the software program that actually 
 
 RStudio's window is split into four panes. Where each one sits is consistent no matter what we're doing, so it's worth learning the layout by position.
 
-- **Top-left: the source pane.** This only shows when a script is open, so it likely won't appear in RStudio fresh out of the box. This is where we write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; we have to tell RStudio to run it, which is the next thing we cover.
-- **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. We can type directly into the console, but anything typed there is gone once RStudio closes, which is exactly why the source pane exists.
-- **Top-right: the environment pane.** This lists every object that currently exists in our R session, its type, and a preview of its contents. Every time we create something, it appears here. When something we expected to see isn't listed, that's usually the first clue something went wrong.
-- **Bottom-right: a tabbed pane.** This holds the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
+-   **Top-left: the source pane.** This only shows when a script is open, so it likely won't appear in RStudio fresh out of the box. This is where we write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; we have to tell RStudio to run it, which is the next thing we cover.
+-   **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. We can type directly into the console, but anything typed there is gone once RStudio closes, which is exactly why the source pane exists.
+-   **Top-right: the environment pane.** This lists every object that currently exists in our R session, its type, and a preview of its contents. Every time we create something, it appears here. When something we expected to see isn't listed, that's usually the first clue something went wrong.
+-   **Bottom-right: a tabbed pane.** This holds the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
 
 ![RStudio's four panes: source (top-left), console (bottom-left), environment (top-right), and a tabbed pane for files, plots, packages, and help (bottom-right). This particular window is shown in a dark colour theme rather than RStudio's own light default; it's the layout and position of the four panes that matters here, not the colours.](../images/04-prep1-panes.png){fig-alt="An RStudio window with the four panes labelled: source, console, environment, and a tabbed files/plots/packages/help pane." width="95%" fig-align="center"}
 
@@ -59,10 +57,10 @@ Working with R means managing at least a couple of files, most likely some data 
 
 An RStudio Project turns that folder into something RStudio understands directly, which is what makes relative paths work rather than having to type a full path every time.
 
-1. In RStudio's menu, go to **File → New Project...**
-2. Choose **Existing Directory**, since the folder already exists.
-3. Browse to the project folder you just built, and click **Create Project**.
-4. RStudio reopens with that folder as the **working directory**. You can confirm this by checking the Files pane, bottom-right, which now shows the folder's contents, and the title bar, which now shows the project's name.
+1.  In RStudio's menu, go to **File → New Project...**
+2.  Choose **Existing Directory**, since the folder already exists.
+3.  Browse to the project folder you just built, and click **Create Project**.
+4.  RStudio reopens with that folder as the **working directory**. You can confirm this by checking the Files pane, bottom-right, which now shows the folder's contents, and the title bar, which now shows the project's name.
 
 ![The New Project wizard, with Existing Directory highlighted.](../images/04-prep1-new-project.png){fig-alt="RStudio's New Project wizard, showing New Directory, Existing Directory, and Version Control, with Existing Directory highlighted." width="70%" fig-align="center"}
 
@@ -74,22 +72,22 @@ We can type a line directly into the console and press Enter, and it runs immedi
 
 For anything worth keeping, we write it in a script in the source pane instead, then run it from there:
 
-- **Ctrl+Enter** (Windows) or **Cmd+Return** (Mac) runs the single line the cursor is on, or a selected block of lines, and sends it to the console.
-- Highlighting several lines and pressing the same shortcut runs all of them in order.
-- The **Source** button, top-right of the source pane, runs the entire script from top to bottom.
+-   **Ctrl+Enter** (Windows) or **Cmd+Return** (Mac) runs the single line the cursor is on, or a selected block of lines, and sends it to the console.
+-   Highlighting several lines and pressing the same shortcut runs all of them in order.
+-   The **Source** button, top-right of the source pane, runs the entire script from top to bottom.
 
 The reason this course insists on scripts rather than the console is simple: we will need to do this again, and we won't remember exactly what we typed. A saved script is a record anyone can rerun from scratch and get the same result. That's the whole idea behind reproducible work, and it's why every exercise in this book asks you to write and save a script rather than work directly in the console.
 
 ## The log we're going to build
 
-From here on, every section in this chapter adds one real piece to a small dataset: a clinic visit log for four patients, invented purely to practise on. By the end of the chapter we'll have this:
+From here on, every section in this chapter adds one real piece to a small dataset: a toy clinic visit log for four patients. By the end of the chapter we'll have this:
 
 | patient_id | age | smoker | weight_kg | chol |
-|---|---|---|---|---|
-| P01 | 34 | No | 72 | 5.2 |
-| P02 | 61 | Yes | 88 | 6.1 |
-| P03 | 45 | No | 65 | NA |
-| P04 | 29 | Yes | 59 | 4.8 |
+|------------|-----|--------|-----------|------|
+| P01        | 34  | No     | 72        | 5.2  |
+| P02        | 61  | Yes    | 88        | 6.1  |
+| P03        | 45  | No     | 65        | NA   |
+| P04        | 29  | Yes    | 59        | 4.8  |
 
 Four patients, four pieces of information about each. Assignment gives us one value. A vector strings several values into one column. A data frame lines several columns up side by side, which is exactly the table above. Every section that follows builds one more piece of it, in R, for real, rather than a table drawn on the page.
 
@@ -138,7 +136,7 @@ Note that all three vectors have to have the same length of data (4 values each)
 
 ## Data types
 
-R keeps track of what kind of value an object holds, and it matters: R decides what it will let us do with a value based on its type, refusing to average text the way it refuses to average a factor's labels, so knowing a column's type is knowing what's even possible on it. `class()` reports it, and our own log is the fastest way to see two of the four:
+R keeps track of what kind of value an object holds, and it matters: R decides what it will let us do with a value based on its type, for example refusing to calculate a mean for text. Knowing a column's type is knowing what's possible on it. `class()` reports it, and our own log is the fastest way to see two of the four:
 
 ```{r}
 #| label: class-demo
@@ -150,10 +148,10 @@ class(factor(c("Yes", "No")))
 
 Four types matter throughout this course:
 
-- **numeric**: a number, like the ages in `visits`
-- **character**: text, like `visits$smoker` right now, always in quotes
-- **logical**: `TRUE` or `FALSE`
-- **factor**: a set of categories. It looks like text but is stored with a fixed, known list of possible categories behind it. `visits$smoker` is a natural candidate for exactly that, though we leave it as character for now. Chapter 3 turns six columns of `nhanes_mph` into proper factors, exactly this way, against the dictionary file.
+-   **numeric**: a number, like the ages in `visits`
+-   **character**: text, like `visits$smoker` right now, always in quotes
+-   **logical**: `TRUE` or `FALSE`
+-   **factor**: a set of categories. It looks like text but is stored with a fixed, known list of possible categories behind it. `visits$smoker` is a natural candidate for exactly that, though we leave it as character for now. Chapter 3 turns six columns of `nhanes_mph` into proper factors, exactly this way, against the dictionary file.
 
 ## Functions and arguments
 
@@ -403,6 +401,19 @@ Same values, different container: a bare vector from `$`, a one-column data fram
 visits$chol |> mean(na.rm = TRUE) |> round(digits = 1)
 ```
 
+### Saving the log
+
+Everything in `visits` only exists inside this R session, in memory. Close RStudio without saving it out, and it's gone, the same way a value typed straight into the console disappeared the moment we moved on. `write.csv()`, from base R, does the opposite of `read.csv()` from the Reading errors section above: it takes an object and a file path, and writes the object out as a real CSV file on disk.
+
+```{r}
+#| label: write-csv
+write.csv(visits, "visits.csv", row.names = FALSE)
+```
+
+`row.names = FALSE` is worth explaining rather than copying without thinking about it. Left out, `write.csv()` adds an extra column at the front of the file, numbering the rows 1 to 4. That's not part of our data, just R's own internal row labels leaking into the file, and it would show up as a stray, unlabelled column the moment the file is opened. `FALSE` tells `write.csv()` to leave it out and write only the columns we actually built.
+
+That line just wrote a real file, `visits.csv`, sitting on disk the moment this page rendered, independent of R and of this book. In our own project, following the `data`/`scripts`/`outputs` structure from earlier in this chapter, this is exactly what the `outputs` subfolder is for: a file we saved out, not one we're about to read back in. Opening it, in a spreadsheet application or a plain text editor, shows exactly what `visits` held in R: patient IDs, ages, smoking status, weight, and cholesterol, one row per patient, values separated by commas, no formatting or formulas hidden behind them. That's the whole idea of a CSV file, and Chapter 2 explains why it matters properly, the moment we start reading files back in rather than writing them out.
+
 Every idea used to build this log, a vector, a data frame, `$`, a comparison, loading a package, the pipe, comes back constantly from Chapter 2 onward. Only the data changes: Chapter 2 brings in this same clinic's real log, all eight patients, exactly as messily kept as real logs actually are.
 
 ## Exercises
@@ -423,38 +434,38 @@ A short multiple-choice check, not a writing exercise. There's no statistical re
 
 **1.** In `mean_x <- mean(x, na.rm = TRUE)`, what's the difference between `<-` and `=`?
 
-a) They mean exactly the same thing
-b) `<-` creates or updates an object; `=` here only names an argument inside the function call
-c) `<-` only works inside a function call, `=` only works outside one
-d) `=` creates an object; `<-` only names an argument
+a)  They mean exactly the same thing
+b)  `<-` creates or updates an object; `=` here only names an argument inside the function call
+c)  `<-` only works inside a function call, `=` only works outside one
+d)  `=` creates an object; `<-` only names an argument
 
 **2.** `visits$smoker` and `select(visits, smoker)` return the same four values. What actually differs between them?
 
-a) Nothing, they always return identical output
-b) `$` only works on vectors, never on data frames
-c) `$` returns a bare vector; `select()` returns a data frame with one column
-d) `select()` is base R; `$` is from `dplyr`
+a)  Nothing, they always return identical output
+b)  `$` only works on vectors, never on data frames
+c)  `$` returns a bare vector; `select()` returns a data frame with one column
+d)  `select()` is base R; `$` is from `dplyr`
 
 **3.** In `round(x = 3.14159, digits = 2)`, what happens if you write `round(digits = 2, x = 3.14159)` instead?
 
-a) Nothing changes: named arguments can be given in any order
-b) R throws an error, because the arguments are in the wrong order
-c) R silently ignores `digits` and uses its default instead
-d) It only works if `x` is written first, always
+a)  Nothing changes: named arguments can be given in any order
+b)  R throws an error, because the arguments are in the wrong order
+c)  R silently ignores `digits` and uses its default instead
+d)  It only works if `x` is written first, always
 
 **4.** Why does R separate `install.packages()` from `library()`?
 
-a) They do the same thing; `install.packages()` is just the older name for it
-b) `install.packages()` downloads a package once; `library()` loads it into the current session, and has to be run again every time R restarts
-c) `library()` downloads the package; `install.packages()` only loads it
-d) Both have to be run every single time you use a function from a package
+a)  They do the same thing; `install.packages()` is just the older name for it
+b)  `install.packages()` downloads a package once; `library()` loads it into the current session, and has to be run again every time R restarts
+c)  `library()` downloads the package; `install.packages()` only loads it
+d)  Both have to be run every single time you use a function from a package
 
 **5.** Running `Mean(age)` produces `Error in Mean(age) : could not find function "Mean"`. What's actually wrong?
 
-a) The object `age` doesn't exist
-b) R is case-sensitive and there's no function called `Mean`; the function is `mean()`
-c) A package needs to be installed first
-d) There's a missing comma somewhere in the call
+a)  The object `age` doesn't exist
+b)  R is case-sensitive and there's no function called `Mean`; the function is `mean()`
+c)  A package needs to be installed first
+d)  There's a missing comma somewhere in the call
 
 ::: {.callout-note collapse="true"}
 ## Solutions
@@ -507,9 +518,9 @@ select(visits, patient_id, smoker)
 
 **Self-check answers**
 
-1. **b.** `<-` creates or updates an object. `=` inside a function call only names which argument a value belongs to; it never creates an object there.
-2. **c.** Same values, different container: `$` strips the data frame away and leaves a bare vector, `select()` keeps the data frame structure.
-3. **a.** Named arguments are matched by name, not position, so their order in the call makes no difference to the result.
-4. **b.** Installing is a one-off download. Loading has to happen at the start of every R session, since a fresh session starts with no packages loaded, even ones already installed.
-5. **b.** R is case-sensitive throughout. `Mean` and `mean` are different names as far as R is concerned, and only one of them is a real function.
+1.  **b.** `<-` creates or updates an object. `=` inside a function call only names which argument a value belongs to; it never creates an object there.
+2.  **c.** Same values, different container: `$` strips the data frame away and leaves a bare vector, `select()` keeps the data frame structure.
+3.  **a.** Named arguments are matched by name, not position, so their order in the call makes no difference to the result.
+4.  **b.** Installing is a one-off download. Loading has to happen at the start of every R session, since a fresh session starts with no packages loaded, even ones already installed.
+5.  **b.** R is case-sensitive throughout. `Mean` and `mean` are different names as far as R is concerned, and only one of them is a real function.
 :::

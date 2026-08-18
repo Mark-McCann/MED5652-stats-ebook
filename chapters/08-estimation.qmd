@@ -1,12 +1,10 @@
 # Estimation, precision, and sample size (Week 8) {#sec-08-estimation}
 
-**The problem.** Chapter 3 taught us to describe a variable with statistics like the mean and the standard deviation, and to visualise it using graphs. But a mean calculated from one sample is just a single estimate, and it would come out slightly different from a different sample. How do we know if the mean is precise? And how do we find out how big a sample we need to achieve a certain precision?
+Chapter 3 taught us to describe a variable with statistics like the mean and the standard deviation, and to visualise it using graphs. But a mean calculated from one sample is just a single estimate, and it would come out slightly different from a different sample. How do we know if the mean is precise? And how do we find out how big a sample we need to achieve a certain precision?
 
 Both questions come from one idea: a sample is not the population, and an estimate built from one wobbles. So we start by reactivating the seminar's account of sampling variability and the central limit theorem, which is what makes that wobble predictable. From there comes the distinction this chapter turns on, between the standard deviation, which describes the spread of the *data*, and the standard error, which describes the precision of an *estimate*. We calculate a standard error by hand, build a confidence interval from it, check both against R's own functions, and practise saying in writing what such an interval does and doesn't claim. Then we watch an interval narrow as the sample grows, and run that same logic backwards to size a study that hasn't been run yet.
 
 ## Chapter intended learning outcomes
-
-Every ILO below is a piece of answering those two questions.
 
 By the end of this chapter you will be able to:
 
@@ -265,7 +263,7 @@ levels(strep_tb$arm)
 
 `"Streptomycin"` is first, so `prop 1` is the streptomycin arm and `prop 2` is the control arm, and the difference runs streptomycin minus control. Both ends of the interval are positive, which therefore says the streptomycin arm improved *more*. Had the two levels been the other way round, every number in that interval would have carried a minus sign and meant exactly the same thing. Chapter 5 puts this same factor the other way round on purpose, so it's worth having looked at the levels here first.
 
-Two things in that output are worth explaining. First, the heading says "with continuity correction": `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. Chapter 5 explains what it does, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. Second, that p-value itself belongs to a hypothesis test, which is still Chapter 5's subject.
+Two things in that output are worth explaining. Firstly, the heading says "with continuity correction": `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. Chapter 5 explains what it does, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. Secondly, that p-value itself belongs to a hypothesis test, which is still Chapter 5's subject.
 
 Because `strep_tb` is a randomised trial rather than an observational study, a difference this large and this precisely estimated supports a causal reading in a way that an association in `nhanes_mph` would not. We can quite safely conclude, from the findings, that streptomycin improved the proportion of patients with X-ray improvement by about `r round((strep_arm_summary$prop_improved[1] - strep_arm_summary$prop_improved[2]) * 100)` percentage points, compared with bed rest alone. We say percentage points rather than percent here: percent would describe how much bigger one proportion is relative to the other, not the size of the gap between them, which is what this interval actually estimates.
 

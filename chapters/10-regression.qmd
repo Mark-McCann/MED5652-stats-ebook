@@ -1,12 +1,10 @@
 # Correlation and simple linear regression (Week 10) {#sec-10-regression}
 
-**The problem.** Chapter 5 compared two groups directly against each other. But plenty of public health questions aren't about groups at all: does cholesterol change with age, or with hours of sedentary time? How do we put an exact number and a line on a relationship between two continuous variables in R, know whether that line is a fair description of the data at all, use it to predict a value we haven't observed, and recognise when a prediction has wandered somewhere the data can't support?
+Chapter 5 compared two groups directly against each other. But plenty of public health questions aren't about groups at all: does cholesterol change with age, or with hours of sedentary time? How do we put an exact number and a line on a relationship between two continuous variables in R, know whether that line is a fair description of the data at all, use it to predict a value we haven't observed, and recognise when a prediction has wandered somewhere the data can't support?
 
 We measure the relationship before modelling it, with a scatterplot and Pearson's correlation coefficient, plus Spearman's rank correlation for the case where one variable is ordered categories rather than a measurement. Then we model it, fitting a simple linear regression, Y = α + βX + ε, which turns that picture into an intercept, a slope with a confidence interval, and an R² saying how much of the outcome the line accounts for. A fitted line is only worth reading if its assumptions hold, so we check them with residual and QQ plots before trusting anything it says. Then we use the model to predict, and see what it returns when we ask it about an input the data never contained.
 
 ## Chapter intended learning outcomes
-
-Every ILO below is a step in doing that.
 
 By the end of this chapter you will be able to:
 
