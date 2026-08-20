@@ -1,0 +1,247 @@
+# Glossary {.unnumbered}
+
+This appendix is a reference, not a chapter to work through. Once we have already met a package, a function, a piece of syntax, or a statistical term in its proper place, this is where we come back to look it up. Every entry names the chapter that actually teaches it, because a one-line description here is a reminder, not a replacement for that fuller explanation.
+
+## Packages
+
+| Package | What it's for | First loaded |
+|---|---|---|
+| base R | Comes with R itself, no `library()` needed: objects, vectors, arithmetic, comparisons, `data.frame()`, basic tests and models. | Chapter 1 |
+| `dplyr` | Manipulating data: filtering rows, building new columns, grouping and summarising. | Chapter 1 |
+| `readr` | Reading a CSV file into R. Faster than base R's own version, and doesn't silently guess wrong. | Chapter 2 |
+| `here` | Builds a file path from the project folder down to a file, so code runs on any machine. | Chapter 2 |
+| `ggplot2` | All the plotting in this book. | Chapter 2 |
+| `gtsummary` | Publication-style summary and regression tables. | Chapter 3 |
+| `medicaldata` | Supplies `strep_tb`, the 1948 MRC streptomycin trial data. | Chapter 4 |
+| `epitools` | Risk ratios and odds ratios with confidence intervals, from a 2x2 table. | Chapter 5 |
+| `broom` | Tidies a fitted model's coefficients and fitted values into a data frame. | Chapter 6 |
+| `broom.helpers` | Not loaded directly. `gtsummary`'s `tbl_regression()` depends on it and finds it automatically once it's installed. | Chapter 7 |
+
+## Functions
+
+### Base R: objects, vectors, and data frames
+
+| Function | What it does | First met |
+|---|---|---|
+| `c()` | Combines values into a vector. | Chapter 1 |
+| `class()` | Reports what kind of value an object holds. | Chapter 1 |
+| `data.frame()` | Builds a data frame, columns supplied by name. | Chapter 1 |
+| `factor()` | Converts a variable into a set of named categories, with levels in a stated order. | Chapter 1 |
+| `library()` | Loads an installed package for the current session. | Chapter 1 |
+| `install.packages()` | Downloads a package onto this computer, once. Never run inside a chunk. | Chapter 1 |
+| `read.csv()` | Base R's own function for reading a CSV file. Superseded by `readr`'s `read_csv()` from Chapter 2 onward. | Chapter 1 |
+| `write.csv()` | Writes an object out as a real CSV file on disk. `row.names = FALSE` leaves out R's own row-number column. | Chapter 1 |
+| `select()` | From `dplyr`. Keeps only the named columns. | Chapter 1 |
+| `is.na()` | Tests whether each value is missing. | Chapter 2 |
+| `names()` | Lists a data frame's column names. | Chapter 2 |
+| `dim()` | Reports the number of rows and columns. | Chapter 2 |
+| `head()` | Prints the first few rows of a data frame. | Chapter 2 |
+| `levels()` | Lists a factor's categories, in their current order. | Chapter 3 |
+| `relevel()` | Reassigns a factor's reference level to the one named. | Chapter 3 |
+| `list()` | Bundles several settings together, one per item. | Chapter 3 |
+| `nrow()` | Counts the rows in a data frame. | Chapter 4 |
+| `set.seed()` | Fixes the sequence of "random" numbers R uses, so a random draw repeats the same way every time. | Chapter 4 |
+| `as.numeric()` | Converts a value to a continuous number. | Chapter 6 |
+| `substr()` | Extracts characters from a fixed position in a text string. | Chapter 2 |
+
+### Base R: summaries and maths
+
+| Function | What it does | First met |
+|---|---|---|
+| `mean()` | Calculates the arithmetic mean. `na.rm = TRUE` drops missing values first. | Chapter 1 |
+| `round()` | Rounds a number to a stated number of decimal places. | Chapter 1 |
+| `sum()` | Adds values, or counts `TRUE`s when given a logical condition. | Chapter 1 |
+| `summary()` | Prints a quick five-number-plus-mean summary of a variable, or an overview of a data frame. | Chapter 2 |
+| `median()` | Calculates the median. | Chapter 3 |
+| `sd()` | Calculates the standard deviation. | Chapter 3 |
+| `IQR()` | Calculates the interquartile range. | Chapter 3 |
+| `quantile()` | Reports the value at a stated percentile. | Chapter 3 |
+| `table()` | Cross-tabulates one or more categorical variables into counts. | Chapter 3 |
+| `prop.table()` | Converts a table of counts into proportions. `margin = 1` divides by row totals, `margin = 2` by column totals. | Chapter 3 |
+| `sqrt()` | Calculates a square root. | Chapter 4 |
+| `exp()` | Undoes a natural logarithm, used to convert a log-odds coefficient back to an odds ratio. | Chapter 7 |
+
+### Base R: tests and models
+
+| Function | What it does | First met |
+|---|---|---|
+| `t.test()` | A t-test: a confidence interval and p-value for a mean, or for the difference between two means. | Chapter 4 |
+| `prop.test()` | A confidence interval and p-value for a proportion, or for the difference between two proportions. Uses a continuity correction by default; `correct = FALSE` switches it off. | Chapter 4 |
+| `power.t.test()` | Calculates the sample size needed to detect a given difference in means, or the power a given sample size has. | Chapter 4 |
+| `power.prop.test()` | The same calculation as `power.t.test()`, for a difference in proportions. | Chapter 4 |
+| `wilcox.test()` | The Wilcoxon signed-rank test, a non-parametric alternative to the paired t-test. | Chapter 5 |
+| `chisq.test()` | The chi-squared test of association between two categorical variables. `correct = FALSE` switches off its default continuity correction. | Chapter 5 |
+| `fisher.test()` | Fisher's exact test, used in place of the chi-squared test when expected cell counts are small. | Chapter 5 |
+| `cor()` | Calculates a correlation coefficient. | Chapter 6 |
+| `cor.test()` | A correlation coefficient with a confidence interval and p-value attached. | Chapter 6 |
+| `lm()` | Fits a linear regression model. | Chapter 6 |
+| `coef()` | Pulls a fitted model's coefficients. | Chapter 6 |
+| `confint()` | Pulls a fitted model's confidence intervals. For `glm()`, this refits the model repeatedly ("profiling") rather than using a shortcut formula. | Chapter 6 |
+| `predict()` | Uses a fitted model to generate a predicted value for a new set of inputs, supplied as a data frame. | Chapter 6 |
+| `glm()` | Fits a generalised linear model. `family = binomial` fits a logistic regression, for a 0/1 outcome. | Chapter 7 |
+
+### `readr`
+
+| Function | What it does | First met |
+|---|---|---|
+| `read_csv()` | Reads a CSV file into a data frame. Faster than base R's `read.csv()`, and doesn't silently convert text columns to factors. | Chapter 2 |
+| `write_csv()` | The `readr` equivalent of `write.csv()`. Named alongside `read_csv()` in Chapter 2, but never called in this book's taught code. | Chapter 2 |
+
+### `here`
+
+| Function | What it does | First met |
+|---|---|---|
+| `here()` | Builds a file path from the project folder, so the same code finds its files on any machine. | Chapter 2 |
+
+### `dplyr`
+
+| Function | What it does | First met |
+|---|---|---|
+| `glimpse()` | Prints every column of a data frame, its type, and a preview of its values, one row per column. | Chapter 3 |
+| `filter()` | Keeps only the rows that match a condition. | Chapter 3 |
+| `mutate()` | Adds a new column, or changes an existing one. | Chapter 3 |
+| `arrange()` | Sorts rows by one or more columns. `desc()` reverses the order. | Chapter 3 |
+| `desc()` | Reverses the sort order inside `arrange()`, high to low. | Chapter 3 |
+| `slice()` | Keeps rows by their position. | Chapter 3 |
+| `group_by()` | Splits a data frame into groups, so the next step runs once per group. | Chapter 3 |
+| `summarise()` | Collapses each group (or the whole data frame) into one row of summary statistics. | Chapter 3 |
+| `n()` | Counts rows, used inside `summarise()`. | Chapter 3 |
+| `slice_sample()` | Keeps a random subset of rows. `prop =` states the fraction to keep. | Chapter 4 |
+| `pull()` | Extracts one column as a plain vector, rather than a one-column data frame. | Chapter 4 |
+| `case_when()` | Builds a new column from a list of conditions, checked in order. | Chapter 7 |
+
+### `ggplot2`
+
+| Function | What it does | First met |
+|---|---|---|
+| `ggplot()` | Starts a plot, given a data frame. | Chapter 2 |
+| `aes()` | Maps a variable onto a visual property: x, y, fill, or colour. | Chapter 2 |
+| `geom_histogram()` | Draws a histogram of a continuous variable. `binwidth =` sets the width of each bar. | Chapter 2 |
+| `geom_bar()` | Draws a bar chart of a categorical variable's counts. | Chapter 3 |
+| `geom_boxplot()` | Draws a boxplot. | Chapter 3 |
+| `geom_point()` | Draws a scatterplot. | Chapter 3 |
+| `labs()` | Sets a plot's axis labels and title. | Chapter 3 |
+| `ylim()` | Fixes the y-axis range shown. | Chapter 3 |
+| `geom_smooth()` | Adds a fitted line, with a shaded confidence band, over a scatterplot. | Chapter 6 |
+| `geom_hline()` | Draws a horizontal reference line at a stated `yintercept`. | Chapter 6 |
+| `stat_qq()` | Plots standardised residuals against what a normal distribution would produce, for checking a regression's normality assumption. | Chapter 6 |
+| `stat_qq_line()` | Adds the reference line to a `stat_qq()` plot. | Chapter 6 |
+
+### `gtsummary`
+
+| Function | What it does | First met |
+|---|---|---|
+| `tbl_summary()` | Builds a publication-style summary table ("Table 1"). `by =` stratifies it by a grouping variable. | Chapter 3 |
+| `all_continuous()` | Inside `list()` or `statistic =`, means "every continuous variable in this table". | Chapter 3 |
+| `add_p()` | Adds a column of hypothesis-test p-values to a `tbl_summary()` table. | Chapter 5 |
+| `tbl_regression()` | Builds a publication-style table directly from a fitted model. | Chapter 7 |
+| `tbl_merge()` | Combines two or more `gtsummary` tables side by side, for comparing crude and adjusted models. | Chapter 7 |
+
+### `broom`
+
+| Function | What it does | First met |
+|---|---|---|
+| `tidy()` | Turns a fitted model's coefficients into a data frame, one row per term. `exponentiate = TRUE` converts a logistic model's coefficients to odds ratios. | Chapter 6 |
+| `augment()` | Adds each observation's fitted value (`.fitted`) and residual (`.resid`) back onto the original data. | Chapter 6 |
+
+### `epitools`
+
+| Function | What it does | First met |
+|---|---|---|
+| `riskratio()` | Takes a 2x2 table and calculates the risk ratio, with a confidence interval. | Chapter 5 |
+| `oddsratio()` | Takes a 2x2 table and calculates the odds ratio. `method = "wald"` matches the ± 1.96 x SE formula behind a confidence interval built by hand. | Chapter 5 |
+
+## R syntax and operators
+
+| Symbol | What it does | First met |
+|---|---|---|
+| `<-` | Assignment: stores the value on the right in the name on the left. | Chapter 1 |
+| `|>` | The pipe. Takes what's on the left and feeds it in as the first input to what's on the right. Read aloud as "and then". | Chapter 1 |
+| `%>%` | The older pipe, from `dplyr`, before base R had its own. Both can be treated the same. | Chapter 1 |
+| `$` | Pulls one named column, or one named piece, out of a data frame or another R object. | Chapter 1 |
+| `!` | Negates a condition. | Chapter 1 |
+| `&` | Combines two conditions, both must be true. | Chapter 1 |
+| `|` | Combines two conditions, either must be true. | Chapter 1 |
+| `%in%` | Tests whether each value appears anywhere in a set. | Chapter 1 |
+| `==` `!=` | Equal to, not equal to. | Chapter 1 |
+| `<` `>` `<=` `>=` | Less than, greater than, and their "or equal to" versions. | Chapter 1 |
+| `""` | Marks a value as text. Numbers, `TRUE`/`FALSE`, and object or column names don't take quotes. | Chapter 1 |
+| backticks | A different kind of quoting mark, needed for a column name containing a space or other unusual character. | Chapter 1 |
+| `?` | Followed by a function name, opens that function's help page. | Chapter 1 |
+| `#` | Starts a comment in an R script: everything after it on the line is ignored when the code runs. | Chapter 1 |
+| `#|` | A chunk option, inside a code chunk: sets things like a chunk's label or whether its output shows. | Chapter 1 |
+| `NA` | R's code for a missing value. | Chapter 1 |
+| `TRUE` / `FALSE` | The two logical values. Always written in full in this book, never abbreviated to `T`/`F`. | Chapter 1 |
+| `+` | Inside `ggplot2`, joins plot layers together, not arithmetic addition. | Chapter 2 |
+| `~` | A formula: separates an outcome (left) from a predictor (right), as in `t.test(chol ~ gender)`. | Chapter 5 |
+| `::` | Calls a function from a named package directly, without loading the whole package with `library()` first, as in `broom::augment()`. | Chapter 6 |
+
+## Statistical terms
+
+### Describing data
+
+| Term | What it means | First met |
+|---|---|---|
+| Categorical variable | A variable whose values are named categories, not numbers. Nominal categories have no order (`gender`); ordinal categories do (`edu`). | Chapter 3 |
+| Numeric variable | A variable whose values are numbers: binary (0/1), count (0, 1, 2, 3, ...), or continuous (12.1, 13.5, ...). | Chapter 3 |
+| Factor | R's way of storing a categorical variable, as a set of named levels. | Chapter 3 |
+| Reference level | The category everything else in a table or model is compared against. | Chapter 3 |
+| Mean, median | Two measures of a distribution's centre: the arithmetic average, and the middle value when sorted. | Chapter 3 |
+| Standard deviation (SD), interquartile range (IQR) | Two measures of a distribution's spread, paired with the mean and the median respectively. | Chapter 3 |
+| Skew | A distribution with a longer tail on one side, where the mean and median pull apart. | Chapter 3 |
+| Complete-case | An analysis that keeps only the rows with no missing value on any variable it uses. | Chapter 3 |
+| Table 1 | The standard first table of a paper: participant characteristics, often stratified by group. | Chapter 3 |
+
+### Estimation and uncertainty
+
+| Term | What it means | First met |
+|---|---|---|
+| Population, sample | The whole group we want to know about, and the smaller group we actually measured. | Chapter 4 |
+| Point estimate | A single number, calculated from a sample, standing in for the population value. | Chapter 4 |
+| Standard error (SE) | Describes the precision of an estimate, unlike the standard deviation, which describes the spread of the data. | Chapter 4 |
+| Central limit theorem (CLT) | The seminar's demonstration that an estimate's own sampling distribution becomes approximately normal as sample size grows, whatever shape the underlying data has. | Chapter 4 |
+| Confidence interval (CI) | A range of values, built from a point estimate and its standard error, that quantifies an estimate's precision. | Chapter 4 |
+| Power, sample size calculation | The chance a study detects a real effect of a given size, and the calculation that sizes a study to hit a target power. | Chapter 4 |
+
+### Hypothesis tests and measures of association
+
+| Term | What it means | First met |
+|---|---|---|
+| Null hypothesis | The claim a hypothesis test starts by assuming: no difference, no association. | Chapter 5 |
+| p-value | The probability of a result at least this extreme, if the null hypothesis were true. Never reported alone in this book, always alongside an effect size and a confidence interval. | Chapter 5 |
+| Parametric, non-parametric | A test that assumes a particular distribution (parametric, like the t-test), against one that doesn't (non-parametric, like the Wilcoxon test). | Chapter 5 |
+| Paired, independent samples | Two measurements on the same person or unit (paired), against measurements on two separate groups (independent). | Chapter 5 |
+| 2x2 table | A cross-tabulation of two binary variables, the standard layout for calculating a risk ratio or odds ratio by hand. | Chapter 5 |
+| Risk, risk ratio | The proportion of a group who experience an outcome, and the ratio of that proportion between two groups. | Chapter 5 |
+| Odds, odds ratio | The ratio of an outcome happening to it not happening, and the ratio of that quantity between two groups. | Chapter 5 |
+| Null value | The value of an effect size that means "no association": 0 for a difference, 1 for a ratio. | Chapter 5 |
+
+### Regression
+
+| Term | What it means | First met |
+|---|---|---|
+| Correlation (Pearson's r, Spearman's rho) | A single number summarising how closely two continuous variables move together. Pearson's r assumes a linear relationship; Spearman's rho doesn't. | Chapter 6 |
+| Outcome, predictor | What a regression model explains (the outcome, also called the dependent variable), and what it explains it with (a predictor, also called an independent variable). | Chapter 6 |
+| Intercept, slope, coefficient | The fitted line's value at zero, how much the outcome changes per unit of a predictor, and the general name for both. | Chapter 6 |
+| Residual | The vertical distance between an observed value and the model's fitted line. | Chapter 6 |
+| Linearity, constant variance, normally distributed residuals | The three assumptions a fitted line's trustworthiness rests on, checked with diagnostic plots. | Chapter 6 |
+| Extrapolation | Using a model to predict outside the range of data it was actually fitted on. | Chapter 6 |
+| Multivariable | Several predictors, one outcome. Some writers say "multiple regression" for the same thing. "Multivariate regression" is a different, formal term for several outcomes modelled together, not used in this course. | Chapter 7 |
+| Crude, adjusted | An association estimated on its own (crude), against one estimated alongside other variables that might confound it (adjusted). | Chapter 7 |
+
+### Study design and causal language
+
+| Term | What it means | First met |
+|---|---|---|
+| Confounder | A variable that's a common cause of both the exposure and the outcome, distorting the crude association between them unless adjusted for. | Chapter 7 |
+| Mediator | A variable that sits on the causal path between an exposure and an outcome. Adjusting for one, unlike a confounder, removes part of the real effect rather than a distortion. | Chapter 7 |
+| Adjustment set | The variables chosen, before fitting a model, to adjust an association for. | Chapter 7 |
+| Sensitivity analysis | Fitting a model more than one way, on purpose, to see how much a result depends on an assumption that can't be settled from the data. | Chapter 7 |
+| Collider bias | Distortion introduced by adjusting for a variable that's a common *effect* of the exposure and the outcome, rather than a common cause. | Chapter 7 |
+| Table 2 fallacy | Reading every coefficient in an adjusted regression table as if it had the same interpretation as the one the model was built to estimate. | Chapter 7 |
+
+## Where to look things up
+
+`?` followed by a function name, typed into the console, opens that function's help page, covered properly in Chapter 1. It's usually faster than searching online, and it's always correct for the version of R actually installed. RStudio also keeps a set of cheat sheets under **Help → Cheatsheets**, one per major package.
+
+This appendix stays deliberately thin. For the reasoning behind any entry here, the fuller explanation lives in the chapter named beside it.
