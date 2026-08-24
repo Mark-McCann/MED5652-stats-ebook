@@ -8,12 +8,12 @@ Describing a variable properly starts with knowing what kind of variable it is, 
 
 By the end of this chapter you will be able to:
 
-1. Use `select()`, `filter()`, `mutate()`, and `arrange()` to manipulate a dataset, and produce grouped summaries with `group_by()` and `summarise()`
-2. Construct frequency and cross-tabulations
-3. Build histograms, boxplots, bar charts, and scatterplots using the package `ggplot2`
+1. Use `dplyr`'s `select()`, `filter()`, `mutate()`, and `arrange()` to manipulate a dataset, and produce grouped summaries with `group_by()` and `summarise()`
+2. Construct frequency and cross-tabulations using `table()` and `prop.table()`
+3. Build histograms, boxplots, bar charts, and scatterplots using `ggplot2`
 4. Modify a plot's bin width, scale, and labels, and describe the effect on interpretation
-5. Convert a character variable to a factor and set its reference level
-6. Produce a basic "Table 1" of participant characteristics, and describe it in writing
+5. Convert a character variable to a factor using `factor()` and set its reference level using `relevel()`
+6. Produce a basic "Table 1" of participant characteristics using `gtsummary::tbl_summary()`, and describe it in writing
 
 ## The data: `nhanes_mph`
 

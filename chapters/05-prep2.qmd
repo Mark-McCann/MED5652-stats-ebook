@@ -9,8 +9,8 @@ Answering that runs in three steps. Firstly we take a real, messy clinic spreads
 By the end of this chapter you will be able to:
 
 1.  Identify features of a spreadsheet that will prevent it being analysed, and restructure it
-2.  Import a CSV into R using a correctly specified path, and diagnose and resolve the most common import failures
-3.  Inspect an imported dataset's dimensions, variable names, types, and missing values
+2.  Import a CSV into R using `readr::read_csv()` and a correctly specified path built with `here::here()`, and diagnose and resolve the most common import failures
+3.  Inspect an imported dataset's dimensions, variable names, and types with `dim()`, `names()`, and `dplyr::glimpse()`, and its missing values with `is.na()`
 4.  Write, save, and re-run an R script that imports data, summarises it, and produces a plot
 5.  Locate a downloaded file on your own operating system, construct or copy a valid path to it, and explain what a CSV file physically contains
 

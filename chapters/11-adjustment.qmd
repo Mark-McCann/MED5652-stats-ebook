@@ -9,11 +9,11 @@ Both questions get answered by extending one model. We add predictors to Chapter
 By the end of this chapter you will be able to:
 
 1. Derive a fixed-window binary outcome from an event indicator and a follow-up time, and justify the exclusion rule it requires
-2. Fit a multivariable linear regression, including categorical predictors with a stated reference level
+2. Fit a multivariable linear regression using `lm()`, including categorical predictors with a stated reference level
 3. Compare crude and adjusted estimates and quantify the change
 4. Fit a logistic regression with `glm(family = binomial)`, and interpret an exponentiated coefficient as an adjusted odds ratio with a confidence interval
 5. Compare nested models as a sensitivity analysis
-6. Write an interpretation of an adjusted association suitable for a results section
+6. Write an interpretation of an adjusted association in an appropriate academic style
 
 ## Setup
 

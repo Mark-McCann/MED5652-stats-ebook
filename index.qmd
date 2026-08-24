@@ -39,7 +39,7 @@ Two parts: two preparatory chapters worked through before seminars on statistics
 
 All weeks are interconnected, so please attend all classes. Missing one class would mean you lose the foundation of the next, with a knock-on effect on your overall learning. If you really can't attend a class, please make sure you read and work through the relevant chapter in this ebook before the next class.
 
-An appendix at the end of the book, the Glossary, collects every package, function, operator, and statistical term used across all seven chapters, grouped by package, with the chapter that first teaches each one.
+An appendix at the end of the book, the Glossary, collects every package, function, operator, and statistical term used across all seven chapters, grouped by package, with the chapter each one first appears in.
 
 To illustrate how each chapter is linked: Chapter 3 describes a variable, e.g. a health outcome, using summary statistics and visualisations. Chapter 4 attaches a confidence interval to the summary statistics, so we can say how precise the estimation is. Chapter 5 tests whether the health outcome differs between populations, and sizes that difference with a risk ratio or an odds ratio. Chapter 6 examines if the health outcome could be explained or described by another variable, as a regression model. Lastly, Chapter 7 puts several variables into that regression model at once, so an association can be adjusted for confounders named in advance, as covered in the epidemiology classes, and extends the same logic to a binary outcome with logistic regression.
 

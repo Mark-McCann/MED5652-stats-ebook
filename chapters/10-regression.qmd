@@ -8,11 +8,11 @@ We measure the relationship before modelling it, with a scatterplot and Pearson'
 
 By the end of this chapter you will be able to:
 
-1. Produce and interpret a scatterplot with a fitted regression line
+1. Produce and interpret a scatterplot with a fitted regression line using `ggplot2`
 2. Fit a simple linear regression with `lm()`
 3. Generate and interpret standard diagnostic plots
 4. Generate predictions and identify when a prediction constitutes extrapolation
-5. Extract coefficients and confidence intervals, and report a simple regression result in journal format
+5. Extract coefficients and confidence intervals, and report a simple regression result in an appropriate academic style
 
 ## Setup
 

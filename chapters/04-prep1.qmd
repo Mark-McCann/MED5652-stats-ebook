@@ -12,7 +12,7 @@ By the end of this chapter you will be able to:
 2.  Work in RStudio using a Project and a saved script, and explain why we script rather than work in the console
 3.  Create objects by assignment, and recognise R's basic data types and structures (numeric, character, logical, factor, vector, data frame)
 4.  Call a function using named arguments, explain what a default value is, and find its help page
-5.  Write and read a short piped sequence that includes a logical condition and extracts a column from a data frame
+5.  Write and read a short piped sequence that includes a logical condition and extracts a column from a data frame using `$` and `dplyr`'s `select()`
 6.  Diagnose a failed line of code from its error message
 7.  Build a project folder, following sensible file and folder naming conventions
 
@@ -232,6 +232,8 @@ library(dplyr)
 ```
 
 Loading a package sometimes prints a short message, often about functions it's replacing from another package. It's suppressed here since it doesn't matter yet, but there's no need to worry if one appears later in the course.
+
+That message points at a real ambiguity: once two loaded packages both define a function with the same name, R has to pick one, and it's not always the one we meant. `package::function()` sidesteps the whole problem. Writing `dplyr::select()` instead of just `select()` calls `select()` from `dplyr` directly, by name, whichever packages happen to be loaded, and without needing `library()` to have loaded that package first at all. We'll use this notation in prose from here on whenever it's worth being explicit about which package a function comes from.
 
 ## `$` versus `select()`
 
