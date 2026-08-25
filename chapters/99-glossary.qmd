@@ -64,11 +64,11 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 
 | Function | What it does | First appearance |
 |---|---|---|
-| `t.test()` | A t-test: a confidence interval and p-value for a mean, or for the difference between two means. | Chapter 4 |
+| `t.test()` | A t-test: a confidence interval and p-value for a mean, or for the difference between two means. `paired = TRUE` runs a paired test; `var.equal = TRUE` assumes the two groups share one variance, the same assumption `lm()` makes of a binary predictor. | Chapter 4 |
 | `prop.test()` | A confidence interval and p-value for a proportion, or for the difference between two proportions. Uses a continuity correction by default; `correct = FALSE` switches it off. | Chapter 4 |
 | `power.t.test()` | Calculates the sample size needed to detect a given difference in means, or the power a given sample size has. | Chapter 4 |
 | `power.prop.test()` | The same calculation as `power.t.test()`, for a difference in proportions. | Chapter 4 |
-| `wilcox.test()` | The Wilcoxon signed-rank test, a non-parametric alternative to the paired t-test. | Chapter 5 |
+| `wilcox.test()` | The Wilcoxon signed-rank test, a non-parametric alternative to a one-sample or paired t-test. `mu` sets the reference value for a one-sample test; `paired = TRUE` runs the paired version. | Chapter 5 |
 | `chisq.test()` | The chi-squared test of association between two categorical variables. `correct = FALSE` switches off its default continuity correction. | Chapter 5 |
 | `fisher.test()` | Fisher's exact test. | Chapter 5 |
 | `cor()` | Calculates a correlation coefficient. | Chapter 6 |
@@ -174,7 +174,7 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 | `|` | Combines two conditions, either must be true. `TRUE | TRUE` is `TRUE`; `TRUE | FALSE` is `TRUE`. | Chapter 1 |
 | `::` | Calls a function from a named package directly, without loading the whole package with `library()` first, as in `dplyr::select()`. | Chapter 1 |
 | `+` | Inside `ggplot2`, joins plot layers together, not arithmetic addition. | Chapter 2 |
-| `~` | A formula: separates an outcome (left) from a predictor (right), as in `t.test(chol ~ gender)`. | Chapter 5 |
+| `~` | A formula: separates an outcome (left) from a predictor (right), as in `t.test(chol ~ gender)`. | Chapter 4 |
 
 ## Statistical terms
 
@@ -182,9 +182,9 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 
 | Term | What it means | First appearance |
 |---|---|---|
-| Categorical variable | A variable whose values are named categories, not numbers. Nominal categories have no order (`gender`); ordinal categories do (`edu`). | Chapter 3 |
-| Numeric variable | A variable whose values are numbers: binary (0/1), count (0, 1, 2, 3, ...), or continuous (12.1, 13.5, ...). | Chapter 3 |
-| Factor | R's way of storing a categorical variable, as a set of named levels. | Chapter 3 |
+| Categorical variable | A variable that puts each observation into one of a fixed set of groups. Nominal categories have no order (`gender`); ordinal categories do (`edu`); binary is a two-category special case (`blm.cvd`), even where R has stored it as the numbers 0 and 1. | Chapter 3 |
+| Numeric variable | A variable whose values are numbers, in one of two shapes: count (0, 1, 2, 3, ...) or continuous (12.1, 13.5, ...). A binary variable coded 0/1 is categorical, not numeric, whatever class R has stored it as. | Chapter 3 |
+| Factor | R's way of storing a categorical variable, as a set of named levels. What class R stores a variable as (`glimpse()`'s `<dbl>`, `<chr>`, or a factor) is a separate question from what the variable statistically is. | Chapter 3 |
 | Reference level | The category everything else in a table or model is compared against. In R the default is the first level in a factor. | Chapter 3 |
 | Mean, median | Two measures of a distribution's centre: the arithmetic average, and the middle value when sorted. | Chapter 3 |
 | Standard deviation (SD) | A measure of a distribution's spread, usually paired with the mean. When used without context an SD can be assumed to describe the population. | Chapter 3 |
@@ -213,6 +213,7 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 | Term | What it means | First appearance |
 |---|---|---|
 | Null hypothesis | The baseline assumption in a statistical test, typically stating there is no effect, no difference, or no association between variables in the population. | Chapter 5 |
+| Alternative hypothesis | The statement a test weighs the null hypothesis against: that there is an effect, a difference, or an association. A test never proves the null hypothesis true; it only asks whether the sample is surprising enough to reject it in favour of the alternative. | Chapter 5 |
 | p-value | The probability of observing a result as extreme as, or more extreme than, the one calculated from our sample, assuming the null hypothesis is completely true. As good practice, we should always report point and interval estimates along with p-values. | Chapter 5 |
 | Parametric, non-parametric | Parametric tests assume the underlying population data follows a specific distribution (e.g. t-distribution, in t-tests). Non-parametric tests make no such assumptions and often rely on ranking the data (e.g. Wilcoxon tests). | Chapter 5 |
 | Paired, independent samples | Paired (or dependent) samples involve measurements linked to each other (e.g. pre/post tests on the same patient, or matched twins). Independent samples involve completely separate, unrelated groups. | Chapter 5 |

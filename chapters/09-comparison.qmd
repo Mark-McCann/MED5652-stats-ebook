@@ -1,24 +1,24 @@
 # Hypothesis tests and measures of association (Week 9) {#sec-09-comparison}
 
-Chapter 4 taught us to attach a confidence interval to an estimate, or to the difference between two groups, so we could say how precise it was. But we often want to know whether a difference is 'real' or is just chance. The interval from Chapter 4 answers that indirectly, by showing whether the null value falls inside it. A hypothesis test answers it head on, and reported alongside the interval rather than instead of it, that is what this chapter builds. And once a difference looks real, how large is it? The risk ratio and the odds ratio from the epidemiology half answer that, and here each one gets a confidence interval and a p-value attached.
+Chapter 4 taught us to attach a confidence interval to an estimate, or to the difference between two groups, so we could say how precise our estimates were. But we often want to know whether a difference is "real" or is just chance. The interval from Chapter 4 answers that indirectly. A hypothesis test answers it head on, and is often reported alongside the interval. The hypothesis test is what this chapter builds. In addition to the descriptive statistics for continuous variables, we also need to quantify differences in binary variables by groups. The risk ratio and the odds ratio from epidemiology answer that, and here we learn to attach a confidence interval and a p-value to them.
 
-So we start with the logic of a test: a null and an alternative hypothesis, a test statistic turned into a p-value, and precision about what a p-value actually is. Then we run the tests themselves, choosing between them from the structure of the data: an independent-samples t-test for two separate groups, a paired t-test for two measurements taken on the same person, a non-parametric alternative when the distribution won't support either, and a chi-squared test for a two-way table of counts. Along the way it becomes clear that a confidence interval and a hypothesis test carry the same information, which is why the reporting standard from here on is an effect size, a 95% confidence interval, and a p-value, together. We finish on risk ratios and odds ratios, and practise writing up each result in an appropriate academic style.
+So we start with the logic of a test: a null and an alternative hypothesis, a test statistic turned into a p-value, and what a p-value actually is. Then we run the tests themselves, choosing between them from the structure of the data: a one-sample t-test against a fixed reference value, a paired t-test for two related measurements on the same person, an independent-samples t-test for two separate groups, a non-parametric alternative (`wilcox.test()`) when a distribution won't support a t-test, and a chi-squared test for a two-way table of counts. Along the way it becomes clear that a confidence interval and a hypothesis test carry the same information, which is why the reporting standard from here on is an effect size, a 95% confidence interval, and a p-value, together. We finish on risk ratios and odds ratios, and practise writing up each result in an appropriate academic style.
 
 ## Chapter intended learning outcomes
 
 By the end of this chapter you will be able to:
 
-1. Perform and interpret an independent-samples t-test in R using `t.test()`
-2. Perform and interpret a paired t-test, recognise from a data structure which is required, and distinguish paired measurements taken over time from two related measurements taken at once
-3. Construct a contingency table and perform a chi-squared test using `table()` and `chisq.test()`
-4. Obtain risk ratios and odds ratios with confidence intervals using `epitools::riskratio()` and `epitools::oddsratio()`
-5. Write up a result in an appropriate academic style
+1. Perform and interpret a one-sample, paired, and independent-samples t-test using `t.test()`
+2. Construct a contingency table and perform a chi-squared test using `table()` and `chisq.test()`
+3. Determine when the above tests are valid, and when a non-parametric or exact alternative is needed (`wilcox.test()`, `fisher.test()`)
+4. Calculate risk ratios and odds ratios with confidence intervals using `epitools::riskratio()` and `epitools::oddsratio()`
+5. Write up a test result in an appropriate academic style
 
 ## Setup
 
 As in Chapters 3 and 4, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. We also bring back `strep_tb`, from the `medicaldata` package, for the categorical half of this chapter.
 
-This chapter adds one new package, `epitools`. If `epitools` isn't already on your machine, run `install.packages("epitools")` once in the console, not inside this document. Once it's installed, `library(epitools)` below makes its functions available for this session.
+This chapter adds one new package, `epitools`. Install it with `install.packages("epitools")` in the console, the same way as any other package, if it isn't on your machine already. Once it's installed, `library(epitools)` below makes its functions available for this session.
 
 ```{r}
 #| label: setup
@@ -35,8 +35,6 @@ library(epitools)
 nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
 dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
 ```
-
-As in Chapter 4, `dictionary` is read in even though no code below refers to it. It's there so it's to hand the moment we're unsure what a column means.
 
 ```{r}
 #| label: setup-hidden
@@ -73,35 +71,55 @@ nhanes <- nhanes |>
 
 This is the same recode we introduced in Chapters 3 and 4. See Chapter 3 for the reasoning behind each variable.
 
-## Independent-samples t-test: cholesterol by gender
+## The logic of a test
 
-`t.test()` compares two independent groups directly. We already used it in Chapter 4 to build a confidence interval for the difference in total cholesterol (`chol`, in mmol/L) between men and women:
+A classical hypothesis test starts from two competing statements about the **population**. The **null hypothesis**, written H0, says there's nothing going on: no difference between groups, or no association between variables. The exact wording depends on what is being tested, but it always describes the population, never the sample we happen to have measured. The **alternative hypothesis**, H1, says there is a difference. A one-sided alternative hypothesis, specifying the direction of the difference in advance, exists too, but is rarely used in practice; every test in this chapter uses the two-sided form. A test never proves the null hypothesis true. It only asks whether the pattern shown from the sample is surprising enough to reject the null hypothesis.
+
+A test turns the sample data into a single number, a **test statistic**, that measures how far the data sit from what the null hypothesis predicts under the sampling distribution. R then converts that statistic into a **p-value**: the probability of seeing that test statistic at least this extreme, if the null hypothesis were actually true. A p-value is not the probability that the null hypothesis is true, and it's not the probability the result happened by chance. A small p-value, conventionally below 0.05, means the data would be unusual under the null hypothesis, so we reject it in favour of the alternative. A p-value alone says nothing about how large an effect is, only about how surprising it is.
+
+A confidence interval and a hypothesis test carry the same information, read two different ways. If a 95% confidence interval for a difference excludes the null value, 0 for a difference, 1 for a risk ratio or odds ratio, the matching test rejects the null hypothesis at the 5% level, and vice versa. That's why Chapter 4 could already show us a real effect using intervals alone, before this chapter ever named a null hypothesis. From here on, every test in this book states its null and alternative hypothesis in words before running the test, always as a statement about the population, never about the sample or the particular study, and every result is reported the way the seminar set out: an effect size, a confidence interval, and a p-value, together.
+
+## One-sample t-test: total cholesterol against a clinical benchmark
+
+Guideline bodies often set a single reference value for a measurement: a "desirable" total cholesterol of under 5.2 mmol/L is a standard clinical benchmark. A one-sample t-test asks whether the population's mean differs from a single fixed value like that one, instead of from another group's mean.
+
+**Null hypothesis.** Mean total cholesterol in the population is 5.2 mmol/L.
+
+**Alternative hypothesis.** Mean total cholesterol in the population is not 5.2 mmol/L.
+
+`t.test()` runs a one-sample test when we give it one variable and a value to test it against, `mu`:
 
 ```{r}
-#| label: ttest-chol-gender
-t.test(chol ~ gender, data = nhanes |> filter(!is.na(gender)))
+#| label: ttest-onesample-chol
+t.test(nhanes$chol, mu = 5.2)
 ```
 
-This is the exact same call as Chapter 4's. `t.test()` was already giving us a hypothesis test; Chapter 4 just hadn't introduced hypothesis testing yet, so we only looked at the confidence interval. Now we bring the rest into view: a t-statistic, degrees of freedom, and a p-value.
+R prints a 95% confidence interval for the mean itself, 4.96 to 4.98 mmol/L, not for the quantity the test is actually about, which is how far that mean sits from the 5.2 mmol/L benchmark. Subtracting 5.2 from both ends turns it into the effect size we want: mean total cholesterol in this sample is about 4.97 mmol/L, 0.23 mmol/L below the 5.2 mmol/L benchmark (95% CI: 0.22 to 0.24 mmol/L below, p < 0.001). This is the same move the independent-samples section further on makes with its own confidence interval: read what R printed, then work out what it means for the comparison actually being asked.
 
-Before trusting a t-test, it's worth checking that the two groups aren't wildly different in spread or shape, the way Chapter 3's boxplot of `chol` by `gender` already let us do:
+A one-sample t-test assumes the **sampling distribution** of the mean is roughly normally distributed, not that `chol` itself is. We never see a sampling distribution directly, since we only have the one sample, so the shape of the data is the evidence we have about it. The central limit theorem says the sampling distribution of the mean gets closer to normal as the sample grows, whatever shape the data themselves have, and the more skewed the data, the larger a sample that takes. Chapter 3's histogram of `chol` showed a distribution with a mild right skew, not a perfectly symmetric bell shape, but with a sample this large, tens of thousands of participants, that skew is easily large enough for the theorem to apply. So the question a histogram answers here is not "is `chol` normal?" but "is this sample large enough, given how skewed `chol` is?", and for `chol` the answer is a comfortable yes. `wilcox.test()` is the non-parametric alternative, for a smaller sample (typically <30) or a more pronounced skew where that reassurance is less safe.
+
+**Null hypothesis (`wilcox.test()`).** The population median of `chol` is 5.2 mmol/L.
+
+**Alternative hypothesis.** The population median is not 5.2 mmol/L.
+
+`wilcox.test()`, from base R, takes the same `mu` argument for a one-sample test. Rather than a mean, it tests a **median**, using the ranks of how far each value sits from `mu`, so one extreme value can't dominate the result the way it can dominate a mean:
 
 ```{r}
-#| label: boxplot-recheck
-ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = chol)) +
-  geom_boxplot() +
-  labs(x = "Gender", y = "Total cholesterol (mmol/L)")
+#| label: wilcox-onesample-chol
+wilcox.test(nhanes$chol, mu = 5.2)
 ```
 
-The two boxplots are similar in spread and shape, just shifted slightly. Nothing here rules out a t-test. If, instead, the shape of the boxplot looks very different between the two groups, a t-test might not be appropriate, since it only compares the sample means. `t.test()` also doesn't assume equal variance between the two groups by default, which protects us even where the spreads differ more than they do here.
-
-Before reading the interval, check the direction, exactly as Chapter 4 set out. The alternative-hypothesis line says *group Male and group Female*, because `"Male"` is the first level of `gender`, so R has printed men minus women and both ends come out negative. Reversing every sign together turns it into the more natural reading: mean total cholesterol was about 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19 mmol/L, p < 0.001). The two statements are the same result written from a different perspective. This is the reporting standard the seminar introduced: effect size, confidence interval, and p-value, together, every time, from here on. `p < 0.001` is how we write a p-value that R prints as something like `< 2.2e-16`. Convention in public health (or clinical medicine) reports a very small p-value this way rather than typing out the full number.
+`wilcox.test()` returns a p-value and nothing else, no effect size, so the size of the effect has to come from a descriptive statistic that matches what the test is about: a median, not a mean. The sample median of `chol` is 4.89 mmol/L (IQR: 4.22 to 5.61 mmol/L), below the 5.2 mmol/L benchmark, consistent with the p-value far below 0.001. Typical cholesterol in this sample sits below the clinical benchmark whichever way we measure the middle of the distribution. With a sample this large, a t-test and its non-parametric alternative usually agree, but we should stay alert for when the central limit theorem's reassurance runs thin, in a smaller sample or a more skewed one.
 
 ## Paired t-test: two domains of activity in one person
 
 `nhanes_mph` records physical activity as two separate totals for each participant, both in MET-hours/day: `met_w`, activity at work, and `met_r`, activity outside work, exactly as the dictionary describes it. These are two different domains of activity, measured at the same time, in the same person.
 
-That distinction decides which test applies. An independent-samples t-test, like the one we just ran on `chol` by `gender`, compares two separate groups of people. Here we have one group of people, each measured twice. The right tool is a paired t-test. Rather than comparing the two columns directly, it collapses them into a single column of within-person differences (`met_w` minus `met_r`) and tests whether that difference is, on average, zero.
+That distinction decides which test applies. The one-sample test above compared one variable against a fixed value. Here there's no fixed value: two measurements to compare, both taken on the same people. That's not the same as comparing two separate groups, an independent-samples test, introduced later in this chapter. Every `met_w` value here has exactly one matching `met_r` value, from the same participant. The right tool is a paired t-test. Instead of comparing the two columns directly, it collapses them into a single column of within-person differences (`met_w` minus `met_r`) and tests whether that difference is, on average, zero.
+
+**Null hypothesis.** In the population, mean work activity and mean outside-work activity are the same: the mean within-person difference is zero.
+
+**Alternative hypothesis.** The mean within-person difference is not zero.
 
 `t.test()` runs a paired test when we set `paired = TRUE`:
 
@@ -112,9 +130,9 @@ t.test(nhanes$met_w, nhanes$met_r, paired = TRUE)
 
 On average, work activity ran about 3.07 MET-hours/day higher than activity outside work (95% CI: 2.93 to 3.21 MET-hours/day, p < 0.001).
 
-A paired t-test also arises in a before-and-after design, where the same measurement is taken at two time points on the same person. That is a different study design from the one here, even though the R code looks identical. There is no repeated measurement over time in this data, and describing the result as though there were would misdescribe the study and plant a habit that causes real trouble in a longitudinal design later on.
+A paired t-test also arises in a before-and-after design, where the same measurement is taken at two time points on the same person. That is a different study design from the one here, even though the R code looks identical. There is no repeated measurement over time in this data, and describing the result as though there were would plant a habit that causes real trouble in a longitudinal design later on.
 
-We can also get the paired t-test result by running an ordinary one-sample t-test on the differences directly, testing whether `met_w - met_r` has a mean of zero:
+We can also get the paired t-test result by running an ordinary one-sample t-test on the differences directly, testing whether `met_w - met_r` has a mean of zero, exactly the calculation the one-sample section above just introduced:
 
 ```{r}
 #| label: paired-ttest-manual
@@ -125,7 +143,7 @@ The t-statistic, degrees of freedom, and p-value are identical to the paired tes
 
 ## A non-parametric alternative: the Wilcoxon signed-rank test
 
-A paired t-test assumes the within-person differences are at least roughly normally distributed. Let's check that assumption directly, the way we checked spread with a boxplot earlier:
+A paired t-test assumes the sampling distribution of the within-person difference is at least roughly normally distributed, the same kind of claim the one-sample section above explained. Let's look at the data's distribution, this time with a histogram, since the within-person difference is a new variable we haven't looked at yet:
 
 ```{r}
 #| label: hist-met-diff
@@ -134,20 +152,58 @@ ggplot(nhanes |> mutate(met_diff = met_w - met_r), aes(x = met_diff)) +
   labs(x = "Work minus outside-work activity (MET-hours/day)", y = "Count")
 ```
 
-The distribution of differences is heavily skewed, and a large share of participants sit exactly at zero. Many people report no occupational activity at all, so `met_w` and `met_r` are equal for them. This is exactly the shape a paired t-test's normality assumption doesn't cope well with.
+The distribution of differences is heavily skewed, and a large share of participants sit exactly at zero. Many people report no occupational activity at all, so `met_w` and `met_r` are equal for them. The paired t-test may still be fine, because the sample size is large enough for the central limit theorem to apply, but a skew this pronounced is a good reason to check the conclusion against a test that doesn't lean on that theorem at all.
 
-`wilcox.test()`, from base R, tests the same null hypothesis (no systematic difference within the pair) without assuming a normal distribution. It works with the ranks of the differences rather than their average, so one extreme value or an oddly-shaped distribution can't dominate the result the way it can dominate a mean. With `paired = TRUE`, it runs the paired version, known as the Wilcoxon signed-rank test:
+`wilcox.test()` also tests the same question as the paired t-test here, without assuming a normal distribution. It works with the ranks of the differences rather than their average, so one extreme value or an oddly-shaped distribution can't dominate the result the way it can dominate a mean.
+
+**Null hypothesis.** In the population, work activity and outside-work activity are equally likely to be the larger of the pair: there's no systematic difference within the pair.
+
+**Alternative hypothesis.** One is systematically larger than the other.
+
+With `paired = TRUE`, it runs the paired version, known as the Wilcoxon signed-rank test:
 
 ```{r}
 #| label: wilcox-met
 wilcox.test(nhanes$met_w, nhanes$met_r, paired = TRUE)
 ```
 
-The conclusion doesn't change here: both tests reject the null hypothesis convincingly, each with a p-value far below 0.001. With a sample this large, the t-test and the Wilcoxon test agree despite the skew. That won't always be true. With a smaller sample, or a more extreme distribution, the two tests can disagree, and the non-parametric result is usually the one to trust when the normality assumption is in real doubt.
+The conclusion doesn't change here: both tests reject the null hypothesis convincingly, each with a p-value far below 0.001, and the paired t-test's own effect size above, work activity running about 3.07 MET-hours/day higher, still stands as the effect-size figure to report alongside either p-value. With a sample this large, the t-test and the Wilcoxon test agree despite the skew. That won't always be true. With a smaller sample, or a more extreme distribution, the two tests can disagree, and the non-parametric result is usually the one to trust when the normality assumption is in real doubt.
+
+## Independent-samples t-test: cholesterol by gender
+
+Unlike the paired comparison just above, an independent-samples t-test compares two entirely separate groups of people, with no link between a value in one group and a value in the other. `t.test()` compares two independent groups directly. We already used it in Chapter 4 to build a confidence interval for the difference in total cholesterol (`chol`, in mmol/L) between men and women.
+
+**Null hypothesis.** Mean total cholesterol is the same in men and women in the population.
+
+**Alternative hypothesis.** Mean total cholesterol differs between men and women in the population.
+
+```{r}
+#| label: ttest-chol-gender
+t.test(chol ~ gender, data = nhanes |> filter(!is.na(gender)))
+```
+
+This is the exact same call as Chapter 4's. `t.test()` was already giving us a hypothesis test; Chapter 4 just hadn't introduced hypothesis testing yet, so we only looked at the confidence interval. Now we bring the rest into view: a t-statistic, degrees of freedom, and a p-value.
+
+Before trusting a t-test, we check that the two groups aren't wildly different in spread or shape, the way Chapter 3's boxplot of `chol` by `gender` already let us do. This is a different check from the sampling-distribution question the one-sample and paired sections asked: there, the concern was whether one sampling distribution was close to normal; here, with two separate groups, the concern is whether the two groups look comparable enough in spread and shape for a difference in their means to be meaningful.
+
+```{r}
+#| label: boxplot-recheck
+ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = chol)) +
+  geom_boxplot() +
+  labs(x = "Gender", y = "Total cholesterol (mmol/L)")
+```
+
+The two boxplots are similar in spread and shape, just shifted slightly. Nothing here rules out a t-test. If, instead, the shape of the boxplot looks very different between the two groups, a t-test might not be appropriate, since it only compares the sample means. `t.test()` also doesn't assume equal variance between the two groups by default, which protects us even where the spreads differ more than they do here.
+
+Before reading the interval, check the direction, exactly as Chapter 4 set out. The alternative-hypothesis line says *group Male and group Female*, because `"Male"` is the first level of `gender`, so R has printed men minus women and both ends come out negative. Reversing every sign together turns it into the more natural reading: mean total cholesterol was about 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19 mmol/L, p < 0.001). The two statements are the same result written from a different perspective. This is the reporting standard the seminar introduced: effect size, confidence interval, and p-value, together, every time, from here on. `p < 0.001` is how we write a p-value that R prints as something like `< 2.2e-16`. Convention in public health (or clinical medicine) reports a very small p-value this way rather than typing out the scientific notation.
 
 ## Chi-squared test: `strep_tb`'s primary result
 
-`strep_tb`'s primary outcome is binary: did chest X-ray improve at six months (`improved`), and does that depend on trial arm (`arm`)? `table()` builds a two-way count, the same way it did in Chapter 3, and `chisq.test()`, from base R, tests whether the two variables are associated:
+`strep_tb`'s primary outcome is binary: did chest X-ray improve at six months (`improved`), and does that depend on trial arm (`arm`)? `table()` builds a two-way count, the same way it did in Chapter 3, and `chisq.test()`, from base R, tests whether the two variables are associated.
+
+**Null hypothesis.** The probability of improvement is the same in the population of patients receiving streptomycin and the population of patients receiving control treatment.
+
+**Alternative hypothesis.** The probability of improvement is not the same in the two populations.
 
 ```{r}
 #| label: table-arm-improved
@@ -162,33 +218,41 @@ chisq.test(tab_arm, correct = FALSE)
 
 The chi-squared statistic is large and the p-value is small: the proportion improved is not the same in the two arms. A p-value alone doesn't say by how much; the risk ratio and odds ratio below put a size on that difference.
 
-Before trusting a chi-squared test, it's worth checking the assumption behind it. Every **expected** count should be reasonably large, conventionally at least 5. `chisq.test()` calculates these expected counts internally and stores them in `$expected`:
+A chi-squared test also has an assumption to check. Every **expected** count should be reasonably large, conventionally at least 5. `chisq.test()` calculates these expected counts internally and stores them in `$expected`:
 
 ```{r}
 #| label: chisq-expected
 chisq.test(tab_arm, correct = FALSE)$expected
 ```
 
-All four expected counts are comfortably above 5, so the test is on solid ground here. When expected counts run low, typically in a small or very unevenly split sample, `fisher.test()`, also from base R, tests the same association exactly rather than by approximation, and doesn't depend on that condition.
+All four expected counts are comfortably above 5, so the test is on solid ground here. Expected counts run low typically in a small or very unevenly split sample. When that happens, `fisher.test()`, also from base R, is the alternative: it tests the same association exactly, rather than by approximation, and doesn't depend on that condition.
 
-It's worth saying what `correct = FALSE` actually switches off. Left alone on a 2×2 table, `chisq.test()` applies **Yates' continuity correction** by default: a conservative adjustment that shrinks the test statistic slightly, to compensate for approximating whole-number counts with a smooth curve. It makes the p-value larger.
+`correct = FALSE` switches off a specific adjustment. Left alone on a 2×2 table, `chisq.test()` applies **Yates' continuity correction** by default: it subtracts 0.5 from the absolute difference between each observed and expected count before squaring, a conservative adjustment that compensates for approximating whole-number counts with a smooth curve. It shrinks the test statistic slightly, so it makes the p-value larger.
 
 We've already met it without being told what it was. Chapter 4's `prop.test()` on these same two arms was headed "with continuity correction" too, and printed a p-value of 0.0003548. The uncorrected test above gives 0.000166: same data, same comparison, two different numbers, purely from this one default.
 
 The correction earns its place when expected counts run low, typically down around 5 to 10. Ours aren't: the smallest expected count is above 25. So we switch it off here, and it's also what makes this p-value match the one `epitools` reports for the same table in the next section.
 
+::: {.callout-note}
+## Try it yourself: two tests, one answer
+
+Chapter 4's `prop.test()` compares two proportions; this section's `chisq.test()` tests association in a two-way table. Run `prop.test(tab_arm, correct = FALSE)` and compare its chi-squared statistic and p-value to `chisq.test(tab_arm, correct = FALSE)` above, digit for digit. Write one sentence on what that match tells us about how the two tests relate, for a 2×2 table like this one.
+
+`prop.test()` also prints something `chisq.test()` doesn't: a confidence interval for the difference between the two proportions. Read the two proportions R prints and check which category of `improved` they refer to, the same way Chapter 4 warned to check before feeding a table straight in. Reverse the signs if needed, the way the independent-samples section above reversed its own interval, and write a one-sentence results statement giving the risk difference between the two arms with its 95% confidence interval. Write a second sentence on why that statement is something `chisq.test()` alone could never have given us.
+:::
+
 ## Fisher's exact test
 
-This is the test to reach for when a chi-squared test's expected-count assumption fails, which in public health work usually means a small trial or a rare outcome, both common enough to be worth knowing the fix for in advance. `fisher.test()`, mentioned above as the alternative when expected counts run low, is worth trying on this table too, even though nothing here required it. The call looks just like `chisq.test()`:
+This is the test to reach for when a chi-squared test's expected-count assumption fails, which in public health work usually means a small trial or a rare outcome, both common enough to be worth knowing the fix for in advance. It tests the same null and alternative hypothesis as the chi-squared test above, independence versus dependence between arm and improvement, just by an exact calculation instead of an approximation. Let's try `fisher.test()` on this table too, even though nothing here required it. The call looks just like `chisq.test()`:
 
 ```{r}
 #| label: fisher
 fisher.test(tab_arm)
 ```
 
-The p-value, 0.0002218, is close to the chi-squared test's 0.000166 but not identical: the two tests approximate the same underlying question in different ways, and only agree exactly by coincidence. Both lead to the same conclusion here, a clear association between arm and improvement. `riskratio()` and `oddsratio()`, met below, report a Fisher's exact p-value of their own for the same table, so this number will reappear.
+The p-value, 0.0002218, is close to the chi-squared test's 0.000166. Both lead to the same conclusion here, a clear association between arm and improvement. `riskratio()` and `oddsratio()`, met below, report a Fisher's exact p-value of their own for the same table, so this number will reappear.
 
-On a larger table, with many categories rather than the 2×2 shape here, `fisher.test()` can become slow, because it enumerates every possible table with the same row and column totals to work out the exact probability. If it runs too slowly or refuses with an error on a bigger table, adding `simulate.p.value = TRUE` switches it to a Monte Carlo estimate instead of the exact calculation, trading a small amount of precision for speed. That isn't needed here.
+On a larger table, with many categories instead of the 2×2 shape here, `fisher.test()` can become slow, because it enumerates every possible table with the same row and column totals to work out the exact probability. If it runs too slowly or refuses with an error on a bigger table, adding `simulate.p.value = TRUE` switches it to a Monte Carlo estimate instead of the exact calculation, trading a small amount of precision for speed. That isn't needed here.
 
 ## Risk ratios and odds ratios, with confidence intervals
 
@@ -196,16 +260,22 @@ The epidemiology half already taught how to calculate a risk ratio and an odds r
 
 `riskratio()` and `oddsratio()`, both from `epitools`, take a 2×2 table and compare its rows, treating the first row as the reference category everything else is measured against.
 
-They expect the table a particular way round, and that's worth knowing before building one, because getting it wrong produces a perfectly ordinary-looking answer rather than an error. The **exposure goes in the rows**, with the reference group first. The **outcome goes in the columns**, and the second column is taken as the event: the thing whose risk we're comparing. Our table has `arm` in the rows and `improved` in the columns, and `improved` holds `TRUE`/`FALSE` values, which `table()` orders `FALSE` then `TRUE`, so improvement lands in the second column exactly as needed. Print the table and look at it before passing it on. If the reference row or the event column is the wrong one, these functions still return a risk ratio, just an upside-down one.
+**Null hypothesis.** In the population, the risk ratio is 1, and the odds ratio is 1: no association between arm and improvement.
 
-`levels()`, from base R, lists a factor's categories in their current order, which is exactly what we need to check before comparing rows:
+**Alternative hypothesis.** The risk ratio, and the odds ratio, differ from 1.
+
+Note the null value sits at 1 for a risk ratio or an odds ratio, not 0. A ratio of 1 means the two groups' risk, or odds, are identical; a difference in means or a slope has its null at 0 instead, because there the null value means no gap rather than no ratio.
+
+They expect the table a particular way round. That's worth knowing before building one, because getting it wrong produces a perfectly ordinary-looking answer, not an error. The **exposure goes in the rows**, with the reference group first. The **outcome goes in the columns**, and the second column is taken as the event: the thing whose risk we're comparing. Our table has `arm` in the rows and `improved` in the columns. `improved` holds `TRUE`/`FALSE` values, and `table()` orders these `FALSE` then `TRUE`, so improvement lands in the second column exactly as needed. Print the table and look at it before passing it on. If the reference row or the event column is the wrong one, these functions still return a risk ratio, just an upside-down one.
+
+`levels()`, from base R, lists a factor's categories in their current order, which is what we need to check before comparing rows:
 
 ```{r}
 #| label: levels-arm
 levels(strep_tb$arm)
 ```
 
-`Streptomycin` is listed first, which would make it the reference, backwards from what we want here. `relevel()`, met in Chapter 3 when we checked the reference level on `eth`, moves the level named in `ref` to the front, making it the new reference level. There we were only demonstrating it; here it changes the answer:
+`Streptomycin` is listed first, which would make it the reference, backwards from what we want here. `relevel()`, met in Chapter 3, moves the level named in `ref` to the front, making it the new reference level. There we were only demonstrating it; here it changes the answer:
 
 ```{r}
 #| label: relevel-arm
@@ -213,7 +283,7 @@ arm_control_ref <- relevel(strep_tb$arm, ref = "Control")
 levels(arm_control_ref)
 ```
 
-`Control` is now first, so it becomes the reference row: the one everything else is compared against. This is the same reference level idea we met with factors in Chapter 3, now doing real work rather than being demonstrated on a copy, and it's worth having used twice before Chapter 7, where setting a sensible reference level is part of fitting a regression model.
+`Control` is now first, so it becomes the reference row: the one everything else is compared against. This is the same reference level idea we met with factors in Chapter 3, now doing real work instead of being demonstrated on a copy. Using it here, a second time before Chapter 6, is good practice: setting a sensible reference level is part of fitting a regression model there too.
 
 We rebuild the table with the releveled factor, and pass it to `riskratio()`:
 
@@ -225,7 +295,7 @@ tab_arm_releveled
 riskratio(tab_arm_releveled)
 ```
 
-`oddsratio()` works the same way. We ask for `method = "wald"`, which uses the same normal-approximation logic behind the ± 1.96 × SE intervals from Chapter 4, and which matches the simple cross-product formula from the hand calculation directly:
+`oddsratio()` works the same way. We ask for `method = "wald"`, which uses the same normal-approximation logic behind the ± 1.96 × SE intervals from Chapter 4. This matches the simple cross-product formula from the hand calculation directly:
 
 ```{r}
 #| label: oddsratio-arm
@@ -234,7 +304,7 @@ oddsratio(tab_arm_releveled, method = "wald")
 
 From the table above: 38 of 55 patients improved in the streptomycin arm (risk = 0.69), and 17 of 52 improved in the control arm (risk = 0.33). By hand, risk ratio = 0.69 / 0.33 = 2.11, and odds ratio = (38 × 35) / (17 × 17) = 4.60. Both match what `riskratio()` and `oddsratio()` just reported, with a confidence interval attached to each: a risk ratio of 2.11 (95% CI: 1.38 to 3.24) and an odds ratio of 4.60 (95% CI: 2.04 to 10.39). Neither interval comes close to including 1, the null value for both a risk ratio and an odds ratio, consistent with the chi-squared test above.
 
-`riskratio()` and `oddsratio()` each also report three p-values alongside the estimate: a mid-p exact test, Fisher's exact test, and a chi-squared test. All three agree closely here. The chi-squared one is 0.000166, exactly the p-value `chisq.test(tab_arm, correct = FALSE)` gave us above, to every digit printed. That's the payoff from switching the continuity correction off: the same test, run by two different packages, now gives one number instead of two. Had we left the correction on, `chisq.test()` would have reported 0.0003548, the number Chapter 4's `prop.test()` printed, while `epitools` reported 0.000166, and there'd be no way to tell from the output that the two functions had simply made different default choices.
+`riskratio()` and `oddsratio()` each also report three p-values alongside the estimate: a mid-p exact test, Fisher's exact test, and a chi-squared test. All three agree closely here. The chi-squared one is 0.000166, exactly the p-value `chisq.test(tab_arm, correct = FALSE)` gave us above, to every digit printed. That's only because we switched the continuity correction off. Had we left the correction on, `chisq.test()` would have reported 0.0003548, the number Chapter 4's `prop.test()` printed, while `epitools` reported 0.000166. There'd be no way to tell from the output that the two functions had simply made different default choices.
 
 ## `gtsummary::tbl_summary()` with a test attached
 
@@ -253,7 +323,7 @@ This single call reproduces the count, the percentage, and the p-value we built 
 ::: {.callout-note}
 ## Try it yourself: sample size and significance
 
-Using `slice_sample()` from Chapter 4, take a 10% random subsample of `nhanes` (remember to `set.seed()` first, so the subsample is reproducible) and re-run the `chol ~ gender` t-test from earlier in this chapter on it. Compare the p-value and the confidence interval to the ones from the full sample. Write one sentence on what changed and one sentence on what this means for judging whether a small p-value reflects a large effect or simply a large sample.
+Using `slice_sample()` from Chapter 4, take a 10% random subsample of `nhanes` (remember to `set.seed()` first, so the subsample is reproducible) and re-run the `chol ~ gender` t-test from earlier in this chapter on it. Compare the p-value and the confidence interval to the ones from the full sample. Note what changed in one sentence, then explain in a second what it means for judging whether a small p-value reflects a large effect or simply a large sample.
 :::
 
 ## Worked example: sedentary time by gender
@@ -272,39 +342,46 @@ ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = sed)) +
 t.test(sed ~ gender, data = nhanes |> filter(!is.na(gender)))
 ```
 
-The boxplots overlap substantially, with similar spread in each group, so a t-test is reasonable here too. R prints the difference men minus women once again, so the interval on the page runs from -0.49 to -0.03. Written as it would appear in a results section, with the whole thing reversed: women reported slightly more sedentary time than men (mean difference about 0.26 hours/day, 95% CI: 0.03 to 0.49 hours/day, p = 0.026). The interval is entirely on one side of zero, so the difference is statistically significant, but it's a small effect on a scale of many hours a day.
+The boxplots overlap substantially, with similar spread in each group, so a t-test is reasonable here too. R prints the difference men minus women once again, so the interval on the page runs from -0.49 to -0.03. Put into a sentence, with the whole thing reversed: women reported slightly more sedentary time than men (mean difference about 0.26 hours/day, 95% CI: 0.03 to 0.49 hours/day, p = 0.026). The interval doesn't include zero, so the difference is statistically significant, but it's a small effect, about 15 minutes a day, on a scale of many hours a day.
 
 ## Exercises
 
-**Exercise 1** (ILO 1). Perform an independent-samples t-test comparing age (`age`) between men and women. Check the assumption graphically first with a boxplot. Write one sentence reporting the result as it would appear in a results section, and one sentence commenting on whether a statistically significant result here is also a practically important one.
+**Exercise 1** (ILOs 1, 3). State the null and alternative hypotheses for a one-sample test of sedentary time (`sed`) against a reference value of 6 hours/day. Perform a one-sample t-test with `t.test()`, then repeat it with `wilcox.test()`. Report both results in one sentence each, each with its own effect size, and write a third sentence on why the mean and the median of `sed` might point to different conclusions about a typical participant's sedentary time.
 
-**Exercise 2** (ILO 2). Using `filter()`, restrict `nhanes` to participants whose sedentary time (`sed`) is above the sample median. On this subgroup, run both a paired t-test and a Wilcoxon signed-rank test comparing `met_w` and `met_r`. Write one sentence stating whether your conclusion changes in this more sedentary subgroup, and one sentence explaining why `met_w` and `met_r` are still a paired comparison here, not an independent one, even after filtering.
+**Exercise 2** (ILOs 1, 3). State the null and alternative hypotheses for a paired comparison of `met_w` and `met_r`. Using `filter()`, restrict `nhanes` to participants whose sedentary time (`sed`) is above the sample median. On this subgroup, run both a paired t-test and a Wilcoxon signed-rank test comparing `met_w` and `met_r`. Write one sentence stating whether your conclusion changes in this more sedentary subgroup, and one sentence explaining why `met_w` and `met_r` are still a paired comparison here, not an independent one, even after filtering.
 
-**Exercise 3** (ILO 3). Construct a contingency table of baseline cavitation (`baseline_cavitation`) against improvement (`improved`) in `strep_tb`. Run a chi-squared test, check the expected counts, and write one sentence interpreting the result.
+**Exercise 3** (ILO 1). State the null and alternative hypotheses, then perform an independent-samples t-test comparing age (`age`) between men and women. Check the assumption graphically first with a boxplot. Report the result in a single sentence, and add one more sentence on whether a statistically significant result here is also a practically important one.
 
-**Exercise 4** (ILOs 4, 5). Using the same method as the `arm`/`improved` example above, check with `levels()` which category of `gender` is already the reference, then use `relevel()` to set it explicitly (even if it turns out to already be the one you want). Obtain a risk ratio and an odds ratio, each with a 95% confidence interval, for improvement in men compared with women. Reconcile the software output with a hand calculation from the same 2×2 table, and write a two-sentence results statement.
+**Exercise 4** (ILOs 2, 3). State the null and alternative hypotheses, then construct a contingency table of baseline cavitation (`baseline_cavitation`) against improvement (`improved`) in `strep_tb`. Run a chi-squared test, check the expected counts, and write one sentence interpreting the result.
+
+**Exercise 5** (ILOs 4, 5). State the null and alternative hypotheses for the risk ratio and the odds ratio, noting the scale their null value sits on. Using the same method as the `arm`/`improved` example above, check with `levels()` which category of `gender` is already the reference, then use `relevel()` to set it explicitly (even if it turns out to already be the one you want). Obtain a risk ratio and an odds ratio, each with a 95% confidence interval, for improvement in men compared with women. Reconcile the software output with a hand calculation from the same 2×2 table, and write a two-sentence results statement.
 
 ## Writing exercise
 
-Using the `arm`/`improved` result from earlier in this chapter, write two sentences, as they would appear in a results section, for `strep_tb`'s primary outcome. State the proportion improved in each arm, and report the risk ratio or the odds ratio (your choice), its 95% confidence interval, and its p-value, together.
+Using the `arm`/`improved` result from earlier in this chapter, write two sentences for `strep_tb`'s primary outcome. State the proportion improved in each arm, and report the risk ratio or the odds ratio (your choice), its 95% confidence interval, and its p-value, together.
 
 ::: {.callout-note collapse="true"}
 ## Solutions
 
 **Exercise 1**
 
-```{r}
-#| label: sol-ex1
-ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = age)) +
-  geom_boxplot() +
-  labs(x = "Gender", y = "Age (years)")
+**Null hypothesis.** In the population, mean sedentary time is 6 hours/day (t-test); median sedentary time is 6 hours/day (`wilcox.test()`).
 
-t.test(age ~ gender, data = nhanes |> filter(!is.na(gender)))
+**Alternative hypothesis.** The mean, or the median, is not 6 hours/day.
+
+```{r}
+#| label: sol-ex1-onesample
+t.test(nhanes$sed, mu = 6)
+wilcox.test(nhanes$sed, mu = 6)
 ```
 
-This time R's interval is already positive, and that's informative: the difference is still men minus women, so a positive interval means the first group is the higher one. Men in this sample were on average about 0.7 years older than women (95% CI: 0.4 to 1.1 years, p < 0.001), and no signs need reversing to say so. The difference is statistically significant but tiny relative to a population averaging around 47 years old. With a sample this large, tens of thousands of participants, even a very small true difference will produce a small p-value. Statistical significance here is not the same as a practically important difference, and it doesn't really contradict Chapter 3's impression that age looked similar across the two groups.
+R's confidence interval, 6.45 to 6.68 hours/day, is for the mean itself; subtracting the 6-hour benchmark from both ends gives the effect size: mean sedentary time is about 6.56 hours/day, 0.56 hours/day above 6 hours/day (95% CI: 0.45 to 0.68 hours/day above, p < 0.001). The Wilcoxon test is significant too (p < 0.001), but it's testing a different quantity, so its effect size is a median, not a mean: sample median 5 hours/day (IQR: 3 to 8 hours/day), *below* the 6-hour benchmark. The mean and the median disagree on which side of 6 hours "typical" sedentary time falls. Sedentary time is right-skewed: a small number of participants report very high values, which pulls the mean up above the median, and above the benchmark, while the middle of the distribution, where most participants actually sit, remains below it. A typical participant, in the middle of the distribution, reports noticeably less sedentary time than the mean alone would suggest.
 
 **Exercise 2**
+
+**Null hypothesis.** In the population of participants in this more sedentary subgroup, the mean within-person difference between `met_w` and `met_r` is zero.
+
+**Alternative hypothesis.** The mean within-person difference is not zero.
 
 ```{r}
 #| label: sol-ex2
@@ -319,8 +396,29 @@ Both tests still reject the null hypothesis in this more sedentary subgroup, tho
 
 **Exercise 3**
 
+**Null hypothesis.** Mean age is the same in men and women in the population.
+
+**Alternative hypothesis.** Mean age differs between men and women in the population.
+
 ```{r}
 #| label: sol-ex3
+ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = age)) +
+  geom_boxplot() +
+  labs(x = "Gender", y = "Age (years)")
+
+t.test(age ~ gender, data = nhanes |> filter(!is.na(gender)))
+```
+
+This time R's interval is already positive, and that's informative: the difference is still men minus women, so a positive interval means the first group is the higher one. Men in this sample were on average about 0.7 years older than women (95% CI: 0.4 to 1.1 years, p < 0.001), and no signs need reversing to say so. The difference is statistically significant but tiny relative to a population averaging around 47 years old. With a sample this large, tens of thousands of participants, even a very small true difference will produce a small p-value. Statistical significance here is not the same as a practically important difference, and it doesn't really contradict Chapter 3's impression that age looked similar across the two groups.
+
+**Exercise 4**
+
+**Null hypothesis.** In the population, improvement is not associated with baseline cavitation.
+
+**Alternative hypothesis.** Improvement depends on baseline cavitation.
+
+```{r}
+#| label: sol-ex4
 tab_cavitation <- table(strep_tb$baseline_cavitation, strep_tb$improved)
 tab_cavitation
 chisq.test(tab_cavitation, correct = FALSE)
@@ -331,10 +429,14 @@ All expected counts are comfortably above 5, the smallest being just under 22, s
 
 The chi-squared test gives a p-value of about 0.056. That's above the conventional 0.05 threshold, but only just, and it would be a mistake to read much into which side of it the number landed on. The honest reading is the same either way: this is weak evidence of an association between baseline cavitation and improvement. The data don't establish a relationship, but they don't rule one out either. A trial of 107 patients simply cannot settle a question this size, and the result is best reported as inconclusive.
 
-**Exercise 4**
+**Exercise 5**
+
+**Null hypothesis.** In the population, the risk ratio is 1 and the odds ratio is 1: no association between gender and improvement.
+
+**Alternative hypothesis.** The risk ratio, and the odds ratio, differ from 1. Both nulls sit at 1, not 0, since these are ratios instead of differences.
 
 ```{r}
-#| label: sol-ex4
+#| label: sol-ex5
 levels(strep_tb$gender)
 
 gender_f_ref <- relevel(strep_tb$gender, ref = "F")
@@ -345,7 +447,7 @@ riskratio(tab_gender)
 oddsratio(tab_gender, method = "wald")
 ```
 
-`levels()` shows that `"F"` is already listed first, so `relevel()` here confirms that choice explicitly. By hand, from the table: 27 of 48 men improved (risk = 0.5625) and 28 of 59 women improved (risk = 0.4746), giving a risk ratio of 0.5625 / 0.4746 = 1.19, and an odds ratio of (27 × 31) / (21 × 28) = 1.42. Both match the software output. The proportion improved was slightly higher in men than in women (risk ratio 1.19, 95% CI: 0.82 to 1.71; odds ratio 1.42, 95% CI: 0.66 to 3.06, chi-squared p = 0.37), but both confidence intervals include the null value of 1, so this trial gives no good evidence of a difference in improvement by gender. `oddsratio()` prints three p-values, as it did for the `arm` table; the chi-squared one is quoted here because that's the one that reconciles with `chisq.test()`.
+`levels()` shows that `"F"` is already listed first, so `relevel()` here confirms that choice explicitly. By hand, from the table: 27 of 48 men improved (risk = 0.5625) and 28 of 59 women improved (risk = 0.4746), giving a risk ratio of 0.5625 / 0.4746 = 1.19, and an odds ratio of (27 × 31) / (21 × 28) = 1.42. Both match the software output. The proportion improved was slightly higher in men than in women (risk ratio 1.19, 95% CI: 0.82 to 1.71; odds ratio 1.42, 95% CI: 0.66 to 3.06, chi-squared p = 0.37). But both confidence intervals include the null value of 1, so this trial gives no good evidence of a difference in improvement by gender. `oddsratio()` prints three p-values, as it did for the `arm` table; the chi-squared one is quoted here because that's the one that reconciles with `chisq.test()`.
 
 **Writing exercise (sample answer)**
 

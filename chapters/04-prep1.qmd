@@ -1,16 +1,16 @@
 # R and R Studio (Week 4) {#sec-04-prep1}
 
-We all know how to work with a spreadsheet, but a spreadsheet is not the best way to record, manage, and analyse data. A copy-and-paste error in an Excel-based model contributed to JPMorgan Chase's \$6 billion loss in 2012, and Public Health England failed to log over 15,000 positive coronavirus test results in 2020, because they used an older Excel format template. The list goes on. A spreadsheet is useful for looking at the data and for some simple calculations, but it isn't designed for reproducible work: the work done in one doesn't normally get tracked, and there's no way to tell what has been done to a file just by looking at it. Instead, in public health and statistics, we often use statistical software for data management and analysis, as the record is clearer and can make the process more reproducible. This is one of the many reasons why we learn R to manage, handle, and analyse statistical data. As an example, we will examine how we can properly interact with R and RStudio, and use it to build a toy clinic record.
+We all know how to work with a spreadsheet, but a spreadsheet is not the best way to record, manage, and analyse data. A copy-and-paste error in an Excel-based model contributed to JPMorgan Chase's \$6 billion loss in 2012. Public Health England failed to log over 15,000 positive coronavirus test results in 2020, because they used an older Excel format template. A spreadsheet is useful for looking at data and for some simple calculations, but it isn't designed for reproducible work: the work done in one doesn't normally get tracked, and there's no way to tell what has been done to a file just by looking at it. Statistical software like R keeps a clearer record and makes the process more reproducible, which is why public health and statistics use it for data management and analysis. We will examine how to properly interact with R and RStudio, and use it to build a toy clinic record.
 
-Doing that systematically starts with somewhere to keep the work. So we install R and RStudio, build a project folder, and see why a saved script, rather than a line typed into the console and lost, is what makes an analysis repeatable at all. Then we learn how R holds data: objects, the types of value they store, the functions that act on them, and how to read the handful of error messages we'll all meet in the next ten weeks. We build every piece of it into a small clinic visit log, one column at a time, until we have a dataset of our own to ask questions of. Nothing here is statistics yet, but it's the foundation everything after it stands on.
+Doing that systematically starts with somewhere to keep the work. So we install R and RStudio, and build a project folder. Along the way we see why a saved script, and not a line typed into the console and lost, is what makes an analysis repeatable at all. Then we learn how R holds data: objects, the types of value they store, the functions that act on them, and how to read the handful of error messages we'll all meet in the next ten weeks. We build every piece of it into a small clinic visit log, one column at a time, until we have a dataset of our own to ask questions of. Nothing here is statistics yet, but it's the foundation everything after it stands on.
 
 ## Chapter intended learning outcomes
 
 By the end of this chapter you will be able to:
 
 1.  Install R and RStudio on your own device, and verify the installation by running code and loading a package
-2.  Work in RStudio using a Project and a saved script, and explain why we script rather than work in the console
-3.  Create objects by assignment, and recognise R's basic data types and structures (numeric, character, logical, factor, vector, data frame)
+2.  Use an RStudio Project and a saved script, and justify scripting instead of working in the console
+3.  Assign values to objects, and identify R's basic data types and structures (numeric, character, logical, factor, vector, data frame)
 4.  Call a function using named arguments, explain what a default value is, and find its help page
 5.  Write and read a short piped sequence that includes a logical condition and extracts a column from a data frame using `$` and `dplyr`'s `select()`
 6.  Diagnose a failed line of code from its error message
@@ -40,18 +40,18 @@ R is the programming language itself, and is the software program that actually 
 
 ### The four panes
 
-RStudio's window is split into four panes. Where each one sits is consistent no matter what we're doing, so it's worth learning the layout by position.
+RStudio's window is split into four panes, and where each one sits stays consistent no matter what we're doing.
 
 -   **Top-left: the source pane.** This only shows when a script is open, so it likely won't appear in RStudio fresh out of the box. This is where we write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; we have to tell RStudio to run it, which is the next thing we cover.
 -   **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. We can type directly into the console, but anything typed there is gone once RStudio closes, which is exactly why the source pane exists.
 -   **Top-right: the environment pane.** This lists every object that currently exists in our R session, its type, and a preview of its contents. Every time we create something, it appears here. When something we expected to see isn't listed, that's usually the first clue something went wrong.
 -   **Bottom-right: a tabbed pane.** This holds the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
 
-![RStudio's four panes: source (top-left), console (bottom-left), environment (top-right), and a tabbed pane for files, plots, packages, and help (bottom-right). This particular window is shown in a dark colour theme rather than RStudio's own light default; it's the layout and position of the four panes that matters here, not the colours.](../images/04-prep1-panes.png){fig-alt="An RStudio window with the four panes labelled: source, console, environment, and a tabbed files/plots/packages/help pane." width="95%" fig-align="center"}
+![RStudio's four panes: source (top-left), console (bottom-left), environment (top-right), and a tabbed pane for files, plots, packages, and help (bottom-right). This particular window is shown in a dark colour theme instead of RStudio's own light default; it's the layout and position of the four panes that matters here, not the colours.](../images/04-prep1-panes.png){fig-alt="An RStudio window with the four panes labelled: source, console, environment, and a tabbed files/plots/packages/help pane." width="95%" fig-align="center"}
 
 ### Building a project folder
 
-Working with R means managing at least a couple of files, most likely some data files and some R script files. It is usually a good idea to put them into a 'project folder'. Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`, following the naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
+Working with R means managing at least a couple of files, most likely some data files and some R script files. It is usually a good idea to put them into a "project folder". Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`. That follows a naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
 
 ### Creating an RStudio Project
 
@@ -76,7 +76,7 @@ For anything worth keeping, we write it in a script in the source pane instead, 
 -   Highlighting several lines and pressing the same shortcut runs all of them in order.
 -   The **Source** button, top-right of the source pane, runs the entire script from top to bottom.
 
-The reason this course insists on scripts rather than the console is simple: we will need to do this again, and we won't remember exactly what we typed. A saved script is a record anyone can rerun from scratch and get the same result. That's the whole idea behind reproducible work, and it's why every exercise in this book asks you to write and save a script rather than work directly in the console.
+The reason this course insists on scripts instead of the console is simple: we will need to do this again, and we won't remember exactly what we typed. A saved script is a record anyone can rerun from scratch and get the same result, which is why every exercise in this book asks for a script instead of console work.
 
 ## The log we're going to build
 
@@ -155,7 +155,7 @@ Four types matter throughout this course:
 
 ## Functions and arguments
 
-Nearly everything we do in R, from here to the last chapter, is calling a function, so it's worth understanding the shape of one properly now. A function is a machine that takes some input, processes it, and produces some output. Our log needs one more column: what each patient weighed on the clinic scale, in kilograms, before rounding. P01's reading was 71.83 kg. In the example below, `round()` takes that reading and rounds it to a specific precision, whole kilograms, which is the precision we actually want in the log. Note that a function is always followed by a pair of parentheses `()`.
+Nearly everything we do in R, from here to the last chapter, is calling a function, so we look at the shape of one properly now. A function is a machine that takes some input, processes it, and produces some output. Our log needs one more column: what each patient weighed on the clinic scale, in kilograms, before rounding. P01's reading was 71.83 kg. In the example below, `round()` takes that reading and rounds it to a specific precision, whole kilograms, which is the precision we actually want in the log. Note that a function is always followed by a pair of parentheses `()`.
 
 A function takes different **arguments**, basically the inputs the machine runs on. A function's arguments can be matched two ways: by **position**, in the order the function expects them, or by **name**, in any order at all.
 
@@ -217,13 +217,13 @@ visits$age > 80 | visits$age < 30
 visits$age %in% c(34, 45)
 ```
 
-One patient, P02, is both over 50 and a smoker. Conditions exactly like this, built on a real column of our own data, are what every `filter()` from Chapter 3 onward runs on.
+One patient, P02, is both over 50 and a smoker.
 
 ## Packages
 
 Everything used so far, `c()`, `class()`, `round()`, `mean()`, comes built into R itself. Most of what this course does lives in add-on packages instead: `dplyr` for manipulating data, `ggplot2` for plotting, and others still to come. Getting a package ready to use is two separate actions. **Installing** downloads it onto this computer, once. **Loading**, with `library()`, makes its functions available in the current R session, and has to be done again every time we start a fresh session, even though we never need to install the same package twice.
 
-Installing is typically a one-off, run in the console rather than saved in a script: `install.packages("dplyr")`. Loading is what actually goes in a script, since every script that uses `dplyr` needs it loaded first:
+Installing is typically a one-off, run in the console and not saved in a script: `install.packages("dplyr")`. Loading is what actually goes in a script, since every script that uses `dplyr` needs it loaded first:
 
 ```{r}
 #| label: load-dplyr
@@ -233,7 +233,7 @@ library(dplyr)
 
 Loading a package sometimes prints a short message, often about functions it's replacing from another package. It's suppressed here since it doesn't matter yet, but there's no need to worry if one appears later in the course.
 
-That message points at a real ambiguity: once two loaded packages both define a function with the same name, R has to pick one, and it's not always the one we meant. `package::function()` sidesteps the whole problem. Writing `dplyr::select()` instead of just `select()` calls `select()` from `dplyr` directly, by name, whichever packages happen to be loaded, and without needing `library()` to have loaded that package first at all. We'll use this notation in prose from here on whenever it's worth being explicit about which package a function comes from.
+That message points at a real ambiguity: once two loaded packages both define a function with the same name, R has to pick one, and it's not always the one we meant. `package::function()` sidesteps the whole problem. Writing `dplyr::select()` instead of just `select()` calls `select()` from `dplyr` directly, by name, whichever packages happen to be loaded, and without needing `library()` to have loaded that package first at all. We'll use this notation in prose from here on whenever it helps to be explicit about which package a function comes from.
 
 ## `$` versus `select()`
 
@@ -292,7 +292,7 @@ If we see other people's code, we may find `%>%`, the older pipe, which is only 
 
 ## Reading errors
 
-The errors below are R telling us our *code* is wrong: a typo, a missing bracket, the wrong function name. That's a different job from checking whether the *data* are wrong, which is Chapter 2's problem once we're reading in a real file rather than typing values ourselves. We will encounter a lot of errors when working with R, and that's normal. Even a very experienced R user encounters errors. The skill worth building now is reading the message rather than panicking at it. R usually formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything we'll see in this course.
+The errors below are R telling us our *code* is wrong: a typo, a missing bracket, the wrong function name. That's a different job from checking whether the *data* are wrong, which is Chapter 2's problem once we're reading in a real file rather than typing values ourselves. Even a very experienced R user encounters errors constantly, so the skill worth building now is reading the message instead of panicking at it. R usually formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything we'll see in this course.
 
 **Object not found.** R can't find something by that name, usually a typo or a variable that was never created:
 
@@ -412,9 +412,9 @@ Everything in `visits` only exists inside this R session, in memory. Close RStud
 write.csv(visits, "visits.csv", row.names = FALSE)
 ```
 
-`row.names = FALSE` is worth explaining rather than copying without thinking about it. Left out, `write.csv()` adds an extra column at the front of the file, numbering the rows 1 to 4. That's not part of our data, just R's own internal row labels leaking into the file, and it would show up as a stray, unlabelled column the moment the file is opened. `FALSE` tells `write.csv()` to leave it out and write only the columns we actually built.
+Left out, `write.csv()` adds an extra column at the front of the file, numbering the rows 1 to 4. That's not part of our data, just R's own internal row labels leaking into the file, and it would show up as a stray, unlabelled column the moment the file is opened. `FALSE` tells `write.csv()` to leave it out and write only the columns we actually built.
 
-That line just wrote a real file, `visits.csv`, sitting on disk the moment this page rendered, independent of R and of this book. In our own project, following the `data`/`scripts`/`outputs` structure from earlier in this chapter, this is exactly what the `outputs` subfolder is for: a file we saved out, not one we're about to read back in. Opening it, in a spreadsheet application or a plain text editor, shows exactly what `visits` held in R: patient IDs, ages, smoking status, weight, and cholesterol, one row per patient, values separated by commas, no formatting or formulas hidden behind them. That's the whole idea of a CSV file, and Chapter 2 explains why it matters properly, the moment we start reading files back in rather than writing them out.
+That line just wrote a real file, `visits.csv`, sitting on disk the moment this page rendered, independent of R and of this book. In our own project, following the `data`/`scripts`/`outputs` structure from earlier in this chapter, this is what the `outputs` subfolder is for: a file we saved out, not one we're about to read back in. Opening it, in a spreadsheet application or a plain text editor, shows exactly what `visits` held in R: patient IDs, ages, smoking status, weight, and cholesterol, one row per patient, values separated by commas, no formatting or formulas hidden behind them. Chapter 2 explains why that matters, the moment we start reading files back in instead of writing them out.
 
 Every idea used to build this log, a vector, a data frame, `$`, a comparison, loading a package, the pipe, comes back constantly from Chapter 2 onward. Only the data changes: Chapter 2 brings in this same clinic's real log, all eight patients, exactly as messily kept as real logs actually are.
 
