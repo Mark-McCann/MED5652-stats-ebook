@@ -28,15 +28,13 @@ NHANES is not a simple random sample of Americans. It's a **complex survey**. So
 
 ## Variable types
 
-The seminar classified every variable into two broad kinds, categorical and numeric.
+Every variable falls into one of two broad kinds, categorical and numeric.
 
 A **categorical** variable puts each participant into one of a fixed set of groups. `gender` and `eth` are **nominal**: the categories have no natural order. `phq.c`, depression classification, is **ordinal**: normal, mild symptoms, and possible depression run in a genuine order, even though the gap between them isn't a measured distance. `blm.cvd`, baseline cardiovascular disease, is **binary**: a two-category special case of categorical, present or absent, even though in the data it takes the value 0 or 1.
 
 A **numeric** variable is a number, and numbers come in two shapes that matter differently for analysis. `phq`, the raw depression symptom score behind `phq.c`, is a **count** (sometimes called discrete): whole numbers only, 0 through 6. `chol`, `age`, and `sed` are **continuous**: any value in a range is possible, 4.7 mmol/L as easily as 4.71.
 
-The type decides the summary and the plot. A mean and an SD, or a median and an IQR, describe a **continuous** variable. A **categorical** variable, however few its categories, is summarised as a proportion or a frequency table instead: for a binary variable like `blm.cvd`, the proportion of 1s and the mean of its 0/1 values come out as exactly the same number, but we still call it a proportion, since what it summarises is a category, not a measurement. This book says *continuous* from here on when that's specifically what's meant, not the vaguer *numeric*, since numeric alone doesn't say whether a variable is a count or continuous.
-
-A binary variable and a nominal variable with two categories describe the same kind of fact, present or absent. That's exactly why `blm.cvd` gets turned into a factor in the setup below, alongside the five columns that were categorical from the start. Recoding it doesn't change what it is; it just replaces `0`/`1` with labels a reader can understand without the dictionary open, which is also why a result in this book should never show `blm.cvd = 1`.
+The variable type decides the summary and the plot. A mean and an SD, or a median and an IQR, describe a **continuous** variable. A **categorical** variable, however few its categories, is summarised as a proportion or a frequency table instead: for a binary variable like `blm.cvd`, the proportion of 1s and the mean of its 0/1 values come out as exactly the same number, but we still call it a proportion, since what it summarises is a category, not a measurement. This book says *continuous* from here on when that's specifically what's meant, not the vaguer *numeric*, since numeric alone doesn't say whether a variable is a count or continuous.
 
 ## Setup
 

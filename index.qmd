@@ -1,7 +1,7 @@
 # Introduction {.unnumbered}
 
 ::: {.content-visible unless-format="pdf"}
-![](images/cover.png){fig-alt="IES Statistical Practicals: MED5652, Introduction to Epidemiology & Statistics" width="58%" fig-align="center"}
+![](images/cover.png){fig-alt="IES Statistical Labs: MED5652, Introduction to Epidemiology & Statistics" width="58%" fig-align="center"}
 :::
 
 ## What this book is

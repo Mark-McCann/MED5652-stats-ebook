@@ -1,4 +1,4 @@
-# Generates images/cover.png: the book cover for IES Statistical Practicals.
+# Generates images/cover.png: the book cover for IES Statistical Labs.
 # One-off build utility, not sourced by any chapter. Re-run after design changes.
 
 library(ggplot2)
@@ -58,7 +58,7 @@ p <- ggplot() +
             lineend = "round") +
   geom_point(data = scatter, aes(x, y, size = size), colour = ink, alpha = 0.72) +
   scale_size_identity() +
-  annotate("text", x = 4, y = 4.1, label = "Statistical Practicals",
+  annotate("text", x = 4, y = 4.1, label = "Statistical Labs",
            colour = ink, size = 7.1, fontface = "bold", family = "sans") +
   annotate("text", x = 4, y = 3.35, label = "MED5652",
            colour = accent, size = 4.2, fontface = "bold", family = "sans") +
