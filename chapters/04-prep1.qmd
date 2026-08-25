@@ -2,7 +2,7 @@
 
 We all know how to work with a spreadsheet, but a spreadsheet is not the best way to record, manage, and analyse data. A copy-and-paste error in an Excel-based model contributed to JPMorgan Chase's \$6 billion loss in 2012. Public Health England failed to log over 15,000 positive coronavirus test results in 2020, because they used an older Excel format template. A spreadsheet is useful for looking at data and for some simple calculations, but it isn't designed for reproducible work: the work done in one doesn't normally get tracked, and there's no way to tell what has been done to a file just by looking at it. Statistical software like R keeps a clearer record and makes the process more reproducible, which is why public health and statistics use it for data management and analysis. We will examine how to properly interact with R and RStudio, and use it to build a toy clinic record.
 
-Doing that systematically starts with somewhere to keep the work. So we install R and RStudio, and build a project folder. Along the way we see why a saved script, and not a line typed into the console and lost, is what makes an analysis repeatable at all. Then we learn how R holds data: objects, the types of value they store, the functions that act on them, and how to read the handful of error messages we'll all meet in the next ten weeks. We build every piece of it into a small clinic visit log, one column at a time, until we have a dataset of our own to ask questions of. Nothing here is statistics yet, but it's the foundation everything after it stands on.
+None of that works without somewhere to keep it, so an installation and a project folder come first. After that the chapter is mostly R's own vocabulary: objects hold values, values have types, functions act on them, and an error message tells us which of the three we got wrong. Running underneath all of it is one habit that matters more than any of the vocabulary. A saved script can be run again; a line typed into the console and lost cannot. Everything we learn goes into a small clinic visit log, built one column at a time until it's a dataset we can ask questions of. Nothing here is statistics yet; all of it is what the statistics will run on.
 
 ## Chapter intended learning outcomes
 
@@ -231,7 +231,7 @@ Installing is typically a one-off, run in the console and not saved in a script:
 library(dplyr)
 ```
 
-Loading a package sometimes prints a short message, often about functions it's replacing from another package. It's suppressed here since it doesn't matter yet, but there's no need to worry if one appears later in the course.
+Loading a package sometimes prints a short message, often about functions it's replacing from another package. It's suppressed here since it doesn't matter yet. Later in the course it will, for a specific reason.
 
 That message points at a real ambiguity: once two loaded packages both define a function with the same name, R has to pick one, and it's not always the one we meant. `package::function()` sidesteps the whole problem. Writing `dplyr::select()` instead of just `select()` calls `select()` from `dplyr` directly, by name, whichever packages happen to be loaded, and without needing `library()` to have loaded that package first at all. We'll use this notation in prose from here on whenever it helps to be explicit about which package a function comes from.
 
@@ -286,13 +286,13 @@ visits$chol |> mean(na.rm = TRUE) |> round(digits = 1)
 
 Take the log's cholesterol column, and then average it, dropping the one missing value, and then round the answer to one decimal place. Written without the pipe, the same calculation reads inside-out: `round(mean(visits$chol, na.rm = TRUE), digits = 1)`. The pipe exists so a sequence of steps can be read in the order they actually happen, which is how every multi-step `dplyr` sequence in this book, starting in Chapter 3, is written.
 
-There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). We'll likely write a lot of pipes, so it's worth remembering.
+There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). We'll write a lot of pipes over the rest of this course, and typing `|>` out by hand every time gets old fast.
 
 If we see other people's code, we may find `%>%`, the older pipe, which is only available once we've loaded the `dplyr` package. Practically, both pipes can be treated the same.
 
 ## Reading errors
 
-The errors below are R telling us our *code* is wrong: a typo, a missing bracket, the wrong function name. That's a different job from checking whether the *data* are wrong, which is Chapter 2's problem once we're reading in a real file rather than typing values ourselves. Even a very experienced R user encounters errors constantly, so the skill worth building now is reading the message instead of panicking at it. R usually formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything we'll see in this course.
+The errors below are R telling us our *code* is wrong: a typo, a missing bracket, the wrong function name. That's a different job from checking whether the *data* are wrong, which is Chapter 2's problem once we're reading in a real file rather than typing values ourselves. Even a very experienced R user encounters errors constantly. The skill is reading what the message says, not reacting to the fact that something went wrong. R usually formats errors as a short heading followed by a line starting with `!` stating what went wrong. Five kinds of failure account for nearly everything we'll see in this course.
 
 **Object not found.** R can't find something by that name, usually a typo or a variable that was never created:
 

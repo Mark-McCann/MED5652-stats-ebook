@@ -1,8 +1,8 @@
 # Describing and visualising data (Week 7) {#sec-07-descriptive}
 
-Chapter 2 got a real dataset into R and confirmed it had imported correctly. But confirming a column exists isn't the same as knowing what it actually looks like. With tens of thousands of participants, we can't just scroll through the way we could with a handful of rows and get a feel for the data. How do we describe a variable properly in R, using descriptive statistics and graphs?
+Scrolling through a dataset of tens of thousands of participants tells us almost nothing. Twenty rows we can read; twenty thousand we can't hold in our head at all. Chapter 2 got a dataset of exactly that size into R and confirmed every column had arrived, which isn't the same as knowing what any of it looks like. Seeing that takes summary statistics and graphs, and building them is the work of this chapter.
 
-Describing a variable properly starts with knowing what kind of variable it is, since a mean and an SD suit a continuous variable while a count or a percentage suits a categorical one. So we sort our variables into types first, then describe them with summary statistics, and visualise them with plots for a look at their distributions. We finish on a "Table 1", the participant-characteristics table that opens most published health research, and on writing in prose what it shows.
+Which statistic is the right one depends entirely on the kind of variable in front of us. A mean and an SD describe a continuous variable and say nothing sensible about a categorical one, where a count and a percentage do the job instead. So the types come first here, and the summaries, the plots, and the choice of what to show all follow from getting them right. The chapter's destination is a "Table 1", the participant-characteristics table that opens most published health research, along with the paragraph of prose that has to go with it.
 
 ## Chapter intended learning outcomes
 

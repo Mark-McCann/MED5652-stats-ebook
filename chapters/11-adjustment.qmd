@@ -1,8 +1,8 @@
 # Multiple linear and logistic regression (Week 11) {#sec-11-adjustment}
 
-Chapter 6 introduced simple linear regression to describe the association between two continuous variables. But an association found that way is often not causal, as we have learnt in epidemiology. A confounder can lie behind both, and a model with a single predictor has no way to account for it. How do we put several variables into one regression, so an association can be adjusted for the confounders we named in advance? And what do we do when the outcome isn't continuous at all, but whether someone lived or died?
+A confounder is a variable that lies behind an association and distorts it, and Chapter 6's single-predictor model has no way to hold one still. Baseline cardiovascular disease in our data is a real example of the problem, not just a definition of it: it's measured at the same visit as the exposure, so nothing in the data says whether it sits upstream of sedentary behaviour or downstream of it. Whether it belongs in the model as a confounder to adjust for, or should stay out because it's actually a mediator, is a judgement the study design can't make for us, and this chapter fits the model both ways and reports both.
 
-The first question is answered by extending the linear regression model: we add confounders, then interpret the adjusted coefficient. Comparing the crude (unadjusted) coefficient with the adjusted one gives us an idea of confounding bias. The second question gets a logistic regression, with odds ratios calculated from its exponentiated coefficients. We close on a sensitivity analysis, where `blm.cvd` could be either a mediator or a confounder.
+Getting there means extending linear regression to hold several predictors at once, so an adjusted coefficient can sit next to the crude one and the gap between them read as an estimate of confounding bias. The same extension handles an outcome that isn't continuous at all: whether someone died within ten years of their baseline visit becomes the input to a logistic regression, with odds ratios read straight off its exponentiated coefficients.
 
 ## Chapter intended learning outcomes
 
@@ -362,7 +362,7 @@ In the second, separate paragraph, report both odds ratios for `sed` from the se
 
 ## Where this leaves you
 
-That's the end of the course. Worth stopping to say what you now have, and what you don't.
+That's the end of the course. Here's what you now have, and what you don't.
 
 ### What the five weeks built
 
@@ -372,9 +372,9 @@ That arc is the module's **ILO 3**, critically appraising and applying key stati
 
 ### Additional remarks
 
-Two loose ends, worth tidying up before the boundaries below.
+Two loose ends to tidy up before the boundaries below.
 
-Firstly, terminology, since the literature isn't consistent about it. This chapter's own title calls what we fitted "multiple linear and logistic regression", and its body has been calling the linear half **multivariable**: several predictors, one outcome. Some writers say *multiple regression* for exactly the same thing, and that's fine too. *Multivariate regression* is a different thing, formally: several outcomes modelled together. This course doesn't cover it, and it's rare in public health research generally. Worth knowing the distinction exists, so a paper that says "multivariate" isn't assumed to mean what this chapter means by "multivariable". Two further pairs name the same thing differently: what this book calls the **outcome** is elsewhere called the **dependent variable**, and what it calls a **predictor** is elsewhere called an **independent variable**. Note also that an **exposure** is a **predictor**, but a **predictor** isn't necessarily an **exposure**.
+Firstly, terminology, since the literature isn't consistent about it. This chapter's own title calls what we fitted "multiple linear and logistic regression", and its body has been calling the linear half **multivariable**: several predictors, one outcome. Some writers say *multiple regression* for exactly the same thing, and that's fine too. *Multivariate regression* is a different thing, formally: several outcomes modelled together. This course doesn't cover it, and it's rare in public health research generally. Knowing the distinction exists means a paper that says "multivariate" doesn't get assumed to mean what this chapter means by "multivariable". Two further pairs name the same thing differently: what this book calls the **outcome** is elsewhere called the **dependent variable**, and what it calls a **predictor** is elsewhere called an **independent variable**. Note also that an **exposure** is a **predictor**, but a **predictor** isn't necessarily an **exposure**.
 
 Secondly, how the models in this chapter were built. Every adjustment set here, `age`, `gender`, and `edu`, then `blm.cvd`, was picked from subject-matter reasoning about what could confound the association in question, decided before any model was fitted. That's the strategy for an aetiological question, one asking what causes the outcome. A prognostic question, one asking how well we can predict who gets the outcome, calls for a different strategy: selecting variables to minimise prediction error, not confounders, regardless of causality. The boundary list below says more about that distinction.
 
@@ -392,7 +392,7 @@ Real boundaries, not gaps you're expected to fill in yourself. These will be tau
 The topics below are common in public health and epidemiology but aren't covered anywhere in the MPH curriculum:
 
 - **Prognostic modelling.** The note above was about how these models were built, to answer one exposure's question, not to predict outcomes. A prognostic model asks the different question directly: how well can we predict who gets the outcome. It's built, judged, and reported differently. Fitting the same `glm()` doesn't make it the same analysis.
-- **Missing data handling.** Worth being blunt about. Every model here is *complete-case*: anyone missing a value on any variable in the model was dropped. This logistic model ran on `r format(nrow(dead_complete), big.mark = ",")` of `r format(nrow(nhanes), big.mark = ",")` participants. Saying so each time is the minimum, not the same as handling it; methods that use incomplete records instead of deleting them, multiple imputation chief among them, aren't covered here.
+- **Missing data handling.** Every model here is *complete-case*, and that deserves stating plainly: anyone missing a value on any variable in the model was dropped. This logistic model ran on `r format(nrow(dead_complete), big.mark = ",")` of `r format(nrow(nhanes), big.mark = ",")` participants. Saying so each time is the minimum, not the same as handling it; methods that use incomplete records instead of deleting them, multiple imputation chief among them, aren't covered here.
 - **Sample size calculation based on regression.** Chapter 4 sized a two-group comparison; sizing a study around an adjusted coefficient is a different calculation.
 - **Time-varying confounding**, where a confounder changes over follow-up and standard adjustment stops working.
 - **Survey weighting**, from Chapter 3: we've treated a complex survey as a simple cohort throughout, so nothing here is a population-representative estimate.

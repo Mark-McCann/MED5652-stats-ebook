@@ -1,8 +1,8 @@
 # Data and data handling (Week 5) {#sec-05-prep2}
 
-Chapter 1 stressed the importance of having reproducible work in statistics and public health. It also taught R's basic syntax on a handful of patients we typed in ourselves: a small, clean dataset. Real data almost never arrives that way. It can be a spreadsheet that's been edited by hand for years, messy and full of errors. How do we turn a real, messy file into something R can work with reliably, and prove that our process actually works, not just this once but every time we run it?
+A clinic spreadsheet kept by hand for years has a title sitting in the first row, a blank row under the headers, dates written three different ways, and a column where someone typed "n/a" one month and "-" the next. Nobody planned it that way. It happened one edit at a time, and files like it are what real analysis actually starts from. The dataset we typed out in Chapter 1 was clean because we invented it. This chapter deals with the other kind.
 
-Answering that runs in three steps. Firstly we take a real, messy clinic spreadsheet apart: the same clinic setting as Chapter 1's hand-typed log, but a version that has lived in the real world and been edited only by hand in Excel. We work out what makes a dataset usable, restructure it, and save it as a CSV. Then we step up to real data, learning how to tell R where a file lives, what the common import failures look like, and how to check what actually came in rather than what we expected. Last we collect the lines that worked into an R script, so the whole data pipeline, the process that manages and transforms our data, is written down and can be run again from nothing. Week 6 is reading week; Chapter 3 picks up from here.
+Making a file like that usable is most of what data analysis actually is, and none of it counts unless it's written down: a cleaned dataset nobody can reproduce is one person's private result. So the chapter runs from the messy spreadsheet all the way through to a saved script that rebuilds the lot from nothing. In between sits the step that catches almost everyone out the first time, which is telling R where a file lives on our own computer, getting it in, and checking what actually arrived instead of assuming. Week 6 is reading week; Chapter 3 picks up from here.
 
 ## Chapter intended learning outcomes
 
@@ -86,7 +86,7 @@ library(readr)
 library(here)
 ```
 
-`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. That's worth reading the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in Chapter 1, nothing below will find its files, and this is where you'd find that out.
+`library(here)` prints one line when it loads, which this book hides because it's too wide to fit the page. In your own console it says `here() starts at ...` followed by the full path to your project folder. Read it the first time you see it, because it's `here()` telling you exactly which folder it will build every path from. If that path isn't the project folder you built in Chapter 1, nothing below will find its files, and this is where you'd find that out.
 
 ### Four things that go wrong
 
@@ -262,7 +262,7 @@ The dictionary's first column is called `Variable names`, with a space in it, so
 dictionary[dictionary$`Variable names` %in% c("age", "chol", "smoking"), ]
 ```
 
-That's the habit worth building now: when a column's meaning isn't obvious from its name, the answer lives in this file, not in a guess. Chapter 3 uses this same file to build proper factors out of six of these columns; for today, just knowing how to look one up is enough.
+That's the habit to build now: when a column's meaning isn't obvious from its name, the answer lives in this file, not in a guess. Chapter 3 uses this same file to build proper factors out of six of these columns; for today, just knowing how to look one up is enough.
 
 ## A first analysis, and your first script
 
@@ -302,7 +302,7 @@ ggplot(nhanes, aes(x = chol)) +
 
 ### That warning above the plot
 
-The plot came with a line starting `Warning:`, saying it removed `r format(sum(is.na(nhanes$chol)), big.mark = ",")` rows. Read it, because we'll see this one a lot, and then don't worry about it.
+The plot came with a line starting `Warning:`, saying it removed `r format(sum(is.na(nhanes$chol)), big.mark = ",")` rows. Read it, because we'll see this one a lot: here's what it actually says, and when it matters.
 
 Firstly, a warning is not an error. An error means R gave up and produced nothing. A warning means R did the job and is telling us something about how. The plot is there and it's fine.
 
