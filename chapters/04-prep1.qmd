@@ -30,11 +30,11 @@ options(width = 76)
 
 R is the programming language itself, and is the software program that actually runs our code. RStudio is a separate, free program that sits on top of R and makes it nicer to work in: a proper editor, a console, and the panes we look at next. Install R first, then RStudio, in that order. We can use R without RStudio, though it's harder for a beginner, but not the other way round.
 
-**Installing R.** Go to <https://cran.r-project.org> and choose the download link for your operating system, "Download R for Windows" or "Download R for macOS." For most people, you can run the installer and accept every default option.
+**Installing R.** Go to <https://cran.r-project.org> and choose the download link for your operating system, 'Download R for Windows' or 'Download R for macOS.' For most people, you can run the installer and accept every default option.
 
 **Installing RStudio.** Go to <https://posit.co/download/rstudio-desktop/> and download the free RStudio Desktop installer for your operating system. Run it the same way, accepting the defaults throughout.
 
-**Verification.** Once installed, check it is working properly. Open RStudio, type `2 + 2` into the console, the panel where typed commands run, covered properly in a moment, and press Enter. You should see `[1] 4`. Then confirm a package installs and loads too: run `install.packages("dplyr")` once, then `library(dplyr)`. Both get a proper explanation later in this chapter, under Packages; for now, just check that neither throws an error. If anything here fails, get it fixed before going on, since nothing later in this chapter works without it.
+**Verification.** Once installed, check it is working properly. Open RStudio, type `2 + 2` into the console, the panel where typed commands run, covered properly in a moment, and press Enter. You should see `[1] 4`. Then confirm a package installs and loads too: run `install.packages('dplyr')` once, then `library(dplyr)`. Both get a proper explanation later in this chapter, under Packages; for now, just check that neither throws an error. If anything here fails, get it fixed before going on, since nothing later in this chapter works without it.
 
 ## Finding our way around RStudio
 
@@ -47,11 +47,11 @@ RStudio's window is split into four panes, and where each one sits stays consist
 -   **Top-right: the environment pane.** This lists every object that currently exists in our R session, its type, and a preview of its contents. Every time we create something, it appears here. When something we expected to see isn't listed, that's usually the first clue something went wrong.
 -   **Bottom-right: a tabbed pane.** This holds the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
 
-![RStudio's four panes: source (top-left), console (bottom-left), environment (top-right), and a tabbed pane for files, plots, packages, and help (bottom-right). This particular window is shown in a dark colour theme instead of RStudio's own light default; it's the layout and position of the four panes that matters here, not the colours.](../images/04-prep1-panes.png){fig-alt="An RStudio window with the four panes labelled: source, console, environment, and a tabbed files/plots/packages/help pane." width="95%" fig-align="center"}
+![RStudio's four panes: source (top-left), console (bottom-left), environment (top-right), and a tabbed pane for files, plots, packages, and help (bottom-right). This particular window is shown in a dark colour theme instead of RStudio's own light default; it's the layout and position of the four panes that matters here, not the colours.](../images/04-prep1-panes.png){fig-alt='An RStudio window with the four panes labelled: source, console, environment, and a tabbed files/plots/packages/help pane.' width='95%' fig-align='center'}
 
 ### Building a project folder
 
-Working with R means managing at least a couple of files, most likely some data files and some R script files. It is usually a good idea to put them into a "project folder". Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`. That follows a naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
+Working with R means managing at least a couple of files, most likely some data files and some R script files. It is usually a good idea to put them into a 'project folder'. Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`. That follows a naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
 
 ### Creating an RStudio Project
 
@@ -62,9 +62,9 @@ An RStudio Project turns that folder into something RStudio understands directly
 3.  Browse to the project folder you just built, and click **Create Project**.
 4.  RStudio reopens with that folder as the **working directory**. You can confirm this by checking the Files pane, bottom-right, which now shows the folder's contents, and the title bar, which now shows the project's name.
 
-![The New Project wizard, with Existing Directory highlighted.](../images/04-prep1-new-project.png){fig-alt="RStudio's New Project wizard, showing New Directory, Existing Directory, and Version Control, with Existing Directory highlighted." width="70%" fig-align="center"}
+![The New Project wizard, with Existing Directory highlighted.](../images/04-prep1-new-project.png){fig-alt="RStudio's New Project wizard, showing New Directory, Existing Directory, and Version Control, with Existing Directory highlighted." width='70%' fig-align='center'}
 
-A Project's working directory is the folder R treats as "here" when it looks for a file. Once we start reading data in Chapter 2, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
+A Project's working directory is the folder R treats as 'here' when it looks for a file. Once we start reading data in Chapter 2, this is what lets a path like `data/mph_nhanes_20241107.csv` work on any machine, no matter where the project folder actually sits on that machine's disk.
 
 ### Console versus script
 
@@ -126,8 +126,8 @@ A vector holds one type of value, several at once, so it's one variable, like `a
 
 ```{r}
 #| label: dataframe-preview
-patient_id <- c("P01", "P02", "P03", "P04")
-smoker <- c("No", "Yes", "No", "Yes")
+patient_id <- c('P01', 'P02', 'P03', 'P04')
+smoker <- c('No', 'Yes', 'No', 'Yes')
 visits <- data.frame(patient_id, age, smoker)
 visits
 ```
@@ -143,7 +143,7 @@ R keeps track of what kind of value an object holds, and it matters: R decides w
 class(visits$age)
 class(visits$smoker)
 class(TRUE)
-class(factor(c("Yes", "No")))
+class(factor(c('Yes', 'No')))
 ```
 
 Four types matter throughout this course:
@@ -212,7 +212,7 @@ visits$age != 34
 ```{r}
 #| label: logical-demo
 !(visits$age > 50)
-visits$age > 50 & visits$smoker == "Yes"
+visits$age > 50 & visits$smoker == 'Yes'
 visits$age > 80 | visits$age < 30
 visits$age %in% c(34, 45)
 ```
@@ -223,7 +223,7 @@ One patient, P02, is both over 50 and a smoker.
 
 Everything used so far, `c()`, `class()`, `round()`, `mean()`, comes built into R itself. Most of what this course does lives in add-on packages instead: `dplyr` for manipulating data, `ggplot2` for plotting, and others still to come. Getting a package ready to use is two separate actions. **Installing** downloads it onto this computer, once. **Loading**, with `library()`, makes its functions available in the current R session, and has to be done again every time we start a fresh session, even though we never need to install the same package twice.
 
-Installing is typically a one-off, run in the console and not saved in a script: `install.packages("dplyr")`. Loading is what actually goes in a script, since every script that uses `dplyr` needs it loaded first:
+Installing is typically a one-off, run in the console and not saved in a script: `install.packages('dplyr')`. Loading is what actually goes in a script, since every script that uses `dplyr` needs it loaded first:
 
 ```{r}
 #| label: load-dplyr
@@ -259,11 +259,11 @@ Text values need quotes. Numbers, `TRUE`/`FALSE`, and the names of objects or co
 
 ```{r}
 #| label: quoting-demo
-class("P01")
+class('P01')
 class(34)
 ```
 
-`"P01"` is text. `34` is a number, and `class()` treats them completely differently. The same logic applies to object and column names: writing `age` refers to the vector we created earlier, but writing `"age"` is just the three-letter word.
+`'P01'` is text. `34` is a number, and `class()` treats them completely differently. The same logic applies to object and column names: writing `age` refers to the vector we created earlier, but writing `'age'` is just the three-letter word.
 
 A column name containing a space needs a different kind of quoting mark entirely: backticks, not quotation marks.
 
@@ -277,16 +277,18 @@ Backticks aren't easy to work with, and generally it's not recommended to have v
 
 ## The pipe
 
-`|>` takes what's on its left and feeds it in as the first input to what's on its right. Read it aloud as "and then":
+Some R code can be difficult to understand. For instance `round(mean(visits$chol, na.rm = TRUE), digits = 1)` can be quite complex for a new R user. This is mainly because there are two functions in that line, one enclosing another. If you want to decipher code like this, the best way would be to break it down one function at a time, starting from the most central part.
+
+One way to write more understandable code is by using the pipe `|>`. It takes what's on its left and feeds it in as the first input to what's on its right. Read it aloud as 'and then':
 
 ```{r}
 #| label: pipe-demo
 visits$chol |> mean(na.rm = TRUE) |> round(digits = 1)
 ```
 
-Take the log's cholesterol column, and then average it, dropping the one missing value, and then round the answer to one decimal place. Written without the pipe, the same calculation reads inside-out: `round(mean(visits$chol, na.rm = TRUE), digits = 1)`. The pipe exists so a sequence of steps can be read in the order they actually happen, which is how every multi-step `dplyr` sequence in this book, starting in Chapter 3, is written.
+Take the data's cholesterol column, and then average it, dropping the one missing value, and then round the answer to one decimal place. The pipe exists so a sequence of steps can be read in the order they actually happen, which is how every multi-step `dplyr` sequence in this book, starting in Chapter 3, is written.
 
-There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). We'll write a lot of pipes over the rest of this course, and typing `|>` out by hand every time gets old fast.
+There is a keyboard shortcut for the pipe: **Ctrl+Shift+M** (Windows) or **Cmd+Shift+M** (Mac). We'll write a lot of pipes over the rest of this course, so it'd be useful to memorise this shortcut.
 
 If we see other people's code, we may find `%>%`, the older pipe, which is only available once we've loaded the `dplyr` package. Practically, both pipes can be treated the same.
 
@@ -353,7 +355,7 @@ sum(weight_kg)
 ```{r}
 #| label: err-file-not-found
 #| error: true
-read.csv("nonexistent_file.csv")
+read.csv('nonexistent_file.csv')
 ```
 
 The warning line above states the actual reason, a missing file, before the error itself. We'll meet this one properly in Chapter 2, once there's a real file to read, the clinic's own version of the log we've just spent this chapter building by hand. `read.csv()` is base R's own version of the function; from there onward we use `read_csv()` from the `readr` package instead, which behaves a little differently but fails the same way when a path is wrong.
@@ -385,7 +387,7 @@ Pull out one column as a bare vector, and build a logical condition on it, the s
 ```{r}
 #| label: worked-dollar-logical
 visits$age
-visits$age > 50 & visits$smoker == "Yes"
+visits$age > 50 & visits$smoker == 'Yes'
 ```
 
 One of the four patients, P02, is a smoker over 50. Compare `$` against `select()` on the same data frame:
@@ -409,7 +411,7 @@ Everything in `visits` only exists inside this R session, in memory. Close RStud
 
 ```{r}
 #| label: write-csv
-write.csv(visits, "visits.csv", row.names = FALSE)
+write.csv(visits, 'visits.csv', row.names = FALSE)
 ```
 
 Left out, `write.csv()` adds an extra column at the front of the file, numbering the rows 1 to 4. That's not part of our data, just R's own internal row labels leaking into the file, and it would show up as a stray, unlabelled column the moment the file is opened. `FALSE` tells `write.csv()` to leave it out and write only the columns we actually built.
@@ -462,14 +464,14 @@ b)  `install.packages()` downloads a package once; `library()` loads it into the
 c)  `library()` downloads the package; `install.packages()` only loads it
 d)  Both have to be run every single time you use a function from a package
 
-**5.** Running `Mean(age)` produces `Error in Mean(age) : could not find function "Mean"`. What's actually wrong?
+**5.** Running `Mean(age)` produces `Error in Mean(age) : could not find function 'Mean'`. What's actually wrong?
 
 a)  The object `age` doesn't exist
 b)  R is case-sensitive and there's no function called `Mean`; the function is `mean()`
 c)  A package needs to be installed first
 d)  There's a missing comma somewhere in the call
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse='true'}
 ## Solutions
 
 **Exercise 1**
@@ -486,7 +488,7 @@ class(height_cm)
 ```{r}
 #| label: sol-ex2
 round(visits$chol, digits = 0)
-visits$chol > 5 & visits$smoker == "Yes"
+visits$chol > 5 & visits$smoker == 'Yes'
 ```
 
 `?round`'s Usage section reads `round(x, digits = 0)`, so `digits` defaults to 0: leave it out and R rounds to the nearest whole number. Running it both ways confirms that:
