@@ -4,13 +4,11 @@
 ![](images/cover.png){fig-alt='IES Statistical Labs: MED5652, Introduction to Epidemiology & Statistics' width='58%' fig-align='center'}
 :::
 
-## What this ebook is
-
-This is a companion ebook for the statistical labs of the course MED5652 Introduction to Epidemiology and Statistics for UofG MPH students. The principles and theories of statistics are taught in the seminars. This ebook, and the lab sessions, are to apply that knowledge in epidemiology and statistics to real data using R.
+This is a companion ebook for the statistical labs of the course MED5652 Introduction to Epidemiology and Statistics for MPH students in the University of Glasgow. The principles and theories of statistics are taught in the seminars. This ebook, and the lab sessions, are to apply that knowledge in epidemiology and statistics to real data using R.
 
 The first two preparatory sessions help us ease into the analysis environment. R is primarily a programming language, so it has a steeper learning curve than software like SPSS: we communicate with the computer using text commands instead of a mouse. It pays that curve back, though. R is versatile enough to find a software implementation for almost any statistical method we might need, and it's a skill employers actively look for. This ebook is set up for complete beginners regardless, with no prior data analysis or programming experience expected. From Chapter 3 on, every chapter picks up from the theories taught in the seminars, but it doesn't replace the seminar's content. Think of the seminar as where an idea is introduced, and the lab as where we actually do it, in R, on real data.
 
-## Where this ebook sits against the module's outcomes
+## Course intended learning outcomes
 
 MED5652 as a whole has four intended learning outcomes. By the end of the course, you will be able to:
 
@@ -43,7 +41,7 @@ An appendix at the end of the ebook, the Glossary, collects every package, funct
 
 ## Structure of a chapter
 
-Every chapter has its intended learning outcomes, and all contents are centred around them. At the end of each chapter, there are exercises: most are for you to practise your R skills, but many also require you to interpret and understand the output. This is tailored towards helping you to complete the final assessment, where reporting and interpreting the results correctly are as important as arriving at the right numbers. These end-of-chapter exercises have a folded solution in the ebook. There are also occasional 'Try it yourself' boxes, a light-weight exercise that changes small parts of the code, with no provided solutions.
+Every chapter has its intended learning outcomes, and all contents are centred around them. At the end of each chapter, there are exercises: most are for you to practise your R skills, but many also require you to understand and interpret the output. This is tailored towards helping you to complete the final assessment, where reporting and interpreting the results correctly are as important as arriving at the right numbers. These end-of-chapter exercises have a folded solution in the ebook. There are also occasional 'Try it yourself' boxes, a light-weight exercise that changes small parts of the code, with no provided solutions.
 
 ## The two datasets
 
@@ -51,6 +49,6 @@ Most of this ebook runs on one of two datasets. `nhanes_mph` is a curated extrac
 
 ## How to use the ebook
 
-The best thing to do is to work through the corresponding chapter before you come to the lab. Very likely you will encounter some errors you can't fix, or exercises you can't complete. The lab will be particularly useful to help you with these. The lab will also include demonstration of some key commands but will not be able to cover all the details in this ebook.
+The best thing to do is to work through the corresponding chapter before you come to the lab. Very likely you will encounter some errors you can't fix, or exercises you can't complete. The labs will be particularly useful to help you with these. The labs will also include demonstration of some key commands but will not be able to cover all the details in this ebook.
 
 When you work on the ebook, attempt the exercises yourself before you open the solutions. Work along in a script of your own as you go, as taught in Chapter 2. The ebook can stay as a reference whenever you need a reminder. If a function's name is only half-remembered, the Glossary at the end is the place to look it up.
