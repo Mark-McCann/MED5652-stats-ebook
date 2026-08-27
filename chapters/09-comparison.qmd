@@ -18,7 +18,7 @@ By the end of this chapter you will be able to:
 
 As in Chapters 3 and 4, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. We also bring back `strep_tb`, from the `medicaldata` package, for the categorical half of this chapter.
 
-This chapter adds one new package, `epitools`. Install it with `install.packages("epitools")` in the console, the same way as any other package, if it isn't on your machine already. Once it's installed, `library(epitools)` below makes its functions available for this session.
+This chapter adds one new package, `epitools`. Install it with `install.packages('epitools')` in the console, the same way as any other package, if it isn't on your machine already. Once it's installed, `library(epitools)` below makes its functions available for this session.
 
 ```{r}
 #| label: setup
@@ -32,15 +32,15 @@ library(here)
 library(medicaldata)
 library(epitools)
 
-nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
-dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
+nhanes <- read_csv(here('data', 'mph_nhanes_20241107.csv'))
+dictionary <- read_csv(here('data', 'mph_nhanes_20241107_dictionary.csv'))
 ```
 
 ```{r}
 #| label: setup-hidden
 #| include: false
 options(width = 76)
-source(here("R", "gtsummary-knitprint.R"))
+source(here('R', 'gtsummary-knitprint.R'))
 ```
 
 ```{r}
@@ -50,22 +50,22 @@ nhanes <- nhanes |>
   mutate(
     gender = factor(gender,
       levels = c(1, 2),
-      labels = c("Male", "Female")),
+      labels = c('Male', 'Female')),
     eth = factor(eth,
       levels = c(1, 2, 3, 4, 5),
-      labels = c("Mexican American", "Other Hispanic", "White", "Black", "Others")),
+      labels = c('Mexican American', 'Other Hispanic', 'White', 'Black', 'Others')),
     edu = factor(edu,
       levels = c(1, 2, 3),
-      labels = c("Less than high school", "High school graduate", "Above high school")),
+      labels = c('Less than high school', 'High school graduate', 'Above high school')),
     smoking = factor(smoking,
-      levels = c("Never", "Previous", "Current")),
+      levels = c('Never', 'Previous', 'Current')),
     phq.c = factor(phq.c,
-      levels = c("0 Normal", "1 Mild symptoms", "2 Possible depression"),
-      labels = c("Normal", "Mild symptoms", "Possible depression"),
+      levels = c('0 Normal', '1 Mild symptoms', '2 Possible depression'),
+      labels = c('Normal', 'Mild symptoms', 'Possible depression'),
       ordered = TRUE),
     blm.cvd = factor(blm.cvd,
       levels = c(0, 1),
-      labels = c("No", "Yes"))
+      labels = c('No', 'Yes'))
   )
 ```
 
@@ -81,7 +81,7 @@ A confidence interval and a hypothesis test carry the same information, read two
 
 ## One-sample t-test: total cholesterol against a clinical benchmark
 
-Guideline bodies often set a single reference value for a measurement: a "desirable" total cholesterol of under 5.2 mmol/L is a standard clinical benchmark. A one-sample t-test asks whether the population's mean differs from a single fixed value like that one, instead of from another group's mean.
+Guideline bodies often set a single reference value for a measurement: a 'desirable' total cholesterol of under 5.2 mmol/L is a standard clinical benchmark. A one-sample t-test asks whether the population's mean differs from a single fixed value like that one, instead of from another group's mean.
 
 **Null hypothesis.** Mean total cholesterol in the population is 5.2 mmol/L.
 
@@ -96,7 +96,7 @@ t.test(nhanes$chol, mu = 5.2)
 
 R prints a 95% confidence interval for the mean itself, 4.96 to 4.98 mmol/L, not for the quantity the test is actually about, which is how far that mean sits from the 5.2 mmol/L benchmark. Subtracting 5.2 from both ends turns it into the effect size we want: mean total cholesterol in this sample is about 4.97 mmol/L, 0.23 mmol/L below the 5.2 mmol/L benchmark (95% CI: 0.22 to 0.24 mmol/L below, p < 0.001). This is the same move the independent-samples section further on makes with its own confidence interval: read what R printed, then work out what it means for the comparison actually being asked.
 
-A one-sample t-test assumes the **sampling distribution** of the mean is roughly normally distributed, not that `chol` itself is. We never see a sampling distribution directly, since we only have the one sample, so the shape of the data is the evidence we have about it. The central limit theorem says the sampling distribution of the mean gets closer to normal as the sample grows, whatever shape the data themselves have, and the more skewed the data, the larger a sample that takes. Chapter 3's histogram of `chol` showed a distribution with a mild right skew, not a perfectly symmetric bell shape, but with a sample this large, tens of thousands of participants, that skew is easily large enough for the theorem to apply. So the question a histogram answers here is not "is `chol` normal?" but "is this sample large enough, given how skewed `chol` is?", and for `chol` the answer is a comfortable yes. `wilcox.test()` is the non-parametric alternative, for a smaller sample (typically <30) or a more pronounced skew where that reassurance is less safe.
+A one-sample t-test assumes the **sampling distribution** of the mean is roughly normally distributed, not that `chol` itself is. We never see a sampling distribution directly, since we only have the one sample, so the shape of the data is the evidence we have about it. The central limit theorem says the sampling distribution of the mean gets closer to normal as the sample grows, whatever shape the data themselves have, and the more skewed the data, the larger a sample that takes. Chapter 3's histogram of `chol` showed a distribution with a mild right skew, not a perfectly symmetric bell shape, but with a sample this large, tens of thousands of participants, that skew is easily large enough for the theorem to apply. So the question a histogram answers here is not 'is `chol` normal?' but 'is this sample large enough, given how skewed `chol` is?', and for `chol` the answer is a comfortable yes. `wilcox.test()` is the non-parametric alternative, for a smaller sample (typically <30) or a more pronounced skew where that reassurance is less safe.
 
 **Null hypothesis (`wilcox.test()`).** The population median of `chol` is 5.2 mmol/L.
 
@@ -149,7 +149,7 @@ A paired t-test assumes the sampling distribution of the within-person differenc
 #| label: hist-met-diff
 ggplot(nhanes |> mutate(met_diff = met_w - met_r), aes(x = met_diff)) +
   geom_histogram(binwidth = 5) +
-  labs(x = "Work minus outside-work activity (MET-hours/day)", y = "Count")
+  labs(x = 'Work minus outside-work activity (MET-hours/day)', y = 'Count')
 ```
 
 The distribution of differences is heavily skewed, and a large share of participants sit exactly at zero. Many people report no occupational activity at all, so `met_w` and `met_r` are equal for them. The paired t-test may still be fine, because the sample size is large enough for the central limit theorem to apply, but a skew this pronounced is a good reason to check the conclusion against a test that doesn't lean on that theorem at all.
@@ -190,12 +190,12 @@ Before trusting a t-test, we check that the two groups aren't wildly different i
 #| label: boxplot-recheck
 ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = chol)) +
   geom_boxplot() +
-  labs(x = "Gender", y = "Total cholesterol (mmol/L)")
+  labs(x = 'Gender', y = 'Total cholesterol (mmol/L)')
 ```
 
 The two boxplots are similar in spread and shape, just shifted slightly. Nothing here rules out a t-test. If, instead, the shape of the boxplot looks very different between the two groups, a t-test might not be appropriate, since it only compares the sample means. `t.test()` also doesn't assume equal variance between the two groups by default, which protects us even where the spreads differ more than they do here.
 
-Before reading the interval, check the direction, exactly as Chapter 4 set out. The alternative-hypothesis line says *group Male and group Female*, because `"Male"` is the first level of `gender`, so R has printed men minus women and both ends come out negative. Reversing every sign together turns it into the more natural reading: mean total cholesterol was about 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19 mmol/L, p < 0.001). The two statements are the same result written from a different perspective. This is the reporting standard the seminar introduced: effect size, confidence interval, and p-value, together, every time, from here on. `p < 0.001` is how we write a p-value that R prints as something like `< 2.2e-16`. Convention in public health (or clinical medicine) reports a very small p-value this way rather than typing out the scientific notation.
+Before reading the interval, check the direction, exactly as Chapter 4 set out. The alternative-hypothesis line says *group Male and group Female*, because `'Male'` is the first level of `gender`, so R has printed men minus women and both ends come out negative. Reversing every sign together turns it into the more natural reading: mean total cholesterol was about 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19 mmol/L, p < 0.001). The two statements are the same result written from a different perspective. This is the reporting standard the seminar introduced: effect size, confidence interval, and p-value, together, every time, from here on. `p < 0.001` is how we write a p-value that R prints as something like `< 2.2e-16`. Convention in public health (or clinical medicine) reports a very small p-value this way rather than typing out the scientific notation.
 
 ## Chi-squared test: `strep_tb`'s primary result
 
@@ -229,7 +229,7 @@ All four expected counts are comfortably above 5, so the test is on solid ground
 
 `correct = FALSE` switches off a specific adjustment. Left alone on a 2×2 table, `chisq.test()` applies **Yates' continuity correction** by default: it subtracts 0.5 from the absolute difference between each observed and expected count before squaring, a conservative adjustment that compensates for approximating whole-number counts with a smooth curve. It shrinks the test statistic slightly, so it makes the p-value larger.
 
-We've already met it without being told what it was. Chapter 4's `prop.test()` on these same two arms was headed "with continuity correction" too, and printed a p-value of 0.0003548. The uncorrected test above gives 0.000166: same data, same comparison, two different numbers, purely from this one default.
+We've already met it without being told what it was. Chapter 4's `prop.test()` on these same two arms was headed 'with continuity correction' too, and printed a p-value of 0.0003548. The uncorrected test above gives 0.000166: same data, same comparison, two different numbers, purely from this one default.
 
 The correction earns its place when expected counts run low, typically down around 5 to 10. Ours aren't: the smallest expected count is above 25. So we switch it off here, and it's also what makes this p-value match the one `epitools` reports for the same table in the next section.
 
@@ -279,7 +279,7 @@ levels(strep_tb$arm)
 
 ```{r}
 #| label: relevel-arm
-arm_control_ref <- relevel(strep_tb$arm, ref = "Control")
+arm_control_ref <- relevel(strep_tb$arm, ref = 'Control')
 levels(arm_control_ref)
 ```
 
@@ -295,11 +295,11 @@ tab_arm_releveled
 riskratio(tab_arm_releveled)
 ```
 
-`oddsratio()` works the same way. We ask for `method = "wald"`, which uses the same normal-approximation logic behind the ± 1.96 × SE intervals from Chapter 4. This matches the simple cross-product formula from the hand calculation directly:
+`oddsratio()` works the same way. We ask for `method = 'wald'`, which uses the same normal-approximation logic behind the ± 1.96 × SE intervals from Chapter 4. This matches the simple cross-product formula from the hand calculation directly:
 
 ```{r}
 #| label: oddsratio-arm
-oddsratio(tab_arm_releveled, method = "wald")
+oddsratio(tab_arm_releveled, method = 'wald')
 ```
 
 From the table above: 38 of 55 patients improved in the streptomycin arm (risk = 0.69), and 17 of 52 improved in the control arm (risk = 0.33). By hand, risk ratio = 0.69 / 0.33 = 2.11, and odds ratio = (38 × 35) / (17 × 17) = 4.60. Both match what `riskratio()` and `oddsratio()` just reported, with a confidence interval attached to each: a risk ratio of 2.11 (95% CI: 1.38 to 3.24) and an odds ratio of 4.60 (95% CI: 2.04 to 10.39). Neither interval comes close to including 1, the null value for both a risk ratio and an odds ratio, consistent with the chi-squared test above.
@@ -334,7 +334,7 @@ Let's bring the independent-samples t-test together on a research question we ha
 #| label: worked-boxplot-sed
 ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = sed)) +
   geom_boxplot() +
-  labs(x = "Gender", y = "Sedentary time (hours/day)")
+  labs(x = 'Gender', y = 'Sedentary time (hours/day)')
 ```
 
 ```{r}
@@ -360,7 +360,7 @@ The boxplots overlap substantially, with similar spread in each group, so a t-te
 
 Using the `arm`/`improved` result from earlier in this chapter, write two sentences for `strep_tb`'s primary outcome. State the proportion improved in each arm, and report the risk ratio or the odds ratio (your choice), its 95% confidence interval, and its p-value, together.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse='true'}
 ## Solutions
 
 **Exercise 1**
@@ -375,7 +375,7 @@ t.test(nhanes$sed, mu = 6)
 wilcox.test(nhanes$sed, mu = 6)
 ```
 
-R's confidence interval, 6.45 to 6.68 hours/day, is for the mean itself; subtracting the 6-hour benchmark from both ends gives the effect size: mean sedentary time is about 6.56 hours/day, 0.56 hours/day above 6 hours/day (95% CI: 0.45 to 0.68 hours/day above, p < 0.001). The Wilcoxon test is significant too (p < 0.001), but it's testing a different quantity, so its effect size is a median, not a mean: sample median 5 hours/day (IQR: 3 to 8 hours/day), *below* the 6-hour benchmark. The mean and the median disagree on which side of 6 hours "typical" sedentary time falls. Sedentary time is right-skewed: a small number of participants report very high values, which pulls the mean up above the median, and above the benchmark, while the middle of the distribution, where most participants actually sit, remains below it. A typical participant, in the middle of the distribution, reports noticeably less sedentary time than the mean alone would suggest.
+R's confidence interval, 6.45 to 6.68 hours/day, is for the mean itself; subtracting the 6-hour benchmark from both ends gives the effect size: mean sedentary time is about 6.56 hours/day, 0.56 hours/day above 6 hours/day (95% CI: 0.45 to 0.68 hours/day above, p < 0.001). The Wilcoxon test is significant too (p < 0.001), but it's testing a different quantity, so its effect size is a median, not a mean: sample median 5 hours/day (IQR: 3 to 8 hours/day), *below* the 6-hour benchmark. The mean and the median disagree on which side of 6 hours 'typical' sedentary time falls. Sedentary time is right-skewed: a small number of participants report very high values, which pulls the mean up above the median, and above the benchmark, while the middle of the distribution, where most participants actually sit, remains below it. A typical participant, in the middle of the distribution, reports noticeably less sedentary time than the mean alone would suggest.
 
 **Exercise 2**
 
@@ -404,7 +404,7 @@ Both tests still reject the null hypothesis in this more sedentary subgroup, tho
 #| label: sol-ex3
 ggplot(nhanes |> filter(!is.na(gender)), aes(x = gender, y = age)) +
   geom_boxplot() +
-  labs(x = "Gender", y = "Age (years)")
+  labs(x = 'Gender', y = 'Age (years)')
 
 t.test(age ~ gender, data = nhanes |> filter(!is.na(gender)))
 ```
@@ -439,15 +439,15 @@ The chi-squared test gives a p-value of about 0.056. That's above the convention
 #| label: sol-ex5
 levels(strep_tb$gender)
 
-gender_f_ref <- relevel(strep_tb$gender, ref = "F")
+gender_f_ref <- relevel(strep_tb$gender, ref = 'F')
 tab_gender <- table(gender_f_ref, strep_tb$improved)
 tab_gender
 
 riskratio(tab_gender)
-oddsratio(tab_gender, method = "wald")
+oddsratio(tab_gender, method = 'wald')
 ```
 
-`levels()` shows that `"F"` is already listed first, so `relevel()` here confirms that choice explicitly. By hand, from the table: 27 of 48 men improved (risk = 0.5625) and 28 of 59 women improved (risk = 0.4746), giving a risk ratio of 0.5625 / 0.4746 = 1.19, and an odds ratio of (27 × 31) / (21 × 28) = 1.42. Both match the software output. The proportion improved was slightly higher in men than in women (risk ratio 1.19, 95% CI: 0.82 to 1.71; odds ratio 1.42, 95% CI: 0.66 to 3.06, chi-squared p = 0.37). But both confidence intervals include the null value of 1, so this trial gives no good evidence of a difference in improvement by gender. `oddsratio()` prints three p-values, as it did for the `arm` table; the chi-squared one is quoted here because that's the one that reconciles with `chisq.test()`.
+`levels()` shows that `'F'` is already listed first, so `relevel()` here confirms that choice explicitly. By hand, from the table: 27 of 48 men improved (risk = 0.5625) and 28 of 59 women improved (risk = 0.4746), giving a risk ratio of 0.5625 / 0.4746 = 1.19, and an odds ratio of (27 × 31) / (21 × 28) = 1.42. Both match the software output. The proportion improved was slightly higher in men than in women (risk ratio 1.19, 95% CI: 0.82 to 1.71; odds ratio 1.42, 95% CI: 0.66 to 3.06, chi-squared p = 0.37). But both confidence intervals include the null value of 1, so this trial gives no good evidence of a difference in improvement by gender. `oddsratio()` prints three p-values, as it did for the `arm` table; the chi-squared one is quoted here because that's the one that reconciles with `chisq.test()`.
 
 **Writing exercise (sample answer)**
 

@@ -19,7 +19,7 @@ By the end of this chapter you will be able to:
 
 As in Chapters 3 to 5, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary.
 
-This chapter adds one new package, `broom`. If `broom` isn't already on your machine, run `install.packages("broom")` once in the console.
+This chapter adds one new package, `broom`. If `broom` isn't already on your machine, run `install.packages('broom')` once in the console.
 
 ```{r}
 #| label: setup
@@ -31,8 +31,8 @@ library(ggplot2)
 library(here)
 library(broom)
 
-nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
-dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
+nhanes <- read_csv(here('data', 'mph_nhanes_20241107.csv'))
+dictionary <- read_csv(here('data', 'mph_nhanes_20241107_dictionary.csv'))
 ```
 
 ```{r}
@@ -48,22 +48,22 @@ nhanes <- nhanes |>
   mutate(
     gender = factor(gender,
       levels = c(1, 2),
-      labels = c("Male", "Female")),
+      labels = c('Male', 'Female')),
     eth = factor(eth,
       levels = c(1, 2, 3, 4, 5),
-      labels = c("Mexican American", "Other Hispanic", "White", "Black", "Others")),
+      labels = c('Mexican American', 'Other Hispanic', 'White', 'Black', 'Others')),
     edu = factor(edu,
       levels = c(1, 2, 3),
-      labels = c("Less than high school", "High school graduate", "Above high school")),
+      labels = c('Less than high school', 'High school graduate', 'Above high school')),
     smoking = factor(smoking,
-      levels = c("Never", "Previous", "Current")),
+      levels = c('Never', 'Previous', 'Current')),
     phq.c = factor(phq.c,
-      levels = c("0 Normal", "1 Mild symptoms", "2 Possible depression"),
-      labels = c("Normal", "Mild symptoms", "Possible depression"),
+      levels = c('0 Normal', '1 Mild symptoms', '2 Possible depression'),
+      labels = c('Normal', 'Mild symptoms', 'Possible depression'),
       ordered = TRUE),
     blm.cvd = factor(blm.cvd,
       levels = c(0, 1),
-      labels = c("No", "Yes"))
+      labels = c('No', 'Yes'))
   )
 ```
 
@@ -71,16 +71,16 @@ This is the same recode we introduced in Chapter 3 and repeated in Chapters 4 an
 
 ## Correlation: Pearson's r and Spearman's rho
 
-A correlation coefficient examines whether and to what extent two variables move together proportionally. The two variables are symmetric in a correlation: neither is assumed to be an "outcome".
+A correlation coefficient examines whether and to what extent two variables move together proportionally. The two variables are symmetric in a correlation: neither is assumed to be an 'outcome'.
 
 `cor()`, from base R, calculates a correlation coefficient between two continuous variables. Its default method is Pearson's r, which measures the strength of a linear, or straight-line, association. We'll use the pairing this chapter's first model uses, `age` and `chol`:
 
 ```{r}
 #| label: cor-pearson
-cor(nhanes$age, nhanes$chol, use = "complete.obs")
+cor(nhanes$age, nhanes$chol, use = 'complete.obs')
 ```
 
-`use = "complete.obs"` tells `cor()` to drop any participant missing either variable first; without it, a single missing value makes the whole calculation return `NA`. `cor.test()` adds a confidence interval and a p-value, and drops incomplete pairs automatically.
+`use = 'complete.obs'` tells `cor()` to drop any participant missing either variable first; without it, a single missing value makes the whole calculation return `NA`. `cor.test()` adds a confidence interval and a p-value, and drops incomplete pairs automatically.
 
 **Null hypothesis.** In the population, the true correlation between age and cholesterol is zero.
 
@@ -93,7 +93,7 @@ cor.test(nhanes$age, nhanes$chol)
 
 Pearson's r here is about 0.094 (95% CI 0.084 to 0.104, p < 0.001): a weak but non-zero positive correlation between age and cholesterol.
 
-Pearson's r assumes both variables sit on a scale where equal units of increase or decrease mean the same thing throughout, i.e. an interval or ratio scale. `phq.c` doesn't fit with this assumption as "Possible depression" isn't a fixed distance from "Mild symptoms" the way one extra year of age is from another, it's an ordered category, not a measurement. Spearman's rank correlation is the alternative, correlating ranks rather than raw values, so it only needs observations put in order, not a distance measured between them. `phq.c` is already an ordered factor, so `as.numeric()` from base R turns it into the numbers 1, 2, and 3 in the order the factor was built, the ranking Spearman's correlation needs.
+Pearson's r assumes both variables sit on a scale where equal units of increase or decrease mean the same thing throughout, i.e. an interval or ratio scale. `phq.c` doesn't fit with this assumption as 'Possible depression' isn't a fixed distance from 'Mild symptoms' the way one extra year of age is from another, it's an ordered category, not a measurement. Spearman's rank correlation is the alternative, correlating ranks rather than raw values, so it only needs observations put in order, not a distance measured between them. `phq.c` is already an ordered factor, so `as.numeric()` from base R turns it into the numbers 1, 2, and 3 in the order the factor was built, the ranking Spearman's correlation needs.
 
 **Null hypothesis.** In the population, the true rank correlation between age and depression symptom category is zero.
 
@@ -102,31 +102,31 @@ Pearson's r assumes both variables sit on a scale where equal units of increase 
 ```{r}
 #| label: cor-spearman
 phq_numeric <- as.numeric(nhanes$phq.c)
-cor.test(nhanes$age, phq_numeric, method = "spearman")
+cor.test(nhanes$age, phq_numeric, method = 'spearman')
 ```
 
-Spearman's rho here is about 0.005, p = 0.37: close enough to zero, and far from significant, so age and depression symptom category show no clear monotonic relationship. `cor.test()` doesn't report a confidence interval for Spearman's rho the way it did for Pearson's r above; rho has no equivalent simple formula for one. The warning above, "cannot compute exact p-value with ties," isn't a problem: with tens of thousands of participants spread across only three `phq.c` categories, many necessarily share a rank, so R falls back on an approximate p-value, which is still valid.
+Spearman's rho here is about 0.005, p = 0.37: close enough to zero, and far from significant, so age and depression symptom category show no clear monotonic relationship. `cor.test()` doesn't report a confidence interval for Spearman's rho the way it did for Pearson's r above; rho has no equivalent simple formula for one. The warning above, 'cannot compute exact p-value with ties,' isn't a problem: with tens of thousands of participants spread across only three `phq.c` categories, many necessarily share a rank, so R falls back on an approximate p-value, which is still valid.
 
 ## A scatterplot with a fitted line: cholesterol by age
 
-Chapter 3 plotted total cholesterol (`chol`, in mmol/L) against age (in years) as a plain scatterplot, with no line through it. `geom_smooth()`, from `ggplot2`, adds one. With `method = "lm"`, it fits exactly the simple linear regression this chapter is about, and draws the result:
+Chapter 3 plotted total cholesterol (`chol`, in mmol/L) against age (in years) as a plain scatterplot, with no line through it. `geom_smooth()`, from `ggplot2`, adds one. With `method = 'lm'`, it fits exactly the simple linear regression this chapter is about, and draws the result:
 
 ```{r}
 #| label: scatter-age
 ggplot(nhanes |> filter(!is.na(age), !is.na(chol)), aes(x = age, y = chol)) +
   geom_point(alpha = 0.1) +
-  geom_smooth(method = "lm") +
-  labs(x = "Age (years)", y = "Total cholesterol (mmol/L)")
+  geom_smooth(method = 'lm') +
+  labs(x = 'Age (years)', y = 'Total cholesterol (mmol/L)')
 ```
 
-Above the plot, `ggplot2` printed `` `geom_smooth()` using formula = 'y ~ x' ``. That's a message, not a warning: it's just reporting which formula it fitted, since `geom_smooth()` picks one for us if we don't say. Here it chose a straight line in `x`, exactly the simple linear regression we asked for with `method = "lm"`.
+Above the plot, `ggplot2` printed `` `geom_smooth()` using formula = 'y ~ x' ``. That's a message, not a warning: it's just reporting which formula it fitted, since `geom_smooth()` picks one for us if we don't say. Here it chose a straight line in `x`, exactly the simple linear regression we asked for with `method = 'lm'`.
 
 The shaded band around the line is a 95% confidence interval for the line itself, the same idea as every other confidence interval in this course, just drawn as a band rather than printed as two numbers. The line slopes gently upward: cholesterol tends to be a little higher in older participants. The cloud of points around it is wide, though. Age doesn't determine cholesterol on its own, and the next section puts a number on exactly how much of the variation in cholesterol age can explain.
 
 ::: {.callout-note}
 ## Try it yourself: what the band shows
 
-Re-run the plot above with `geom_smooth(method = "lm", se = FALSE)`. Then try `geom_smooth(method = "lm", level = 0.80)`. Describe what disappeared in the first change, then what changed in the second, one sentence each.
+Re-run the plot above with `geom_smooth(method = 'lm', se = FALSE)`. Then try `geom_smooth(method = 'lm', level = 0.80)`. Describe what disappeared in the first change, then what changed in the second, one sentence each.
 :::
 
 ## Fitting the model with `lm()`
@@ -185,7 +185,7 @@ summary(m_gender)
 confint(m_gender)
 ```
 
-With a continuous predictor like `age`, the `(Intercept)` was an abstract number, cholesterol at age zero, nobody's actual cholesterol. With a two-category predictor it's concrete: `gender`'s first level is `"Male"`, so `(Intercept)`, 4.8859 mmol/L, is simply mean cholesterol in men. This is the reference level again, the same idea Chapter 3 introduced and Chapter 5's `relevel()` work used a second time: whichever category is listed first becomes the one everything else in the model is compared against, and here that comparison is the whole model.
+With a continuous predictor like `age`, the `(Intercept)` was an abstract number, cholesterol at age zero, nobody's actual cholesterol. With a two-category predictor it's concrete: `gender`'s first level is `'Male'`, so `(Intercept)`, 4.8859 mmol/L, is simply mean cholesterol in men. This is the reference level again, the same idea Chapter 3 introduced and Chapter 5's `relevel()` work used a second time: whichever category is listed first becomes the one everything else in the model is compared against, and here that comparison is the whole model.
 
 The slope, on `genderFemale`, is the difference between the two group means: 0.1685 mmol/L, women minus men, with its own standard error, t-value, and p-value, and a 95% confidence interval of 0.1470 to 0.1901 mmol/L. Chapter 5 reported the same comparison as 0.17 mmol/L higher in women (95% CI: 0.15 to 0.19 mmol/L), but only after reversing the signs on what `t.test()` printed, because `t.test()` reports Male minus Female by default. `lm()` reports the comparison the other way round, reference category first, so the sign comes out already the way we want to read it: the same underlying result, with no sign-flipping needed here.
 
@@ -218,12 +218,12 @@ confint(m_edu)
 
 Two rows this time, `eduHigh school graduate` and `eduAbove high school`, each a difference from whichever category is first in `levels(edu_chol_complete$edu)`. Neither is anywhere near significant here: on this evidence, education isn't associated with cholesterol in this sample.
 
-`levels()` confirms the reference is `"Less than high school"`. `relevel()`, already met in Chapter 3, moves a different category to the front. This time we write the releveled factor back into a data frame, rather than working on a standalone copy the way Chapter 3 did: `lm()` needs to find `edu` already releveled inside whatever `data =` points at, so it goes into a new object, `edu_relevelled`, leaving `edu_chol_complete` and the model fitted on it untouched:
+`levels()` confirms the reference is `'Less than high school'`. `relevel()`, already met in Chapter 3, moves a different category to the front. This time we write the releveled factor back into a data frame, rather than working on a standalone copy the way Chapter 3 did: `lm()` needs to find `edu` already releveled inside whatever `data =` points at, so it goes into a new object, `edu_relevelled`, leaving `edu_chol_complete` and the model fitted on it untouched:
 
 ```{r}
 #| label: relevel-edu
 edu_relevelled <- edu_chol_complete |>
-  mutate(edu = relevel(edu, ref = "Above high school"))
+  mutate(edu = relevel(edu, ref = 'Above high school'))
 m_edu_relevel <- lm(chol ~ edu, data = edu_relevelled)
 summary(m_edu_relevel)
 confint(m_edu_relevel)
@@ -245,14 +245,14 @@ age_aug <- augment(m_age)
 age_aug
 ```
 
-Plotting residuals against fitted values checks linearity and constant variance together. If the model is a good fit, the points should scatter evenly above and below zero, with no obvious curve and no obvious change in spread from left to right. `geom_hline()`, from `ggplot2`, draws a single horizontal line across the plot at whatever height `yintercept` names, and we put one at zero to make "above and below" easy to judge by eye:
+Plotting residuals against fitted values checks linearity and constant variance together. If the model is a good fit, the points should scatter evenly above and below zero, with no obvious curve and no obvious change in spread from left to right. `geom_hline()`, from `ggplot2`, draws a single horizontal line across the plot at whatever height `yintercept` names, and we put one at zero to make 'above and below' easy to judge by eye:
 
 ```{r}
 #| label: resid-fitted-age
 ggplot(age_aug, aes(x = .fitted, y = .resid)) +
   geom_point(alpha = 0.1) +
   geom_hline(yintercept = 0) +
-  labs(x = "Fitted value (mmol/L)", y = "Residual (mmol/L)")
+  labs(x = 'Fitted value (mmol/L)', y = 'Residual (mmol/L)')
 ```
 
 Most points sit in a fairly even band around zero, consistent with linearity and roughly constant variance. A small number of participants with very high cholesterol readings sit well above the line, though, visible here as points a long way above zero. Those same participants are worth keeping in mind for the QQ plot, which checks whether the residuals are approximately normally distributed. `.std.resid`, also added by `augment()`, standardises each residual to the same scale a normal distribution would use. `stat_qq()` and `stat_qq_line()`, both from `ggplot2`, plot the standardised residuals against what a perfect normal distribution would produce, with a reference line for comparison:
@@ -262,7 +262,7 @@ Most points sit in a fairly even band around zero, consistent with linearity and
 ggplot(age_aug, aes(sample = .std.resid)) +
   stat_qq() +
   stat_qq_line() +
-  labs(x = "Theoretical quantiles", y = "Standardised residuals")
+  labs(x = 'Theoretical quantiles', y = 'Standardised residuals')
 ```
 
 Points that fall on the line are consistent with normally distributed residuals. Here, the middle of the distribution sits close to the line, but the upper tail pulls away from it. That's the same small group of participants with unusually high cholesterol showing up again: the residuals are a little more heavy-tailed than a normal distribution would predict. With a sample this large, the model's estimates are still reliable despite this. With a much smaller sample, tail behaviour like this would be more of a concern.
@@ -273,10 +273,10 @@ Points that fall on the line are consistent with normally distributed residuals.
 
 ```{r}
 #| label: predict-age
-predict(m_age, newdata = data.frame(age = c(45, 150)), interval = "confidence")
+predict(m_age, newdata = data.frame(age = c(45, 150)), interval = 'confidence')
 ```
 
-`interval = "confidence"` adds a confidence interval around each prediction. This confidence interval describes the precision of the predicted **mean** value, not the precision for an **individual**. The precision around an individual prediction is called a **prediction interval**. It's always wider than the confidence interval around the mean, since predicting one person's value is less certain than predicting the average across many. A prediction interval can be requested by stating `interval = "prediction"` instead.
+`interval = 'confidence'` adds a confidence interval around each prediction. This confidence interval describes the precision of the predicted **mean** value, not the precision for an **individual**. The precision around an individual prediction is called a **prediction interval**. It's always wider than the confidence interval around the mean, since predicting one person's value is less certain than predicting the average across many. A prediction interval can be requested by stating `interval = 'prediction'` instead.
 
 The first row, age 45, sits comfortably inside the range of ages actually observed in this sample (18 to 85), so this prediction is supported by data the model was fitted on. The second row, age 150, is not. Nobody in this dataset, or in any verified human population, is 150 years old. The model has no information about what happens at that age, and fitting a straight line through the data we do have says nothing reliable about what lies far outside it. The predicted value it returns looks like an ordinary number, which is exactly what makes extrapolation dangerous: a plausible-looking output doesn't mean the input that produced it was reasonable. Always check a prediction's input against the range the model was actually fitted on before trusting its output.
 
@@ -288,8 +288,8 @@ Let's bring the whole workflow together on another research question: is sedenta
 #| label: worked-scatter-sed
 ggplot(nhanes |> filter(!is.na(sed), !is.na(chol)), aes(x = sed, y = chol)) +
   geom_point(alpha = 0.1) +
-  geom_smooth(method = "lm") +
-  labs(x = "Sedentary time (hours/day)", y = "Total cholesterol (mmol/L)")
+  geom_smooth(method = 'lm') +
+  labs(x = 'Sedentary time (hours/day)', y = 'Total cholesterol (mmol/L)')
 ```
 
 The fitted line is nearly flat, and the confidence band around it is wide enough to include a flat, horizontal line, that is, no relationship at all. Fitting the model directly confirms what the plot suggests:
@@ -313,12 +313,12 @@ sed_aug <- augment(m_sed)
 ggplot(sed_aug, aes(x = .fitted, y = .resid)) +
   geom_point(alpha = 0.1) +
   geom_hline(yintercept = 0) +
-  labs(x = "Fitted value (mmol/L)", y = "Residual (mmol/L)")
+  labs(x = 'Fitted value (mmol/L)', y = 'Residual (mmol/L)')
 
 ggplot(sed_aug, aes(sample = .std.resid)) +
   stat_qq() +
   stat_qq_line() +
-  labs(x = "Theoretical quantiles", y = "Standardised residuals")
+  labs(x = 'Theoretical quantiles', y = 'Standardised residuals')
 ```
 
 The same pattern from the age model shows up again, more visibly. A handful of participants sit far from the fitted line, and `sed` itself carries a long right tail. Some participants recorded well over 24 hours of sedentary time a day, which cannot be literally true, and points to some noise in how this variable was recorded or reported. None of this overturns the conclusion above. It's a reason to hold the result loosely rather than to distrust the direction of the estimate.
@@ -335,13 +335,13 @@ In an academic report this becomes: sedentary time was not associated with total
 
 **Exercise 4** (ILOs 2, 3). State the null and alternative hypotheses, then reproduce Chapter 5's worked example, sedentary time (`sed`) by gender, with `lm()` instead of `t.test()`. Compare the confidence interval `lm()` gives you to the one Chapter 5 reported. Write one sentence on what you find, and a second sentence explaining it, using `var.equal = TRUE` to check your explanation.
 
-**Exercise 5** (ILOs 2, 6). State the null and alternative hypotheses, then fit `chol ~ smoking`. Use `levels()` to check which category of `smoking` the model used as its reference, then refit with `relevel()` using `"Current"` as the reference instead. Report the first model's coefficients in one sentence, then write a second sentence stating what changed between the two model fits and a third stating what stayed exactly the same, and why.
+**Exercise 5** (ILOs 2, 6). State the null and alternative hypotheses, then fit `chol ~ smoking`. Use `levels()` to check which category of `smoking` the model used as its reference, then refit with `relevel()` using `'Current'` as the reference instead. Report the first model's coefficients in one sentence, then write a second sentence stating what changed between the two model fits and a third stating what stayed exactly the same, and why.
 
 ## Writing exercise
 
 Using the `chol ~ sed` result from the worked example, write a short results paragraph of two to three sentences, as it would appear in a report. State the estimated slope, its 95% confidence interval, and its p-value, and say plainly what this evidence does and does not support. Avoid two common mistakes: don't describe a non-significant result as proof there is no relationship at all, and don't write around the p-value without stating it.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse='true'}
 ## Solutions
 
 **Exercise 1**
@@ -356,8 +356,8 @@ vpa_r_complete <- nhanes |> filter(!is.na(vpa_r), !is.na(chol))
 
 ggplot(vpa_r_complete, aes(x = vpa_r, y = chol)) +
   geom_point(alpha = 0.1) +
-  geom_smooth(method = "lm") +
-  labs(x = "Vigorous activity outside work (hours/day)", y = "Total cholesterol (mmol/L)")
+  geom_smooth(method = 'lm') +
+  labs(x = 'Vigorous activity outside work (hours/day)', y = 'Total cholesterol (mmol/L)')
 
 m_vpa_r <- lm(chol ~ vpa_r, data = vpa_r_complete)
 summary(m_vpa_r)
@@ -376,12 +376,12 @@ vpa_r_aug <- augment(m_vpa_r)
 ggplot(vpa_r_aug, aes(x = .fitted, y = .resid)) +
   geom_point(alpha = 0.1) +
   geom_hline(yintercept = 0) +
-  labs(x = "Fitted value (mmol/L)", y = "Residual (mmol/L)")
+  labs(x = 'Fitted value (mmol/L)', y = 'Residual (mmol/L)')
 
 ggplot(vpa_r_aug, aes(sample = .std.resid)) +
   stat_qq() +
   stat_qq_line() +
-  labs(x = "Theoretical quantiles", y = "Standardised residuals")
+  labs(x = 'Theoretical quantiles', y = 'Standardised residuals')
 ```
 
 The residuals-vs-fitted plot checks linearity and constant variance; the QQ plot checks whether the residuals are approximately normally distributed. Most points in the residual plot fall into a small number of vertical strips rather than scattering freely. That's because `vpa_r` itself only takes a small number of distinct values: most participants report exactly zero hours/day of vigorous activity outside work. Their fitted value and residual pattern is shared, not spread out. This is a feature of the predictor's own distribution, not a sign that the model is wrongly specified.
@@ -390,7 +390,7 @@ The residuals-vs-fitted plot checks linearity and constant variance; the QQ plot
 
 ```{r}
 #| label: sol-ex3
-predict(m_vpa_r, newdata = data.frame(vpa_r = c(1, 24)), interval = "confidence")
+predict(m_vpa_r, newdata = data.frame(vpa_r = c(1, 24)), interval = 'confidence')
 ```
 
 The prediction at `vpa_r` = 1 hour/day (about 4.80 mmol/L) can be trusted, because an hour of vigorous activity outside work a day is well within the range observed in this sample (0 to 8 hours/day). The prediction at `vpa_r` = 24 hours/day (about 0.90 mmol/L) cannot: 24 hours/day of vigorous activity is not physically possible to sustain, it is far outside the observed range, and the resulting prediction, a cholesterol level barely above zero, is not a value any living person could have. It is a consequence of extending the fitted line somewhere the data give it no support, not a real finding.
@@ -434,13 +434,13 @@ summary(m_smoking)
 confint(m_smoking)
 
 smoking_relevelled <- smoking_chol_complete |>
-  mutate(smoking = relevel(smoking, ref = "Current"))
+  mutate(smoking = relevel(smoking, ref = 'Current'))
 m_smoking_relevel <- lm(chol ~ smoking, data = smoking_relevelled)
 summary(m_smoking_relevel)
 confint(m_smoking_relevel)
 ```
 
-`levels()` on the original factor shows `"Never"` first, so that's the reference the first model used: mean cholesterol is about 4.97 mmol/L in never-smokers, 0.022 mmol/L higher in previous smokers (95% CI -0.005 to 0.048, p = 0.114), and 0.028 mmol/L higher in current smokers (95% CI 0.000 to 0.056, p = 0.051), neither significant at the conventional 5% level. Releveled to `"Current"`, both rows change: the intercept becomes current smokers' own mean, and the two remaining rows compare `"Never"` and `"Previous"` against `"Current"` instead. `Multiple R-squared` and `Residual standard error` are identical in both printouts, 0.0001279 and 1.091. Which category anchors the comparison changed; what the model actually fits, and predicts for any given participant, didn't.
+`levels()` on the original factor shows `'Never'` first, so that's the reference the first model used: mean cholesterol is about 4.97 mmol/L in never-smokers, 0.022 mmol/L higher in previous smokers (95% CI -0.005 to 0.048, p = 0.114), and 0.028 mmol/L higher in current smokers (95% CI 0.000 to 0.056, p = 0.051), neither significant at the conventional 5% level. Releveled to `'Current'`, both rows change: the intercept becomes current smokers' own mean, and the two remaining rows compare `'Never'` and `'Previous'` against `'Current'` instead. `Multiple R-squared` and `Residual standard error` are identical in both printouts, 0.0001279 and 1.091. Which category anchors the comparison changed; what the model actually fits, and predicts for any given participant, didn't.
 
 **Writing exercise (sample answer)**
 

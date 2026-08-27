@@ -18,7 +18,7 @@ By the end of this chapter you will be able to:
 
 As in Chapter 3, we read the data with `read_csv()` and turn the six coded variables into factors against the dictionary. This chapter also brings in a second dataset for the first time: `strep_tb`. Unlike `nhanes_mph`, `strep_tb` is built into the `medicaldata` package.
 
-`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. It has to be installed before it can be loaded. Run `install.packages("medicaldata")` once in the console. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
+`medicaldata` is the first package this book uses that doesn't come with the tidyverse, so it almost certainly isn't on your machine yet. It has to be installed before it can be loaded. Run `install.packages('medicaldata')` once in the console. Once it's installed, `library(medicaldata)` below works for this session, exactly like every other package we load.
 
 ```{r}
 #| label: setup
@@ -29,8 +29,8 @@ library(dplyr)
 library(here)
 library(medicaldata)
 
-nhanes <- read_csv(here("data", "mph_nhanes_20241107.csv"))
-dictionary <- read_csv(here("data", "mph_nhanes_20241107_dictionary.csv"))
+nhanes <- read_csv(here('data', 'mph_nhanes_20241107.csv'))
+dictionary <- read_csv(here('data', 'mph_nhanes_20241107_dictionary.csv'))
 ```
 
 Two small things about that chunk. There's no `library(ggplot2)`, because this chapter draws no plots and there's no reason to load a package we aren't going to use. And `dictionary` is read in even though no code below refers to it, because it's the thing we reach for the moment we're unsure what a column means. Every chapter reads it for that reason, not because the chapter's own code needs it.
@@ -48,22 +48,22 @@ nhanes <- nhanes |>
   mutate(
     gender = factor(gender,
       levels = c(1, 2),
-      labels = c("Male", "Female")),
+      labels = c('Male', 'Female')),
     eth = factor(eth,
       levels = c(1, 2, 3, 4, 5),
-      labels = c("Mexican American", "Other Hispanic", "White", "Black", "Others")),
+      labels = c('Mexican American', 'Other Hispanic', 'White', 'Black', 'Others')),
     edu = factor(edu,
       levels = c(1, 2, 3),
-      labels = c("Less than high school", "High school graduate", "Above high school")),
+      labels = c('Less than high school', 'High school graduate', 'Above high school')),
     smoking = factor(smoking,
-      levels = c("Never", "Previous", "Current")),
+      levels = c('Never', 'Previous', 'Current')),
     phq.c = factor(phq.c,
-      levels = c("0 Normal", "1 Mild symptoms", "2 Possible depression"),
-      labels = c("Normal", "Mild symptoms", "Possible depression"),
+      levels = c('0 Normal', '1 Mild symptoms', '2 Possible depression'),
+      labels = c('Normal', 'Mild symptoms', 'Possible depression'),
       ordered = TRUE),
     blm.cvd = factor(blm.cvd,
       levels = c(0, 1),
-      labels = c("No", "Yes"))
+      labels = c('No', 'Yes'))
   )
 ```
 
@@ -71,7 +71,7 @@ This is the same recode we introduced in Chapter 3. See Chapter 3 for the reason
 
 ## Point estimate and standard error, by hand
 
-A mean handed to a health board with no sense of how precise it is invites a decision the data may not actually support. A point estimate is our "best guess" from the data, most commonly the mean, and on its own it says nothing about how precise it is. The standard error attaches that precision, calculated from two quantities already familiar from Chapter 3: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
+A mean handed to a health board with no sense of how precise it is invites a decision the data may not actually support. A point estimate is our 'best guess' from the data, most commonly the mean, and on its own it says nothing about how precise it is. The standard error attaches that precision, calculated from two quantities already familiar from Chapter 3: the standard deviation, `sd()`, and the sample size, `n()`. Let's apply this to sedentary time (`sed`):
 
 ```{r}
 #| label: se-by-hand
@@ -106,7 +106,7 @@ sed_stats <- sed_stats |>
 sed_stats
 ```
 
-R has a function that does this directly. `t.test()` expects a single numeric vector, not a data frame, so we pull `sed` out of `nhanes` with `$`. `nhanes$sed` reads as "the `sed` column, inside `nhanes`", and it returns that column on its own, as a plain vector of numbers, rather than a data frame containing it. That's different from `select(sed)`, which keeps a one-column data frame instead of pulling the column out. `t.test()` then returns the mean and its 95% confidence interval without any of the arithmetic above:
+R has a function that does this directly. `t.test()` expects a single numeric vector, not a data frame, so we pull `sed` out of `nhanes` with `$`. `nhanes$sed` reads as 'the `sed` column, inside `nhanes`', and it returns that column on its own, as a plain vector of numbers, rather than a data frame containing it. That's different from `select(sed)`, which keeps a one-column data frame instead of pulling the column out. `t.test()` then returns the mean and its 95% confidence interval without any of the arithmetic above:
 
 ```{r}
 #| label: ci-ttest
@@ -115,7 +115,7 @@ t.test(nhanes$sed)
 
 `t.test()` also reports a test statistic, degrees of freedom, and a p-value. These belong to a hypothesis test, which is Chapter 5's subject. For now, look only at the confidence interval, and check that it closely matches the interval we calculated by hand above.
 
-One thing `t.test()` does quietly is it ignores all missing values. We passed it `nhanes$sed` whole, missing values and all, with no `filter()` and no `na.rm = TRUE`, and it ran anyway. It drops missing values itself, before calculating. The evidence is in the output: the degrees of freedom are `r format(sum(!is.na(nhanes$sed)) - 1, big.mark = ",")`, one less than the `r format(sum(!is.na(nhanes$sed)), big.mark = ",")` participants we filtered down to by hand, which is why the two intervals agree at all. So whenever we run a `t.test()` in R, we should count the missing values ourselves.
+One thing `t.test()` does quietly is it ignores all missing values. We passed it `nhanes$sed` whole, missing values and all, with no `filter()` and no `na.rm = TRUE`, and it ran anyway. It drops missing values itself, before calculating. The evidence is in the output: the degrees of freedom are `r format(sum(!is.na(nhanes$sed)) - 1, big.mark = ',')`, one less than the `r format(sum(!is.na(nhanes$sed)), big.mark = ',')` participants we filtered down to by hand, which is why the two intervals agree at all. So whenever we run a `t.test()` in R, we should count the missing values ourselves.
 
 The two intervals are close but not identical, because `t.test()` doesn't use a fixed multiplier of 1.96. It uses a value from the t-distribution, which is usually a better match to the actual sampling distribution, since it depends on the sample size through its degrees of freedom (`n - 1`). For a sample size this large, the normal and t-distributions are very similar and shouldn't make a material difference. In practice, we'd use `t.test()` rather than working this out by hand every time, but the formula above is exactly what it's doing underneath.
 
@@ -135,7 +135,7 @@ And here is the wrong one, which is the single most common error in this part of
 
 The true mean sedentary time in the population is a fixed number. We don't know it, but it isn't moving around, and it doesn't have a 95% chance of being anywhere. What moves is the *interval*. Draw a different sample and we get a different mean, a different standard error, and so a different pair of numbers. The 95% belongs to that procedure: of all the intervals we could build this way, 95% of them would contain the true value. This particular interval either contains it or it doesn't, and we have no way of knowing which.
 
-In practice the fix is easy, because the correct sentence is the shorter one. State the estimate, put the interval after it, and stop. The moment we write "probability", "chance", or "there's a 95% likelihood the true value is", we have said something about the parameter that the interval doesn't support. Every interval in the rest of this book gets reported the first way, and so should yours.
+In practice the fix is easy, because the correct sentence is the shorter one. State the estimate, put the interval after it, and stop. The moment we write 'probability', 'chance', or 'there's a 95% likelihood the true value is', we have said something about the parameter that the interval doesn't support. Every interval in the rest of this book gets reported the first way, and so should yours.
 
 ## A confidence interval for a proportion
 
@@ -200,7 +200,7 @@ By default, `prop.test()` also tests whether this proportion differs from 50%. T
 
 ## Confidence interval for a difference in means
 
-`t.test()` also compares two groups directly, using **formula syntax**. `chol ~ gender` reads as "`chol`, modelled by `gender`". R splits `chol` into the groups defined by `gender` and compares them:
+`t.test()` also compares two groups directly, using **formula syntax**. `chol ~ gender` reads as '`chol`, modelled by `gender`'. R splits `chol` into the groups defined by `gender` and compares them:
 
 ```{r}
 #| label: ci-diff-means
@@ -213,7 +213,7 @@ This is the same pairing we showed descriptively in Chapter 3's boxplot and Tabl
 
 ### Which way round is the difference?
 
-Both ends of that interval are negative, and a negative difference in cholesterol isn't obviously meaningful until we know what has been subtracted from what. R tells us, on the line beginning "alternative hypothesis": *true difference in means between group Male and group Female*. So it has taken the men's mean and subtracted the women's.
+Both ends of that interval are negative, and a negative difference in cholesterol isn't obviously meaningful until we know what has been subtracted from what. R tells us, on the line beginning 'alternative hypothesis': *true difference in means between group Male and group Female*. So it has taken the men's mean and subtracted the women's.
 
 That order isn't R's choice, and it isn't alphabetical. It's the order the factor's levels are in, which we set ourselves in the setup chunk:
 
@@ -222,9 +222,9 @@ That order isn't R's choice, and it isn't alphabetical. It's the order the facto
 levels(nhanes$gender)
 ```
 
-`"Male"` is first, so men are group 1 and women are group 2, and the difference runs first minus second. A negative interval therefore says the first group is *lower*: mean cholesterol is lower in men than in women, by somewhere between 0.15 and 0.19 mmol/L.
+`'Male'` is first, so men are group 1 and women are group 2, and the difference runs first minus second. A negative interval therefore says the first group is *lower*: mean cholesterol is lower in men than in women, by somewhere between 0.15 and 0.19 mmol/L.
 
-It is useful to check the alternative-hypothesis line before reading any two-group interval. If we'd rather write the comparison the other way round, which is often more natural to read, we flip the whole thing together. "Cholesterol was 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19)" says exactly the same as R's output, with every sign reversed. What we must never do is flip the words and leave the numbers, or flip one end of the interval and not the other. The direction of the estimate and the direction of the interval have to agree.
+It is useful to check the alternative-hypothesis line before reading any two-group interval. If we'd rather write the comparison the other way round, which is often more natural to read, we flip the whole thing together. 'Cholesterol was 0.17 mmol/L higher in women than in men (95% CI: 0.15 to 0.19)' says exactly the same as R's output, with every sign reversed. What we must never do is flip the words and leave the numbers, or flip one end of the interval and not the other. The direction of the estimate and the direction of the interval have to agree.
 
 ## Confidence interval for a difference in proportions
 
@@ -259,15 +259,15 @@ The confidence interval is for the difference in the proportion improved between
 levels(strep_tb$arm)
 ```
 
-`"Streptomycin"` is first, so `prop 1` is the streptomycin arm and `prop 2` is the control arm, and the difference runs streptomycin minus control. Both ends of the interval are positive, which therefore says the streptomycin arm improved *more*. Had the two levels been the other way round, every number in that interval would have carried a minus sign and meant exactly the same thing. Chapter 5 puts this same factor the other way round on purpose, which is exactly why checking the levels here first matters.
+`'Streptomycin'` is first, so `prop 1` is the streptomycin arm and `prop 2` is the control arm, and the difference runs streptomycin minus control. Both ends of the interval are positive, which therefore says the streptomycin arm improved *more*. Had the two levels been the other way round, every number in that interval would have carried a minus sign and meant exactly the same thing. Chapter 5 puts this same factor the other way round on purpose, which is exactly why checking the levels here first matters.
 
-The heading says "with continuity correction": `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. Chapter 5 explains what it does, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. That p-value itself belongs to a hypothesis test, which is still Chapter 5's subject.
+The heading says 'with continuity correction': `prop.test()` applies a small adjustment by default that nudges the p-value up and the interval slightly wider. Chapter 5 explains what it does, so leave it for now, but notice that the p-value printed here, 0.0004, is the one that adjustment produces. That p-value itself belongs to a hypothesis test, which is still Chapter 5's subject.
 
 Because `strep_tb` is a randomised trial rather than an observational study, a difference this large and this precisely estimated supports a causal reading in a way that an association in `nhanes_mph` would not. We can quite safely conclude, from the findings, that streptomycin improved the proportion of patients with X-ray improvement by about `r round((strep_arm_summary$prop_improved[1] - strep_arm_summary$prop_improved[2]) * 100)` percentage points, compared with bed rest alone. We say percentage points rather than percent here: percent would describe how much bigger one proportion is relative to the other, not the size of the gap between them, which is what this interval actually estimates.
 
 ## Width and sample size, without programming
 
-The seminar's rule was that a confidence interval narrows as sample size grows. We can show this directly, by computing the same interval on the full sample and on two smaller subsets of it. `slice_sample()`, from `dplyr`, keeps a random fraction of the rows. `set.seed()`, from base R, fixes the sequence of "random" numbers R uses, so the same subset gets drawn every time this code is run, rather than a different one each time.
+The seminar's rule was that a confidence interval narrows as sample size grows. We can show this directly, by computing the same interval on the full sample and on two smaller subsets of it. `slice_sample()`, from `dplyr`, keeps a random fraction of the rows. `set.seed()`, from base R, fixes the sequence of 'random' numbers R uses, so the same subset gets drawn every time this code is run, rather than a different one each time.
 
 The full sample. This time we save the result into an object with `<-` as well as printing it, because we want to reuse its numbers in a moment:
 
@@ -310,7 +310,7 @@ That's hard to see across three blocks of output, so let's put the three interva
 ```{r}
 #| label: width-table
 widths <- data.frame(
-  sample = c("Full", "50% subset", "10% subset"),
+  sample = c('Full', '50% subset', '10% subset'),
   n = c(sum(!is.na(nhanes$chol)), nrow(chol_50), nrow(chol_10)),
   lower = c(tt_full$conf.int[1], tt_50$conf.int[1], tt_10$conf.int[1]),
   upper = c(tt_full$conf.int[2], tt_50$conf.int[2], tt_10$conf.int[2])
@@ -412,7 +412,7 @@ Then use `t.test()` with formula syntax to obtain a 95% confidence interval for 
 
 Using the cholesterol confidence interval from Exercise 1 and the `strep_tb` arm-improvement confidence interval from earlier in this chapter, write one sentence for each, in the same reporting style. Use the correct units, and don't describe the interval as a probability statement about where the true value falls.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse='true'}
 ## Solutions
 
 **Exercise 1**
@@ -444,7 +444,7 @@ For the difference between the two smoking groups:
 ```{r}
 #| label: sol-ex1-diff
 chol_smoking <- nhanes |>
-  filter(smoking %in% c("Never", "Current"))
+  filter(smoking %in% c('Never', 'Current'))
 
 t.test(chol ~ smoking, data = chol_smoking)
 ```
@@ -457,7 +457,7 @@ tt_smoking <- t.test(chol ~ smoking, data = chol_smoking)
 
 `smoking` still has three levels after the `filter()`, but only two of them have any rows left, and `t.test()` rebuilds the factor from the data it's actually given, so the empty third group drops out on its own.
 
-Check the direction before reading the interval, as above. `"Never"` comes first in `smoking`'s levels, so R has subtracted current smokers from never smokers, and the difference is never minus current.
+Check the direction before reading the interval, as above. `'Never'` comes first in `smoking`'s levels, so R has subtracted current smokers from never smokers, and the difference is never minus current.
 
 Mean total cholesterol was `r round(tt_smoking$estimate[1] - tt_smoking$estimate[2], 3)` mmol/L in never smokers compared with current smokers (95% CI: `r round(tt_smoking$conf.int[1], 3)` to `r round(tt_smoking$conf.int[2], 3)` mmol/L), so a little lower on average in those who had never smoked. Notice that the estimate sits inside its own interval. Always check that: if it doesn't, something is wrong, likely a sign has been flipped somewhere. The interval includes zero, so these data are consistent with no difference between the two groups, though they don't rule out a small one either.
 
@@ -469,7 +469,7 @@ The two intervals mean different things. The first is about a single quantity, m
 #| label: sol-ex2
 cav_stats <- strep_tb |>
   summarise(
-    n_cav = sum(baseline_cavitation == "yes"),
+    n_cav = sum(baseline_cavitation == 'yes'),
     n_total = n(),
     p_cav = n_cav / n_total,
     se_cav = sqrt(p_cav * (1 - p_cav) / n_total)
@@ -513,7 +513,7 @@ sed_10 <- nhanes |>
 tt_sed_10 <- t.test(sed_10$sed)
 
 data.frame(
-  sample = c("Full", "50% subset", "10% subset"),
+  sample = c('Full', '50% subset', '10% subset'),
   n = c(sum(!is.na(nhanes$sed)), nrow(sed_50), nrow(sed_10)),
   lower = c(tt_sed_full$conf.int[1], tt_sed_50$conf.int[1],
             tt_sed_10$conf.int[1]),

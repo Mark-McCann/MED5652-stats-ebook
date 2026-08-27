@@ -23,7 +23,7 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 
 | Function | What it does | First appearance |
 |---|---|---|
-| `c()` | Combines single values ("scalars") into a vector. | Chapter 1 |
+| `c()` | Combines single values ('scalars') into a vector. | Chapter 1 |
 | `class()` | Reports what kind of value an object holds. | Chapter 1 |
 | `data.frame()` | Builds a data frame, columns supplied by name. | Chapter 1 |
 | `factor()` | Converts a variable into a set of named categories, with levels in a stated order. | Chapter 1 |
@@ -40,7 +40,7 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 | `relevel()` | Reassigns a factor's reference level to the one named. | Chapter 3 |
 | `list()` | Bundles several (different) objects together. | Chapter 3 |
 | `nrow()` | Counts the rows in a data frame. | Chapter 4 |
-| `set.seed()` | Fixes the sequence of "random" numbers R uses, so a random draw repeats the same way every time. | Chapter 4 |
+| `set.seed()` | Fixes the sequence of 'random' numbers R uses, so a random draw repeats the same way every time. | Chapter 4 |
 | `as.numeric()` | Converts a value to a continuous number. | Chapter 6 |
 
 ### Base R: summaries and maths
@@ -75,7 +75,7 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 | `cor.test()` | A correlation coefficient with a confidence interval and p-value attached. | Chapter 6 |
 | `lm()` | Fits a linear regression model. | Chapter 6 |
 | `coef()` | Pulls a fitted model's coefficients. | Chapter 6 |
-| `confint()` | Pulls a fitted model's confidence intervals. For `glm()`, this refits the model repeatedly ("profiling") rather than using a shortcut formula. | Chapter 6 |
+| `confint()` | Pulls a fitted model's confidence intervals. For `glm()`, this refits the model repeatedly ('profiling') rather than using a shortcut formula. | Chapter 6 |
 | `predict()` | Uses a fitted model to generate a predicted value for a new set of inputs, supplied as a data frame. | Chapter 6 |
 | `glm()` | Fits a generalised linear model. `family = binomial` fits a logistic regression, for a 0/1 outcome. | Chapter 7 |
 
@@ -131,8 +131,8 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 
 | Function | What it does | First appearance |
 |---|---|---|
-| `tbl_summary()` | Builds a publication-style summary table ("Table 1"). `by =` stratifies it by a grouping variable. | Chapter 3 |
-| `all_continuous()` | Inside `list()` or `statistic =`, means "every continuous variable in this table". | Chapter 3 |
+| `tbl_summary()` | Builds a publication-style summary table ('Table 1'). `by =` stratifies it by a grouping variable. | Chapter 3 |
+| `all_continuous()` | Inside `list()` or `statistic =`, means 'every continuous variable in this table'. | Chapter 3 |
 | `add_p()` | Adds a column of hypothesis-test p-values to a `tbl_summary()` table. | Chapter 5 |
 | `tbl_regression()` | Builds a publication-style table directly from a fitted model. | Chapter 7 |
 | `tbl_merge()` | Combines two or more `gtsummary` tables side by side, for comparing crude and adjusted models. | Chapter 7 |
@@ -149,20 +149,20 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 | Function | What it does | First appearance |
 |---|---|---|
 | `riskratio()` | Takes an r x 2 table and calculates the risk ratio, with a confidence interval. r is the number of levels in the exposure variable. | Chapter 5 |
-| `oddsratio()` | Takes an r x 2 table and calculates the odds ratio. `method = "wald"` matches the ± 1.96 x SE formula behind a confidence interval built by hand. | Chapter 5 |
+| `oddsratio()` | Takes an r x 2 table and calculates the odds ratio. `method = 'wald'` matches the ± 1.96 x SE formula behind a confidence interval built by hand. | Chapter 5 |
 
 ## R syntax and operators
 
 | Symbol | What it does | First appearance |
 |---|---|---|
 | `<-` | Assignment: stores the value on the right in the name on the left. | Chapter 1 |
-| `|>` | The pipe. Takes what's on the left and feeds it in as the first input to what's on the right. Read aloud as "and then". | Chapter 1 |
+| `|>` | The pipe. Takes what's on the left and feeds it in as the first input to what's on the right. Read aloud as 'and then'. | Chapter 1 |
 | `%>%` | The older pipe, from `dplyr`, before base R had its own. Both can be treated the same. | Chapter 1 |
 | `$` | Pulls one named column, or one named piece, out of a data frame or another R object. | Chapter 1 |
 | `%in%` | Tests whether each value appears anywhere in a set. | Chapter 1 |
 | `==` `!=` | Equal to, not equal to. | Chapter 1 |
-| `<` `>` `<=` `>=` | Less than, greater than, and their "or equal to" versions. | Chapter 1 |
-| `""` | Marks a value as text. Numbers, `TRUE`/`FALSE`, and object or column names don't take quotes. `"20"` will be recognised as text in R. | Chapter 1 |
+| `<` `>` `<=` `>=` | Less than, greater than, and their 'or equal to' versions. | Chapter 1 |
+| `''` | Marks a value as text. Numbers, `TRUE`/`FALSE`, and object or column names don't take quotes. `'20'` will be recognised as text in R. | Chapter 1 |
 | `` ` `` | A different kind of quoting mark, needed for a column name containing a space or other unusual character. | Chapter 1 |
 | `?` | Followed by a function name, opens that function's help page. | Chapter 1 |
 | `#` | Starts a comment in an R script: everything after it on the line is ignored when the code runs. | Chapter 1 |
@@ -204,8 +204,8 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 | Sampling distribution | The theoretical distribution of point estimates we would get if we took infinite independent samples of the exact same size from the population. | Chapter 4 |
 | Standard error (SE) | The standard deviation of the sampling distribution. It measures the precision of our point estimate, smaller SE means more precise, and does not describe the variability of individuals in the population, which is what the standard deviation is for. | Chapter 4 |
 | Central limit theorem (CLT) | The rule stating that if our sample size is large enough, the sampling distribution of the mean will be approximately normal, regardless of the underlying population's shape. | Chapter 4 |
-| Confidence interval (CI) | A range of values, built around a point estimate and based on the standard error, that quantifies our uncertainty about the true population parameter. Also known as an "interval estimate". | Chapter 4 |
-| 95% CI | If we repeated our sampling process indefinitely, 95% of the calculated intervals would contain the true population value. It is incorrect to say "there is a 95% chance our specific interval holds the true value". | Chapter 4 |
+| Confidence interval (CI) | A range of values, built around a point estimate and based on the standard error, that quantifies our uncertainty about the true population parameter. Also known as an 'interval estimate'. | Chapter 4 |
+| 95% CI | If we repeated our sampling process indefinitely, 95% of the calculated intervals would contain the true population value. It is incorrect to say 'there is a 95% chance our specific interval holds the true value'. | Chapter 4 |
 | Power, sample size calculation | The chance a study detects a real effect of a given size, and the calculation that sizes a study to hit a target power. | Chapter 4 |
 
 ### Hypothesis tests and measures of association
@@ -236,7 +236,7 @@ This appendix is a reference: packages, functions, R syntax, and statistical ter
 | Residual | The vertical distance between an observed value and the model's fitted line. | Chapter 6 |
 | Linearity, constant variance, normally distributed residuals | The three assumptions a fitted line's trustworthiness rests on, checked with diagnostic plots. | Chapter 6 |
 | Extrapolation | Using a model to predict outside the range of data it was actually fitted on. | Chapter 6 |
-| Multivariable | Several predictors, one outcome. Some writers say "multiple regression" for the same thing. "Multivariate regression" is a different, formal term for several outcomes modelled together, not used in this course. | Chapter 7 |
+| Multivariable | Several predictors, one outcome. Some writers say 'multiple regression' for the same thing. 'Multivariate regression' is a different, formal term for several outcomes modelled together, not used in this course. | Summary |
 | Crude, adjusted | An association estimated on its own (crude), against one estimated alongside other variables that might confound it (adjusted). | Chapter 7 |
 
 ### Study design and causal language
