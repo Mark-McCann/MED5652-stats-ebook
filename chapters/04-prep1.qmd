@@ -1,8 +1,8 @@
 # R and R Studio (Week 4) {#sec-04-prep1}
 
-We all know how to work with a spreadsheet, but a spreadsheet is not the best way to record, manage, and analyse data. A copy-and-paste error in an Excel-based model contributed to JPMorgan Chase's \$6 billion loss in 2012. Public Health England failed to log over 15,000 positive coronavirus test results in 2020, because they used an older Excel format template. A spreadsheet is useful for looking at data and for some simple calculations, but it isn't designed for reproducible work: the work done in one doesn't normally get tracked, and there's no way to tell what has been done to a file just by looking at it. Statistical software like R keeps a clearer record and makes the process more reproducible, which is why public health and statistics use it for data management and analysis. We will examine how to properly interact with R and RStudio, and use it to build a toy clinic record.
+We all know how to work with a spreadsheet, but a spreadsheet is not the best way to record, manage, and analyse data. A copy-and-paste error in an Excel-based model contributed to JPMorgan Chase's \$6 billion loss in 2012. Public Health England failed to log over 15,000 positive coronavirus test results in 2020, because they used an older Excel format template. A spreadsheet is useful for looking at data and for some simple calculations, but it isn't designed for reproducible work: the work done in one doesn't normally get tracked, and there's no way to tell what has been done to a file just by looking at it. Statistical software like R can take information from spreadsheets and handles it in a different way, keeping a clearer record and making the process more reproducible, which is why public health and statistics use it for data management and analysis. We will examine how to properly interact with R and RStudio, and use it to build an example clinic record.
 
-None of that works without somewhere to keep it, so an installation and a project folder come first. After that the chapter is mostly R's own vocabulary: objects hold values, values have types, functions act on them, and an error message tells us which of the three we got wrong. Running underneath all of it is one habit that matters more than any of the vocabulary. A saved script can be run again; a line typed into the console and lost cannot. Everything we learn goes into a small clinic visit log, built one column at a time until it's a dataset we can ask questions of. Nothing here is statistics yet; all of it is what the statistics will run on.
+You need to save R, RStudio and your clinic record on your computer, so first you will work on an installation and setting up a project folder. After that, the chapter is mostly about learning R's vocabulary: objects hold values, values have types, functions act on them, and an error message tells us which of the three we got wrong. Running underneath all of it is one habit that matters more than any of the vocabulary. A saved script can be run again; a line typed into the console is lost and cannot be run again. Reproducibility, replicability and transparancy are key scientific principles: saving scripts is a method for us to make sure our public health science adheres to these principles. Everything we learn goes into a small clinic visit log, built one column at a time until it's a dataset we can ask questions of. Nothing in this chapter is statistics yet; all of it is learning the language we will use to run statistics.
 
 ## Chapter intended learning outcomes
 
@@ -28,7 +28,7 @@ options(width = 76)
 
 ## Installing R and RStudio
 
-R is the programming language itself, and is the software program that actually runs our code. RStudio is a separate, free program that sits on top of R and makes it nicer to work in: a proper editor, a console, and the panes we look at next. Install R first, then RStudio, in that order. We can use R without RStudio, though it's harder for a beginner, but not the other way round.
+R is the programming language itself, and is the software program that actually runs our code. RStudio is a separate, free program that sits on top of R and makes it nicer to work in: a proper editor, a console, and the panes we look at next. Install R first, then RStudio, in that order. We can use R without RStudio, though it's harder for a beginner.
 
 **Installing R.** Go to <https://cran.r-project.org> and choose the download link for your operating system, "Download R for Windows" or "Download R for macOS." For most people, you can run the installer and accept every default option.
 
@@ -42,8 +42,8 @@ R is the programming language itself, and is the software program that actually 
 
 RStudio's window is split into four panes, and where each one sits stays consistent no matter what we're doing.
 
--   **Top-left: the source pane.** This only shows when a script is open, so it likely won't appear in RStudio fresh out of the box. This is where we write and save scripts, the `.R` files that hold everything worth keeping. Code typed here doesn't run on its own; we have to tell RStudio to run it, which is the next thing we cover.
--   **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. We can type directly into the console, but anything typed there is gone once RStudio closes, which is exactly why the source pane exists.
+-   **Top-left: the source pane.** This only shows when a script is open, so it likely won't appear in RStudio fresh out of the box. Click File > New File > R Script and the pane should appear like in the image below.  This is where we write and save scripts, the `.R` files that keep a record of all the statistics we ask R to conduct.  Code typed here doesn't run on its own; we have to tell RStudio to run it, which we cover in section 1.4.4.
+-   **Bottom-left: the console.** This is where code actually executes, one line at a time, and where its output appears. We can type directly into the console, but anything typed there is gone once RStudio closes. We can use the console to test if a line of code works (and check whether we want to keep it or change it), we use the source pane to keep a record of the code we want to keep.
 -   **Top-right: the environment pane.** This lists every object that currently exists in our R session, its type, and a preview of its contents. Every time we create something, it appears here. When something we expected to see isn't listed, that's usually the first clue something went wrong.
 -   **Bottom-right: a tabbed pane.** This holds the file browser, the plot viewer, the list of installed packages, and the help viewer, one tab each.
 
@@ -51,11 +51,11 @@ RStudio's window is split into four panes, and where each one sits stays consist
 
 ### Building a project folder
 
-Working with R means managing at least a couple of files, most likely some data files and some R script files. It is usually a good idea to put them into a "project folder". Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`. That follows a naming habit we'll use for every file and folder in this course from here on: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD` if a name needs one, so files sort in the right order. Inside that folder, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you.
+Working with R means managing at least a couple of files, most likely some data files and some R script files. It is usually a good idea to put them into a "project folder". Pick somewhere sensible on your machine, for example inside Documents. Create a new folder there and give it a short, sensible name, for example `ies_mph`. We will follow a format for naming all files and folders in this course from here on. These naming conventions helps ensure the names can be easily read by computers, and reduces errors in how humans write the code. The conventions are: no spaces, no `&`, `#`, or `%`, consistent case, and a date written as `YYYY-MM-DD`. This date format ensures files are listed in chronological order when sorted by filename. Inside the folder you've created, create three subfolders: `data`, for anything you read in; `scripts`, for the `.R` files you write; and `outputs`, for anything you save out, a plot or a table. Keeping these three separate means you always know where to look for something later, in this course and beyond it. This folder structure isn't compulsory, just a suggestion. We'd still recommend sticking with it throughout the course, just to build the habit. Once you're more familiar with R and RStudio, feel free to work with whatever folder structure works for you. Some employers - particularly in sectors like data science - have their own naming conventions and folder structures, so it's good professional practice to get used to following coding conventions and structures. 
 
 ### Creating an RStudio Project
 
-An RStudio Project turns that folder into something RStudio understands directly, which is what makes relative paths work rather than having to type a full path every time.
+An RStudio Project turns your folder into something RStudio understands directly. RStudio will consider all folders and files relative to the specific project folder, rather than all the folders on the computer. This allows you to navigate to files using relative paths rather than having to type a full path every time (we will cover this later) and is also helpful when working across multiple projects, and when working as part of a team of analysts on a project.
 
 1.  In RStudio's menu, go to **File → New Project...**
 2.  Choose **Existing Directory**, since the folder already exists.
@@ -89,11 +89,11 @@ From here on, every section in this chapter adds one real piece to a small datas
 | P03        | 45  | No     | 65        | NA   |
 | P04        | 29  | Yes    | 59        | 4.8  |
 
-Four patients, four pieces of information about each. Assignment gives us one value. A vector strings several values into one column. A data frame lines several columns up side by side, which is exactly the table above. Every section that follows builds one more piece of it, in R, for real, rather than a table drawn on the page.
+Four patients, four pieces of information about each. Using R's language: Assignment gives us one value. A vector strings several values into one column. A data frame lines several columns up side by side, and the table above shows a data frame. Every section that follows explains the terminology used in R, and builds one more piece of the table in R, for real, rather than a table drawn on a page or typed into a spreadsheet.
 
 ## Objects and assignment
 
-Storing a value under a name means we can use it again later without retyping it, and build on it in the next line rather than starting over. R creates an object this way, assigning a value to a name with `<-`. A keyboard shortcut for this is **Alt+-** or **Option+-**. Patient P01 is 34 years old:
+In R, objects are pieces of information that R uses to perform statistics or data manipulation. You must give each object in your project a unique name, and when you define what information appears in an object, we refer to that as assignment. Storing information in objects means we can use it again later without retyping it, and build on it later in the project workflow rather than starting over. R creates and assigns values to objects  with the arrow and line symbol `<-`. A keyboard shortcut for typing is **Alt+-** or **Option+-**. The name of the object appears to the left of the arrow, and the information we want to place in the object appears at the other end of the arrow. Patient P01 is 34 years old:
 
 ```{r}
 #| label: assignment-demo
@@ -103,14 +103,15 @@ age
 
 `age` now holds the value 34. It appears in the Environment pane, top right, and stays there for the rest of the session, or until we overwrite it by assigning something else to the same name.
 
-`=` looks similar, but does a different job. Inside the parentheses of a function call, `=` doesn't create an object at all. It names which argument of the function a value belongs to:
+<!-- This is confusing for someone totally new, suggest deleting until commands like round are introduced.
+`=` looks similar, but does a different job. Inside the parentheses of a function call, `=` doesn't create an object at all. It names which argument of the function a value belongs to: -->
 
 ```{r}
 #| label: equals-demo
 round(x = 3.14159, digits = 2)
 ```
 
-Here, `x = 3.14159` doesn't create an object called `x`. It tells `round()` that 3.14159 is the value for its `x` argument. Outside a function call, `=` can actually be used for assignment too, the same way `<-` can. This course always writes `<-` for assignment and keeps `=` for naming arguments inside a function call, so the two jobs stay visually distinct rather than looking identical on the page.
+<!-- Here, `x = 3.14159` doesn't create an object called `x`. It tells `round()` that 3.14159 is the value for its `x` argument. Outside a function call, `=` can actually be used for assignment too, the same way `<-` can. This course always writes `<-` for assignment and keeps `=` for naming arguments inside a function call, so the two jobs stay visually distinct rather than looking identical on the page. -->
 
 ## Vectors and a first look at data frames
 
